@@ -1,7 +1,16 @@
 var fs = require('fs');
 const yargs = require('yargs');
 const { logger, logger_fr } = require('./logger.js');
-var lodash = require('lodash');
+var _ = require('lodash');
+
+
+const PERSON_TE_TYPE = "XV3kldsZq0H";
+const TEA_CODE_PATIENT = "dsWUbqvV9GW";
+const TEA_BIRTHDATE = "qA5Vsiat4Sm";
+const TEA_SEX = "HhsxFysTpdu";
+const TEA_ENTRYMODE = "MqqM2vt5RQA";
+const TEA_LOG = "dkfd2UClEwu"; // Erreurs de validation (liste)
+const TEA_TOBEREVIEWED = "ynBaBzJpqGD"; // Erreurs de validation (oui / non)
 
 /**************************************/
 
@@ -73,27 +82,30 @@ if (!fs.existsSync(PATIENT_UID_FILE_CURRENT)) {
 /**
  * TEIS
  */
-var previousTEIs = Object.keys(previous_patient_code_uid);
-var currentTEIs = Object.keys(current_patient_code_uid);
+var previousTEIs_PatientCodes = Object.keys(previous_patient_code_uid);
+var currentTEIs_PatientCodes = Object.keys(current_patient_code_uid);
 
-logger.info(`TEIs list from PREVIOUS data dump: ${previousTEIs}`);
-logger.info(`TEIs list from CURRENT data dump: ${currentTEIs}`);
+var missingTEIs_patientCodes = _.difference(previousTEIs_PatientCodes, currentTEIs_PatientCodes);
+var newTEIs_patientCodes = _.difference(currentTEIs_PatientCodes, previousTEIs_PatientCodes);
+var commonTEIs_patientCodes = _.intersection(previousTEIs_PatientCodes,currentTEIs_PatientCodes);
+/*logger.info(`TEIs list from PREVIOUS data dump: ${previousTEIs_PatientCodes}`);
+logger.info(`TEIs list from CURRENT data dump: ${currentTEIs_PatientCodes}`);*/
 
-//Check for missing TEIs
-previousTEIs.forEach((TEI) => {
-    if (!currentTEIs.includes(TEI)){
-        logger.info(`DELETION; Patient ${TEI} will be removed from DHIS2 server; Not present in new data dump`);
-    }
+//Log missing TEIs
+missingTEIs_patientCodes.forEach((TEI) => {
+    logger.info(`DELETION; Patient ${TEI} (uid: ${previous_patient_code_uid[TEI].uid}) will be removed from DHIS2 server; Not present in new data dump`);
 });
 
-//Check for new TEIs
-currentTEIs.forEach((TEI) => {
-    if (!previousTEIs.includes(TEI)){
-        logger.info(`CREATION; Patient ${TEI} will be created in DHIS2 server; Not present in previous data dump`);
-    } else {
-        checkDifference(TEI);
-    }
+//Log new TEIs
+newTEIs_patientCodes.forEach((TEI) => {
+    logger.info(`CREATION; Patient ${TEI} will be created in DHIS2 server; Not present in previous data dump`);
 })
+
+
+commonTEIs_patientCodes.forEach((TEI) => {
+    logger.info(`UPDATE; Patient ${TEI} (uid: ${previous_patient_code_uid[TEI].uid}) will be reviewed; Present in previous data dump`);
+    checkDifference(TEI); //TODO: 
+} )
 
 /**
  * Given a patient already in DHIS, check the differences in the data
@@ -105,8 +117,10 @@ function checkDifference(codepatient) {
     var dhisData = previous_patient_code_uid[codepatient];
     var newData = current_patient_code_uid[codepatient];
 
-    //If equal -> log and do nothing (no need to update)
-    
+    //If equal -> logger.debug and do nothing (no need to update) //skip porque todo va bien
+
+    //Check TEAs (trackedEntityAttributes)
+
     //Check enrollments
 
     //Check events
