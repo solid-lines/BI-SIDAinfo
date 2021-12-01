@@ -1,0 +1,7 @@
+*~
+node_modules
+.vscode
+.env
+*-patient_code_uid.json
+retrieveDHISdata.js
+config.json
