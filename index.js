@@ -87,25 +87,25 @@ var currentTEIs_PatientCodes = Object.keys(current_patient_code_uid);
 
 var missingTEIs_patientCodes = _.difference(previousTEIs_PatientCodes, currentTEIs_PatientCodes);
 var newTEIs_patientCodes = _.difference(currentTEIs_PatientCodes, previousTEIs_PatientCodes);
-var commonTEIs_patientCodes = _.intersection(previousTEIs_PatientCodes,currentTEIs_PatientCodes);
+var commonTEIs_patientCodes = _.intersection(previousTEIs_PatientCodes, currentTEIs_PatientCodes);
 /*logger.info(`TEIs list from PREVIOUS data dump: ${previousTEIs_PatientCodes}`);
 logger.info(`TEIs list from CURRENT data dump: ${currentTEIs_PatientCodes}`);*/
 
 //Log missing TEIs
 missingTEIs_patientCodes.forEach((TEI) => {
-    logger.info(`DELETION; Patient ${TEI} (uid: ${previous_patient_code_uid[TEI].uid}) will be removed from DHIS2 server; Not present in new data dump`);
+    logger.info(`TEI_DELETION; Patient ${TEI} (uid: ${previous_patient_code_uid[TEI].uid}) will be removed from DHIS2 server; Not present in new data dump`);
 });
 
 //Log new TEIs
 newTEIs_patientCodes.forEach((TEI) => {
-    logger.info(`CREATION; Patient ${TEI} will be created in DHIS2 server; Not present in previous data dump`);
+    logger.info(`TEI_CREATION; Patient ${TEI} will be created in DHIS2 server; Not present in previous data dump`);
 })
 
 
 commonTEIs_patientCodes.forEach((TEI) => {
-    logger.info(`UPDATE; Patient ${TEI} (uid: ${previous_patient_code_uid[TEI].uid}) will be reviewed; Present in previous data dump`);
+    //logger.info(`UPDATE; Patient ${TEI} (uid: ${previous_patient_code_uid[TEI].uid}) will be reviewed; Present in previous data dump`);
     checkDifference(TEI); //TODO: 
-} )
+})
 
 /**
  * Given a patient already in DHIS, check the differences in the data
@@ -114,15 +114,92 @@ commonTEIs_patientCodes.forEach((TEI) => {
  */
 function checkDifference(codepatient) {
 
-    var dhisData = previous_patient_code_uid[codepatient];
-    var newData = current_patient_code_uid[codepatient];
 
-    //If equal -> logger.debug and do nothing (no need to update) //skip porque todo va bien
+    //TEI uids
+    var dhisTEI_uid = previous_patient_code_uid[codepatient].uid;
+    var newTEI_uid = current_patient_code_uid[codepatient].uid;
 
-    //Check TEAs (trackedEntityAttributes)
+    /****************** Read TEI files ********************/
+
+    //DHIS uploaded file
+    var dhisTEI_file;
+    const dhisTEI_fileName = "./teis/" + SOURCE_OU_CODE + "_" + SOURCE_DATE_PREVIOUS + "/" + dhisTEI_uid + ".json";
+    if (!fs.existsSync(dhisTEI_fileName)) {
+        logger.error(`FileError; TEI file (${dhisTEI_fileName}) (previous dump) doesn't exist`)
+    } else {
+        dhisTEI_file = JSON.parse(fs.readFileSync(dhisTEI_fileName))
+    }
+
+    //New dump file
+    var newTEI_file;
+    const newTEI_fileName = "./teis/" + SOURCE_OU_CODE + "_" + SOURCE_DATE_CURRENT + "/" + newTEI_uid + ".json";
+    if (!fs.existsSync(newTEI_fileName)) {
+        logger.error(`FileError; TEI file (${newTEI_fileName}) (new dump) doesn't exist`)
+    } else {
+        newTEI_file = JSON.parse(fs.readFileSync(newTEI_fileName))
+    }
+
+    /**
+     * ATTRIBUTES (TEA)
+     */
+    //Compare attributes
+    if (typeof dhisTEI_file !== "undefined" && typeof newTEI_file !== "undefined") {
+
+        var dhisTEAs_data = dhisTEI_file.attributes;
+        var newTEAs_data = newTEI_file.attributes;
+
+        //Coger attribute UID y construir array con solo los UIDs de los attributes
+        var dhisTEAs_uids = [];
+        dhisTEAs_data.forEach(attr => {
+            dhisTEAs_uids.push(attr.attribute)
+        })
+
+        var newTEAs_uids = [];
+        newTEAs_data.forEach(attr => {
+            newTEAs_uids.push(attr.attribute)
+        })
+
+        var missingTEAs = _.difference(dhisTEAs_uids, newTEAs_uids);
+        /*
+        DEBUG ONLY
+        if (missingTEAs.length != 0) {
+            console.log("Missing TEAs:" + missingTEAs + "de la TEI: " + dhisTEI_file.trackedEntityInstance)
+        }*/
+        
+        var newTEAs = _.difference(newTEAs_uids, dhisTEAs_uids);
+        var commonTEAs = _.intersection(dhisTEAs_uids, newTEAs_uids);
+
+        missingTEAs.forEach((TEA) => {
+            logger.info(`TEA_DELETION; TEA ${TEA} will be removed from patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in new data dump`);
+        });
+
+        newTEAs.forEach((TEA) => {
+            logger.info(`TEA_CREATION; TEA ${TEA} will be created for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in previous data dump`);
+        })
+
+        commonTEAs.forEach((TEA) => {
+            //logger.info(`TEA_UPDATE; TEA ${TEA} will be updated for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Present in previous data dump`);
+            //checkTEADifference(TEA, codepatient); //TODO: 
+        })
+
+
+    }
+
 
     //Check enrollments
 
     //Check events
 
 }
+
+/**
+ * Given a TEA check the differences with the new data
+ * Logs the changes (remain the same or will be updated in the server)
+ * @param {*} TEA 
+ * @param {*} codepatient 
+ */
+ function checkTEADifference(TEA, codepatient) {
+
+        //Has same value then log and do nothing (skip porque todo va bien)
+        //Has different value then UPDATE
+ }
