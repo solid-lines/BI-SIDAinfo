@@ -3,14 +3,30 @@ const yargs = require('yargs');
 const { logger, logger_fr } = require('./logger.js');
 var _ = require('lodash');
 
-
-const PERSON_TE_TYPE = "XV3kldsZq0H";
+//UIDs
 const TEA_CODE_PATIENT = "dsWUbqvV9GW";
-const TEA_BIRTHDATE = "qA5Vsiat4Sm";
-const TEA_SEX = "HhsxFysTpdu";
-const TEA_ENTRYMODE = "MqqM2vt5RQA";
-const TEA_LOG = "dkfd2UClEwu"; // Erreurs de validation (liste)
-const TEA_TOBEREVIEWED = "ynBaBzJpqGD"; // Erreurs de validation (oui / non)
+
+//Labels
+const PROGRAM_TARV_LABEL_ENROLLMENT = "TARV_enrollment"
+const PROGRAM_PTME_MERE_LABEL_ENROLLMENT = "PTME_MERE_enrollment"
+const PROGRAM_PTME_ENFANT_LABEL_ENROLLMENT = "PTME_ENFANT_enrollment"
+
+const PROGRAMSTAGE_TARV_PREMIER_DEBUT_ARV_LABEL = "PREMIER_DEBUT_ARV"
+const PROGRAMSTAGE_TARV_TARV_LABEL = "TARV"
+const PROGRAMSTAGE_TARV_CONSULTATION_LABEL = "CONSULTATION"
+const PROGRAMSTAGE_TARV_DEBUT_TRAITEMENT_TB_LABEL = "DEBUT_TRAITEMENT_TB"
+const PROGRAMSTAGE_TARV_PERDU_DE_VUE_LABEL = "PERDU_DE_VUE"
+const PROGRAMSTAGE_TARV_SORTIE_LABEL = "SORTIE"
+
+const PROGRAMSTAGE_PTME_MERE_ADMISSION_PTME_MERE_LABEL = "ADMISSION"
+const PROGRAMSTAGE_PTME_MERE_PREMIERDEBUTARVPTME_LABEL = "PREMIERDEBUTARVPTME"
+const PROGRAMSTAGE_PTME_MERE_DELIVERY_LABEL = "DELIVERY"
+const PROGRAMSTAGE_PTME_MERE_SORTIE_LABEL = "SORTIE"
+
+const PROGRAMSTAGE_PTME_ENFANT_ADMISSION_LABEL = "ADMISSION"
+const PROGRAMSTAGE_PTME_ENFANT_PCR_INITIAL_LABEL = "PCR_INITIAL"
+const PROGRAMSTAGE_PTME_ENFANT_PCR_SUIVI_LABEL = "PCR_SUIVI"
+const PROGRAMSTAGE_PTME_ENFANT_SORTIE_LABEL = "SORTIE"
 
 /**************************************/
 
@@ -102,8 +118,8 @@ newTEIs_patientCodes.forEach((TEI) => {
 
 
 commonTEIs_patientCodes.forEach((TEI) => {
-    //logger.info(`UPDATE; Patient ${TEI} (uid: ${previous_patient_code_uid[TEI].uid}) will be reviewed; Present in previous data dump`);
-    checkDifference(TEI); //TODO: 
+    //logger.info(`TEI_REVIEW; Patient ${TEI} (uid: ${previous_patient_code_uid[TEI].uid}) will be reviewed; Present in previous data dump`);
+    checkDifference(TEI); //TODO: in process
 })
 
 /**
@@ -138,16 +154,17 @@ function checkDifference(codepatient) {
         newTEI_file = JSON.parse(fs.readFileSync(newTEI_fileName))
     }
 
-    /**
-     * ATTRIBUTES (TEA)
-     */
-    //Compare attributes
     if (typeof dhisTEI_file !== "undefined" && typeof newTEI_file !== "undefined") {
 
+
+        /**
+         * ATTRIBUTES (TEA)
+         */
+        //TEAs arrays
         var dhisTEAs_data = dhisTEI_file.attributes;
         var newTEAs_data = newTEI_file.attributes;
 
-        //Coger attribute UID y construir array con solo los UIDs de los attributes
+        //TEAs UIDs arrays
         var dhisTEAs_uids = [];
         dhisTEAs_data.forEach(attr => {
             dhisTEAs_uids.push(attr.attribute)
@@ -158,13 +175,14 @@ function checkDifference(codepatient) {
             newTEAs_uids.push(attr.attribute)
         })
 
+        //Comparison
         var missingTEAs = _.difference(dhisTEAs_uids, newTEAs_uids);
         /*
         DEBUG ONLY
         if (missingTEAs.length != 0) {
             console.log("Missing TEAs:" + missingTEAs + "de la TEI: " + dhisTEI_file.trackedEntityInstance)
         }*/
-        
+
         var newTEAs = _.difference(newTEAs_uids, dhisTEAs_uids);
         var commonTEAs = _.intersection(dhisTEAs_uids, newTEAs_uids);
 
@@ -174,22 +192,71 @@ function checkDifference(codepatient) {
 
         newTEAs.forEach((TEA) => {
             logger.info(`TEA_CREATION; TEA ${TEA} will be created for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in previous data dump`);
-        })
+        });
 
         commonTEAs.forEach((TEA) => {
-            //logger.info(`TEA_UPDATE; TEA ${TEA} will be updated for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Present in previous data dump`);
-            
+            //logger.info(`TEA_REVIEW; TEA ${TEA} will be reviewed for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Present in previous data dump`);
+
             //Skip TEA_CODE_PATIENT (will always be the same at this point)
-            if(TEA != TEA_CODE_PATIENT){
+            if (TEA != TEA_CODE_PATIENT) {
                 checkTEADifference(TEA, codepatient, dhisTEAs_data[dhisTEAs_uids.indexOf(TEA)], newTEAs_data[newTEAs_uids.indexOf(TEA)]); //TODO: 
             }
+        });
+
+        /**
+         * ENROLLMENTS
+         */
+        const programs = [PROGRAM_PTME_ENFANT_LABEL_ENROLLMENT, PROGRAM_PTME_MERE_LABEL_ENROLLMENT,PROGRAM_TARV_LABEL_ENROLLMENT ];
+
+        programs.forEach((program) => {
+            if (program in previous_patient_code_uid[codepatient]) {
+                if (program in current_patient_code_uid[codepatient]) {
+
+                    var previousEnrollment_dates = Object.keys(previous_patient_code_uid[codepatient][program]) //Array of dates('2019-11-18') 
+                    var currentEnrollment_dates = Object.keys(current_patient_code_uid[codepatient][program])
+
+                    var missingEnrollments = _.difference(previousEnrollment_dates, currentEnrollment_dates);
+                    var newEnrollments = _.difference(currentEnrollment_dates, previousEnrollment_dates);
+                    var commonEnrollments = _.intersection(previousEnrollment_dates, currentEnrollment_dates);
+
+                    if (missingEnrollments.length != 0) { //Some enrollments are missing in the current dump
+                        missingEnrollments.forEach((enrollment_date) => {
+                            logger.info(`Enrollment_DELETION; Enrollment ${previous_patient_code_uid[codepatient][program][enrollment_date]} will be removed from patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in new data dump`);
+                        });
+                    }
+                    if (newEnrollments.length != 0) { //There are new enrollments in the current dump
+                        newEnrollments.forEach((enrollment_date) => {
+                            logger.info(`Enrollment_CREATION; Enrolllment ${current_patient_code_uid[codepatient][program][enrollment_date]} will be created for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in previous data dump`);
+                        });
+                    }
+
+                    if (commonEnrollments.length != 0) { //Some enrollments are missing in the current dump
+                        /*commonEnrollments.forEach((enrollment_date) => {
+                            //logger.info(`Enrollment_REVIEW; Enrollment ${previous_patient_code_uid[codepatient][program][enrollment_date]} 
+                            //will be reviewed for patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server;
+                            //Present in previous data dump`);
+                            
+                            //checkEnrollmentDifference(); //TODO         //dhisTEI_file //newTEI_file
+                        });*/
+                    }
+                } else { //enrollment in previous dump but not in current dump (same as missing enrollment)
+                    logger.info(`Enrollment_DELETION; Enrollment ${previous_patient_code_uid[codepatient][program]} will be removed from patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in new data dump`);
+                }
+            } else { 
+                if (program in current_patient_code_uid[codepatient]) { //enrollment in current dump but not in previous dump (same as new enrollment)
+                    logger.info(`Enrollment_CREATION; ${program} will be created for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in previous data dump`);
+                }
+            }
         })
+
+
+        //previous_patient_code_uid[codepatient]
+        //current_patient_code_uid[codepatient]
 
 
     }
 
 
-    //Check enrollments
 
     //Check events
 
@@ -201,18 +268,17 @@ function checkDifference(codepatient) {
  * @param {*} TEA 
  * @param {*} codepatient 
  */
- function checkTEADifference(TEA, codepatient, dhisTEAs_data, newTEAs_data) {
+function checkTEADifference(TEA, codepatient, dhisTEAs_data, newTEAs_data) {
 
-        //Has same value then log and do nothing (skip porque todo va bien)
-        //Has different value then UPDATE
-        var valueDHIS = dhisTEAs_data.value;
-        var valueNew = newTEAs_data.value;
-        console.log(valueDHIS)
-        console.log(valueNew)
-        if (valueDHIS === valueNew){
-            //logger.info(`TEA_INFO; TEA ${TEA} won't be updated for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; It has the same value as the previous dump`)
-        } else {
-            logger.info(`TEA_UPDATE; TEA ${TEA} will be updated for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Previous value: ${valueDHIS} , New value: ${valueNew}`)
-            //build new TEI payload
-        }
- }
+    //Has same value then log and do nothing (skip porque todo va bien)
+    //Has different value then UPDATE
+    var valueDHIS = dhisTEAs_data.value;
+    var valueNew = newTEAs_data.value;
+
+    if (valueDHIS === valueNew) {
+        //logger.info(`TEA_INFO; TEA ${TEA} won't be updated for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; It has the same value as the previous dump`)
+    } else {
+        logger.info(`TEA_UPDATE; TEA ${TEA} will be updated for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Previous value: ${valueDHIS} , New value: ${valueNew}`)
+        //build new TEI payload
+    }
+}
