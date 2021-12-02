@@ -62,7 +62,6 @@ if (argv._.includes('diff')) {
  * Read input files
  */
 const PATIENT_UID_FILE_PREVIOUS = SOURCE_DATE_PREVIOUS + "-" + SOURCE_OU_CODE + "-patient_code_uid.json";
-console.log(PATIENT_UID_FILE_PREVIOUS)
 if (!fs.existsSync(PATIENT_UID_FILE_PREVIOUS)) {
     logger.error(`ArgError; Patient_uid_file (${PATIENT_UID_FILE_PREVIOUS}) from previous data dump doesn't exist`)
 } else {
@@ -179,7 +178,11 @@ function checkDifference(codepatient) {
 
         commonTEAs.forEach((TEA) => {
             //logger.info(`TEA_UPDATE; TEA ${TEA} will be updated for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Present in previous data dump`);
-            //checkTEADifference(TEA, codepatient); //TODO: 
+            
+            //Skip TEA_CODE_PATIENT (will always be the same at this point)
+            if(TEA != TEA_CODE_PATIENT){
+                checkTEADifference(TEA, codepatient, dhisTEAs_data[dhisTEAs_uids.indexOf(TEA)], newTEAs_data[newTEAs_uids.indexOf(TEA)]); //TODO: 
+            }
         })
 
 
@@ -198,8 +201,18 @@ function checkDifference(codepatient) {
  * @param {*} TEA 
  * @param {*} codepatient 
  */
- function checkTEADifference(TEA, codepatient) {
+ function checkTEADifference(TEA, codepatient, dhisTEAs_data, newTEAs_data) {
 
         //Has same value then log and do nothing (skip porque todo va bien)
         //Has different value then UPDATE
+        var valueDHIS = dhisTEAs_data.value;
+        var valueNew = newTEAs_data.value;
+        console.log(valueDHIS)
+        console.log(valueNew)
+        if (valueDHIS === valueNew){
+            //logger.info(`TEA_INFO; TEA ${TEA} won't be updated for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; It has the same value as the previous dump`)
+        } else {
+            logger.info(`TEA_UPDATE; TEA ${TEA} will be updated for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Previous value: ${valueDHIS} , New value: ${valueNew}`)
+            //build new TEI payload
+        }
  }
