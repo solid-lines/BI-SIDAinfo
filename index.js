@@ -11,9 +11,9 @@ const PROGRAM_TARV_LABEL_ENROLLMENT = "TARV_enrollment"
 const PROGRAM_PTME_MERE_LABEL_ENROLLMENT = "PTME_MERE_enrollment"
 const PROGRAM_PTME_ENFANT_LABEL_ENROLLMENT = "PTME_ENFANT_enrollment"
 
-const PROGRAM_TARV_LABEL = "TARV"
+const PROGRAM_TARV = "TARV"
 const PROGRAM_PTME_MERE = "PTME_MERE"
-const PROGRAM_PTME_ENFANT= "PTME_ENFANT"
+const PROGRAM_PTME_ENFANT = "PTME_ENFANT"
 
 const PROGRAMSTAGE_TARV_PREMIER_DEBUT_ARV_LABEL = "PREMIER_DEBUT_ARV"
 const PROGRAMSTAGE_TARV_TARV_LABEL = "TARV"
@@ -240,7 +240,7 @@ function checkDifference(codepatient) {
                             //will be reviewed for patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server;
                             //Present in previous data dump`);
 
-                            checkEnrollmentDifference(enrollment_date, codepatient, program); //TODO  
+                            checkEnrollmentDifference(enrollment_date, codepatient, program, dhisTEI_file, newTEI_file, previous_patient_code_uid, current_patient_code_uid); //TODO  
                         });
                     }
                 } else { //enrollment in previous dump but not in current dump (same as missing enrollment)
@@ -298,9 +298,15 @@ function checkTEADifference(TEA, codepatient, dhisTEA, newTEA) {
  * Logs the changes (remain the same or will be updated in the server)
  * @param {*} enrollment_date 
  * @param {*} codepatient 
+ * @param
+ * @param
+ * @param
+ * @param
+ * @param
  */
-function checkEnrollmentDifference(enrollment_date, codepatient, program) {
+function checkEnrollmentDifference(enrollment_date, codepatient, program, dhisTEI_file, newTEI_file, previous_patient_code_uid, current_patient_code_uid) {
 
+    //TODO: refactor
     //Check enrollment events existence for each programStage
 
     const ENFANT_programStages = [
@@ -325,25 +331,70 @@ function checkEnrollmentDifference(enrollment_date, codepatient, program) {
     ];
 
     var programStages = [];
+    var dhis_enrollment_key = "";
+    var current_enrollment_key = "";
     if (program == PROGRAM_PTME_ENFANT_LABEL_ENROLLMENT) {
+        //Assign corresponding programStages
         programStages = ENFANT_programStages;
+        //Build Enrollment Keys (eg. "PTME_ENFANT-scWpqiXLR5u")
+        dhis_enrollment_key = PROGRAM_PTME_ENFANT + "-" + previous_patient_code_uid[codepatient][program][enrollment_date];
+        current_enrollment_key = PROGRAM_PTME_ENFANT + "-" + current_patient_code_uid[codepatient][program][enrollment_date];
+
     } else if (program == PROGRAM_PTME_MERE_LABEL_ENROLLMENT) {
         programStages = MERE_programStages;
+        dhis_enrollment_key = PROGRAM_PTME_MERE + "-" + previous_patient_code_uid[codepatient][program][enrollment_date];
+        current_enrollment_key = PROGRAM_PTME_MERE + "-" + current_patient_code_uid[codepatient][program][enrollment_date];
+
     } else if (program == PROGRAM_TARV_LABEL_ENROLLMENT) {
         programStages = TARV_programStages;
+        dhis_enrollment_key = PROGRAM_TARV + "-" + previous_patient_code_uid[codepatient][program][enrollment_date];
+        current_enrollment_key = PROGRAM_TARV + "-" + current_patient_code_uid[codepatient][program][enrollment_date];
     }
+
 
     /**
     * PROGRAM STAGES
     */
     programStages.forEach((stage) => {
-        console.log(stage)
+        if (typeof previous_patient_code_uid[codepatient][dhis_enrollment_key] !== "undefined") { //There are events associated to that enrollment in the previous file
+
+            if (typeof current_patient_code_uid[codepatient][current_enrollment_key] !== "undefined") {
+                if (stage in previous_patient_code_uid[codepatient][dhis_enrollment_key]) { //Stage exist in previous file enrollment
+                    if (stage in current_patient_code_uid[codepatient][current_enrollment_key]) {//Stage exist in current file enrollment
+
+                        //Ver los eventos que contiene
+                        var previousEvents_dates = Object.keys(previous_patient_code_uid[codepatient][dhis_enrollment_key][stage]);
+                        var currentEvents_dates = Object.keys(current_patient_code_uid[codepatient][current_enrollment_key][stage]);
+
+                        var missingEvents = _.difference(previousEvents_dates, currentEvents_dates);
+                        var newEvents = _.difference(currentEvents_dates, previousEvents_dates);
+                        var commonEvents = _.intersection(previousEvents_dates, currentEvents_dates);
+
+                        //TODO: delete, create, review
+
+
+                    } else { //Stage doesn't exist in current file enrollment
+
+                    }
+                } else { //Stage doesn't exist in previous file enrollment
+
+                }
+            } else { //No events associated to that enrollment in the current file
+                //TODO: borrar los que había en la previous file en dhis
+            }
+
+
+
+        } else { //No events associated to that enrollment in the previous file
+            if (typeof current_patient_code_uid[codepatient][current_enrollment_key] !== "undefined") { //There weren't before, there are now
+                //TODO: create events
+            } else { //No events before and no events now
+                //Do nothing
+            }
+        }
+
 
     })
-    /*
-    var missingEvents 
-    var newEvents 
-    var commonEvents
-*/
+
     //dhisTEI_file //newTEI_file
 }
