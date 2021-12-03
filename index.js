@@ -11,6 +11,10 @@ const PROGRAM_TARV_LABEL_ENROLLMENT = "TARV_enrollment"
 const PROGRAM_PTME_MERE_LABEL_ENROLLMENT = "PTME_MERE_enrollment"
 const PROGRAM_PTME_ENFANT_LABEL_ENROLLMENT = "PTME_ENFANT_enrollment"
 
+const PROGRAM_TARV_LABEL = "TARV"
+const PROGRAM_PTME_MERE = "PTME_MERE"
+const PROGRAM_PTME_ENFANT= "PTME_ENFANT"
+
 const PROGRAMSTAGE_TARV_PREMIER_DEBUT_ARV_LABEL = "PREMIER_DEBUT_ARV"
 const PROGRAMSTAGE_TARV_TARV_LABEL = "TARV"
 const PROGRAMSTAGE_TARV_CONSULTATION_LABEL = "CONSULTATION"
@@ -206,7 +210,7 @@ function checkDifference(codepatient) {
         /**
          * ENROLLMENTS
          */
-        const programs = [PROGRAM_PTME_ENFANT_LABEL_ENROLLMENT, PROGRAM_PTME_MERE_LABEL_ENROLLMENT,PROGRAM_TARV_LABEL_ENROLLMENT ];
+        const programs = [PROGRAM_PTME_ENFANT_LABEL_ENROLLMENT, PROGRAM_PTME_MERE_LABEL_ENROLLMENT, PROGRAM_TARV_LABEL_ENROLLMENT];
 
         programs.forEach((program) => {
             if (program in previous_patient_code_uid[codepatient]) {
@@ -231,18 +235,18 @@ function checkDifference(codepatient) {
                     }
 
                     if (commonEnrollments.length != 0) { //Some enrollments are missing in the current dump
-                        /*commonEnrollments.forEach((enrollment_date) => {
+                        commonEnrollments.forEach((enrollment_date) => {
                             //logger.info(`Enrollment_REVIEW; Enrollment ${previous_patient_code_uid[codepatient][program][enrollment_date]} (${program})
                             //will be reviewed for patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server;
                             //Present in previous data dump`);
-                            
-                            //checkEnrollmentDifference(); //TODO         //dhisTEI_file //newTEI_file
-                        });*/
+
+                            checkEnrollmentDifference(enrollment_date, codepatient, program); //TODO  
+                        });
                     }
                 } else { //enrollment in previous dump but not in current dump (same as missing enrollment)
                     logger.info(`Enrollment_DELETION; ${program} ${(Object.values(previous_patient_code_uid[codepatient][program]))} will be removed from patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in new data dump`);
                 }
-            } else { 
+            } else {
                 if (program in current_patient_code_uid[codepatient]) { //enrollment in current dump but not in previous dump (same as new enrollment)
                     logger.info(`Enrollment_CREATION; ${program} will be created for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in previous data dump`);
                 }
@@ -267,13 +271,19 @@ function checkDifference(codepatient) {
  * Logs the changes (remain the same or will be updated in the server)
  * @param {*} TEA 
  * @param {*} codepatient 
+ * @param {*} dhisTEA TEA object : {
+      "attribute": "dsWUbqvV9GW",
+      "value": "003BDI017S020203001422",
+      "storedBy": "SidaInfoIntegrator"
+    }
+ * @param {*} newTEA
  */
-function checkTEADifference(TEA, codepatient, dhisTEAs_data, newTEAs_data) {
+function checkTEADifference(TEA, codepatient, dhisTEA, newTEA) {
 
     //Has same value then log and do nothing (skip porque todo va bien)
     //Has different value then UPDATE
-    var valueDHIS = dhisTEAs_data.value;
-    var valueNew = newTEAs_data.value;
+    var valueDHIS = dhisTEA.value;
+    var valueNew = newTEA.value;
 
     if (valueDHIS === valueNew) {
         //logger.info(`TEA_INFO; TEA ${TEA} won't be updated for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; It has the same value as the previous dump`)
@@ -281,4 +291,59 @@ function checkTEADifference(TEA, codepatient, dhisTEAs_data, newTEAs_data) {
         logger.info(`TEA_UPDATE; TEA ${TEA} will be updated for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Previous value: ${valueDHIS} , New value: ${valueNew}`)
         //build new TEI payload
     }
+}
+
+/**
+ * Given an enrollment check the differences with the new data
+ * Logs the changes (remain the same or will be updated in the server)
+ * @param {*} enrollment_date 
+ * @param {*} codepatient 
+ */
+function checkEnrollmentDifference(enrollment_date, codepatient, program) {
+
+    //Check enrollment events existence for each programStage
+
+    const ENFANT_programStages = [
+        PROGRAMSTAGE_PTME_ENFANT_ADMISSION_LABEL,
+        PROGRAMSTAGE_PTME_ENFANT_PCR_INITIAL_LABEL,
+        PROGRAMSTAGE_PTME_ENFANT_PCR_SUIVI_LABEL,
+        PROGRAMSTAGE_PTME_ENFANT_SORTIE_LABEL
+    ];
+    const MERE_programStages = [
+        PROGRAMSTAGE_PTME_MERE_ADMISSION_PTME_MERE_LABEL,
+        PROGRAMSTAGE_PTME_MERE_PREMIERDEBUTARVPTME_LABEL,
+        PROGRAMSTAGE_PTME_MERE_DELIVERY_LABEL,
+        PROGRAMSTAGE_PTME_MERE_SORTIE_LABEL
+    ];
+    const TARV_programStages = [
+        PROGRAMSTAGE_TARV_PREMIER_DEBUT_ARV_LABEL,
+        PROGRAMSTAGE_TARV_TARV_LABEL,
+        PROGRAMSTAGE_TARV_CONSULTATION_LABEL,
+        PROGRAMSTAGE_TARV_DEBUT_TRAITEMENT_TB_LABEL,
+        PROGRAMSTAGE_TARV_PERDU_DE_VUE_LABEL,
+        PROGRAMSTAGE_TARV_SORTIE_LABEL
+    ];
+
+    var programStages = [];
+    if (program == PROGRAM_PTME_ENFANT_LABEL_ENROLLMENT) {
+        programStages = ENFANT_programStages;
+    } else if (program == PROGRAM_PTME_MERE_LABEL_ENROLLMENT) {
+        programStages = MERE_programStages;
+    } else if (program == PROGRAM_TARV_LABEL_ENROLLMENT) {
+        programStages = TARV_programStages;
+    }
+
+    /**
+    * PROGRAM STAGES
+    */
+    programStages.forEach((stage) => {
+        console.log(stage)
+
+    })
+    /*
+    var missingEvents 
+    var newEvents 
+    var commonEvents
+*/
+    //dhisTEI_file //newTEI_file
 }
