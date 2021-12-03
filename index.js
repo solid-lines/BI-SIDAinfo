@@ -221,18 +221,18 @@ function checkDifference(codepatient) {
 
                     if (missingEnrollments.length != 0) { //Some enrollments are missing in the current dump
                         missingEnrollments.forEach((enrollment_date) => {
-                            logger.info(`Enrollment_DELETION; Enrollment ${previous_patient_code_uid[codepatient][program][enrollment_date]} will be removed from patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in new data dump`);
+                            logger.info(`Enrollment_DELETION; ${program} ${previous_patient_code_uid[codepatient][program][enrollment_date]} will be removed from patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in new data dump`);
                         });
                     }
                     if (newEnrollments.length != 0) { //There are new enrollments in the current dump
                         newEnrollments.forEach((enrollment_date) => {
-                            logger.info(`Enrollment_CREATION; Enrolllment ${current_patient_code_uid[codepatient][program][enrollment_date]} will be created for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in previous data dump`);
+                            logger.info(`Enrollment_CREATION; ${program} will be created for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in previous data dump`);
                         });
                     }
 
                     if (commonEnrollments.length != 0) { //Some enrollments are missing in the current dump
                         /*commonEnrollments.forEach((enrollment_date) => {
-                            //logger.info(`Enrollment_REVIEW; Enrollment ${previous_patient_code_uid[codepatient][program][enrollment_date]} 
+                            //logger.info(`Enrollment_REVIEW; Enrollment ${previous_patient_code_uid[codepatient][program][enrollment_date]} (${program})
                             //will be reviewed for patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server;
                             //Present in previous data dump`);
                             
@@ -240,7 +240,7 @@ function checkDifference(codepatient) {
                         });*/
                     }
                 } else { //enrollment in previous dump but not in current dump (same as missing enrollment)
-                    logger.info(`Enrollment_DELETION; Enrollment ${previous_patient_code_uid[codepatient][program]} will be removed from patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in new data dump`);
+                    logger.info(`Enrollment_DELETION; ${program} ${(Object.values(previous_patient_code_uid[codepatient][program]))} will be removed from patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in new data dump`);
                 }
             } else { 
                 if (program in current_patient_code_uid[codepatient]) { //enrollment in current dump but not in previous dump (same as new enrollment)
