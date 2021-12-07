@@ -225,7 +225,7 @@ function checkDifference(codepatient) {
 
                     if (missingEnrollments.length != 0) { //Some enrollments are missing in the current dump
                         missingEnrollments.forEach((enrollment_date) => {
-                            logger.info(`Enrollment_DELETION; ${program} ${previous_patient_code_uid[codepatient][program][enrollment_date]} will be removed from patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in new data dump`);
+                            logger.info(`Enrollment_DELETION; ${program} (${previous_patient_code_uid[codepatient][program][enrollment_date]}) will be removed from patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in new data dump`);
                         });
                     }
                     if (newEnrollments.length != 0) { //There are new enrollments in the current dump
@@ -234,7 +234,7 @@ function checkDifference(codepatient) {
                         });
                     }
 
-                    if (commonEnrollments.length != 0) { //Some enrollments are missing in the current dump
+                    if (commonEnrollments.length != 0) { //Some enrollments are present in both dumps
                         commonEnrollments.forEach((enrollment_date) => {
                             //logger.info(`Enrollment_REVIEW; Enrollment ${previous_patient_code_uid[codepatient][program][enrollment_date]} (${program})
                             //will be reviewed for patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server;
@@ -371,6 +371,26 @@ function checkEnrollmentDifference(enrollment_date, codepatient, program, dhisTE
                         var commonEvents = _.intersection(previousEvents_dates, currentEvents_dates);
 
                         //TODO: delete, create, review
+                        if (missingEvents.length != 0) { //Some events for that stage are missing in the current dump
+                            missingEvents.forEach((event_date) => {
+                                logger.info(`Event_DELETION; ${stage} event (${previous_patient_code_uid[codepatient][dhis_enrollment_key][stage][event_date]}) on ${event_date} will be removed from patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in new data dump`);
+                            });
+                        }
+                        if (newEvents.length != 0) { //There are new events for that stage in the current dump
+                            newEvents.forEach((event_date) => {
+                                logger.info(`Event_CREATION; ${[stage]} event on ${event_date} will be created for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in previous data dump`);
+                            });
+                        }
+    
+                        if (commonEvents.length != 0) { //Some events for that stage are present in both dumps
+                            commonEvents.forEach((event_date) => {
+                                //logger.info(`Event_REVIEW; Event ${previous_patient_code_uid[codepatient][program][event_date]} (${program})
+                                //will be reviewed for patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server;
+                                //Present in previous data dump`);
+    
+                                //checkEventDifference(event_date, codepatient, program, dhisTEI_file, newTEI_file, previous_patient_code_uid, current_patient_code_uid); //TODO  
+                            });
+                        }
 
 
                     } else { //Stage doesn't exist in current file enrollment
