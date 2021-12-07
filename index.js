@@ -58,6 +58,9 @@ const TARV_programStages = [
     PROGRAMSTAGE_TARV_SORTIE_LABEL
 ];
 
+const PREVIOUS = "PREVIOUS";
+const CURRENT = "CURRENT";
+
 /**************************************/
 
 /**
@@ -155,9 +158,14 @@ commonTEIs_patientCodes.forEach((TEI) => {
 /**
  * Read TEI files
  */
-function readTEIFile(TEI_uid, source_date) {
+function readTEIFile(TEI_uid, dump) {
     /****************** Read TEI files ********************/
-
+    var source_date;
+    if (dump == CURRENT) {
+        source_date = SOURCE_DATE_CURRENT;
+    } else {
+        source_date = SOURCE_DATE_PREVIOUS;
+    }
 
     var TEI_file;
     const TEI_fileName = "./teis/" + SOURCE_OU_CODE + "_" + source_date + "/" + TEI_uid + ".json";
@@ -184,10 +192,10 @@ function checkDifference(codepatient) {
     var newTEI_uid = current_patient_code_uid[codepatient].uid;
 
     //DHIS uploaded file
-    var dhisTEI_file = readTEIFile(dhisTEI_uid, SOURCE_DATE_PREVIOUS);
+    var dhisTEI_file = readTEIFile(dhisTEI_uid, PREVIOUS);
 
     //New dump file
-    var newTEI_file = readTEIFile(newTEI_uid, SOURCE_DATE_CURRENT);
+    var newTEI_file = readTEIFile(newTEI_uid, CURRENT);
 
     if (typeof dhisTEI_file !== "undefined" && typeof newTEI_file !== "undefined") {
 
@@ -354,22 +362,24 @@ function checkEnrollmentDifference(enrollment_date, codepatient, program, previo
     var programStages = [];
     var dhis_enrollment_key = "";
     var current_enrollment_key = "";
+    var enrollment_uid_previous = previous_patient_code_uid[codepatient][program][enrollment_date];
+    var enrollment_uid_current = current_patient_code_uid[codepatient][program][enrollment_date];
     if (program == PROGRAM_PTME_ENFANT_LABEL_ENROLLMENT) {
         //Assign corresponding programStages
         programStages = ENFANT_programStages;
         //Build Enrollment Keys (eg. "PTME_ENFANT-scWpqiXLR5u")
-        dhis_enrollment_key = PROGRAM_PTME_ENFANT + "-" + previous_patient_code_uid[codepatient][program][enrollment_date];
-        current_enrollment_key = PROGRAM_PTME_ENFANT + "-" + current_patient_code_uid[codepatient][program][enrollment_date];
+        dhis_enrollment_key = PROGRAM_PTME_ENFANT + "-" + enrollment_uid_previous;
+        current_enrollment_key = PROGRAM_PTME_ENFANT + "-" + enrollment_uid_current;
 
     } else if (program == PROGRAM_PTME_MERE_LABEL_ENROLLMENT) {
         programStages = MERE_programStages;
-        dhis_enrollment_key = PROGRAM_PTME_MERE + "-" + previous_patient_code_uid[codepatient][program][enrollment_date];
-        current_enrollment_key = PROGRAM_PTME_MERE + "-" + current_patient_code_uid[codepatient][program][enrollment_date];
+        dhis_enrollment_key = PROGRAM_PTME_MERE + "-" + enrollment_uid_previous;
+        current_enrollment_key = PROGRAM_PTME_MERE + "-" + enrollment_uid_current;
 
     } else if (program == PROGRAM_TARV_LABEL_ENROLLMENT) {
         programStages = TARV_programStages;
-        dhis_enrollment_key = PROGRAM_TARV + "-" + previous_patient_code_uid[codepatient][program][enrollment_date];
-        current_enrollment_key = PROGRAM_TARV + "-" + current_patient_code_uid[codepatient][program][enrollment_date];
+        dhis_enrollment_key = PROGRAM_TARV + "-" + enrollment_uid_previous;
+        current_enrollment_key = PROGRAM_TARV + "-" + enrollment_uid_current;
     }
 
 
@@ -377,7 +387,7 @@ function checkEnrollmentDifference(enrollment_date, codepatient, program, previo
     * PROGRAM STAGES
     */
     programStages.forEach((stage) => {
-        checkStageEvents(stage, codepatient, dhis_enrollment_key, current_enrollment_key, previous_patient_code_uid, current_patient_code_uid);
+        checkStageEvents(codepatient, program, stage, dhis_enrollment_key, current_enrollment_key, enrollment_uid_previous, enrollment_uid_current, previous_patient_code_uid, current_patient_code_uid);
     })
 
 }
@@ -394,7 +404,7 @@ function checkEnrollmentDifference(enrollment_date, codepatient, program, previo
  * @param {*} previous_patient_code_uid 
  * @param {*} current_patient_code_uid 
  */
-function checkStageEvents(stage, codepatient, dhis_enrollment_key, current_enrollment_key, previous_patient_code_uid, current_patient_code_uid) {
+function checkStageEvents(codepatient, program, stage, dhis_enrollment_key, current_enrollment_key, enrollment_uid_previous, enrollment_uid_current, previous_patient_code_uid, current_patient_code_uid) {
     if (typeof previous_patient_code_uid[codepatient][dhis_enrollment_key] !== "undefined") { //There are events associated to that enrollment in the previous file
 
         if (typeof current_patient_code_uid[codepatient][current_enrollment_key] !== "undefined") {
@@ -409,7 +419,6 @@ function checkStageEvents(stage, codepatient, dhis_enrollment_key, current_enrol
                     var newEvents = _.difference(currentEvents_dates, previousEvents_dates);
                     var commonEvents = _.intersection(previousEvents_dates, currentEvents_dates);
 
-                    //TODO: delete, create, review
                     if (missingEvents.length != 0) { //Some events for that stage are missing in the current dump
                         missingEvents.forEach((event_date) => {
                             logger.info(`Event_DELETION; ${stage} event (${previous_patient_code_uid[codepatient][dhis_enrollment_key][stage][event_date]}) on ${event_date} will be removed from patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in new data dump`);
@@ -427,7 +436,17 @@ function checkStageEvents(stage, codepatient, dhis_enrollment_key, current_enrol
                             //will be reviewed for patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server;
                             //Present in previous data dump`);
 
-                            //checkEventDifference(event_date, codepatient, program, dhisTEI_file, newTEI_file, previous_patient_code_uid, current_patient_code_uid); //TODO  
+                            var dhisTEI_file = readTEIFile(previous_patient_code_uid[codepatient].uid, PREVIOUS);
+                            var newTEI_file = readTEIFile(current_patient_code_uid[codepatient].uid, CURRENT);
+
+                            var previousEvent_uid = previous_patient_code_uid[codepatient][dhis_enrollment_key][stage][event_date];
+                            var currentEvent_uid = current_patient_code_uid[codepatient][current_enrollment_key][stage][event_date];
+
+                            var dhis_dataValues = getDataValues(dhisTEI_file, enrollment_uid_previous, previousEvent_uid);
+                            var new_dataValues = getDataValues(newTEI_file, enrollment_uid_current, currentEvent_uid);
+
+                            //checkEventDifference(event_date, codepatient, program, stage, dhisTEI_file, newTEI_file, dhis_enrollment_key, current_enrollment_key, enrollment_uid_previous, enrollment_uid_current, previousEvent_uid, currentEvent_uid, previous_patient_code_uid, current_patient_code_uid); //TODO  
+                            checkDataValuesDifference(dhis_dataValues, new_dataValues);
                         });
                     }
 
@@ -453,6 +472,35 @@ function checkStageEvents(stage, codepatient, dhis_enrollment_key, current_enrol
     }
 }
 
+function getDataValues(TEI_file, enrollment_uid, event_uid) {
+    /***************** Read event ****************/
+    /***** Extract enrollment info ******/
+    //Enrollments array
+    var enrollments_data = TEI_file.enrollments;
+
+    //Enrollments UIDs array
+    var enrollments_uids = [];
+    enrollments_data.forEach(enroll => {
+        enrollments_uids.push(enroll.enrollment);
+    });
+
+    /***** Extract events info ******/
+    //Events array
+    var events = enrollments_data[enrollments_uids.indexOf(enrollment_uid)].events;
+
+    //Events UIDs arrays
+    var events_uids = [];
+    events.forEach(event => {
+        events_uids.push(event.event);
+    });
+
+    /***** Extract dataValues info ******/
+    //Event data
+    var event = events[events_uids.indexOf(event_uid)];
+
+    return event.dataValues;
+}
+
 /**
  * Given an event check the differences with the new data
  * Logs the changes (remain the same or will be updated in the server)
@@ -464,6 +512,24 @@ function checkStageEvents(stage, codepatient, dhis_enrollment_key, current_enrol
  * @param
  * @param
  */
-function checkEventDifference(event_date, codepatient, program, dhisTEI_file, newTEI_file, previous_patient_code_uid, current_patient_code_uid) {
+function checkDataValuesDifference(dhis_dataValues, new_dataValues) {
 
+    //For each event
+    //Check DE existence
+    if (typeof dhis_dataValues !== "undefined") { //Event had dataValues in previous dump
+        if (typeof new_dataValues !== "undefined") { //Event has dataValues in new dump
+            //TODO: missingDE, newDE, commonDE
+            //TODO: for each DE in common: compare checkDataValueDifference
+        } else { //Event used to have dataValues but doesn't have anymore
+            //TODO: remove dataValue from DHIS server
+        }
+
+    } else { //Event didn't have dataValues
+        if (typeof new_dataValues !== "undefined") { //Event didn't have DE before but has now
+            //TODO: create DE
+        } else { //Event didn't have dataVales in previous dump nor in new dump
+
+        }
+    }
 }
+
