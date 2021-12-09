@@ -341,6 +341,30 @@ function checkEnrollmentExistence(codepatient, program, previous_patient_code_ui
     } else {
         if (program in current_patient_code_uid[codepatient]) { //enrollment in current dump but not in previous dump (same as new enrollment)
             logger.info(`Enrollment_CREATION; ${program} will be created for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in previous data dump`);
+
+            //var currentEvents_dates = Object.keys(current_patient_code_uid[codepatient][program]);
+            var currentEnrollment_uids = Object.values(current_patient_code_uid[codepatient][program])
+            var current_enrollment_keys = [];
+            currentEnrollment_uids.forEach((uid) => {
+                current_enrollment_keys.push([program] + "-" + uid);
+            })
+/* IN PROCESS
+            if (current_enrollment_keys.length != 0) { //There are new events for that stage in the current dump
+                current_enrollment_keys.forEach((key) => {
+                    //Para cada enrollment iterar sobre sus eventos, leerlos del nuevo dump, y crearlos con los mismo datos
+                    var stages = Object.keys(current_patient_code_uid[codepatient][key]);
+                    stages.forEach((stage) => {
+                        var events = Object.keys(current_patient_code_uid[codepatient][key][stage]);
+                        events.forEach((date) => {
+                            logger.info(`Event_CREATION; ${[program]} event on ${date} will be created for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in previous data dump`);
+
+                        })
+                    })
+
+                });
+            }
+*/
+
         }
     }
 }
@@ -446,26 +470,42 @@ function checkStageEvents(codepatient, program, stage, dhis_enrollment_key, curr
                             var new_dataValues = getDataValues(newTEI_file, enrollment_uid_current, currentEvent_uid);
 
                             //checkEventDifference(event_date, codepatient, program, stage, dhisTEI_file, newTEI_file, dhis_enrollment_key, current_enrollment_key, enrollment_uid_previous, enrollment_uid_current, previousEvent_uid, currentEvent_uid, previous_patient_code_uid, current_patient_code_uid); //TODO  
-                            checkDataValuesDifference(dhis_dataValues, new_dataValues);
+                            checkDataValuesExistence(codepatient, previous_patient_code_uid[codepatient].uid, event_date, stage, dhis_dataValues, new_dataValues, previousEvent_uid);
                         });
                     }
 
 
                 } else { //Stage doesn't exist in current file enrollment
-
+                    logger.info(`Stage_DELETION; ${[stage]} stage from enrollment (${enrollment_uid_current}) and all its associated events will be removed for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in new data dump`);
                 }
             } else { //Stage doesn't exist in previous file enrollment
-
+                if (stage in current_patient_code_uid[codepatient][current_enrollment_key]) {
+                    logger.info(`Event_CREATION; ${[stage]} event on ${Object.keys(current_patient_code_uid[codepatient][current_enrollment_key][stage])} will be created for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in previous data dump`);
+                }
             }
         } else { //No events associated to that enrollment in the current file
-            //TODO: borrar los que había en la previous file en dhis
+            logger.info(`Enrollment_DELETION; ${[enrollment_uid_current]} enrollment and all its associated events will be removed for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in new data dump`);
         }
 
 
 
     } else { //No events associated to that enrollment in the previous file
         if (typeof current_patient_code_uid[codepatient][current_enrollment_key] !== "undefined") { //There weren't before, there are now
-            //TODO: create events
+            //logger.info(`Enrollment_CREATION; ${[enrollment_uid_current]} enrollment and all its associated events will be created for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in previous data dump`);
+            //TODO:Events_CREATION?
+
+            if (stage in current_patient_code_uid[codepatient][current_enrollment_key]) {//Stage exist in current file enrollment
+
+                var currentEvents_dates = Object.keys(current_patient_code_uid[codepatient][current_enrollment_key][stage]);
+
+                if (currentEvents_dates.length != 0) { //There are new events for that stage in the current dump
+                    currentEvents_dates.forEach((event_date) => {
+                        logger.info(`Event_CREATION; ${[stage]} event on ${event_date} will be created for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in previous data dump`);
+                    });
+                }
+            }
+
+
         } else { //No events before and no events now
             //Do nothing
         }
@@ -512,24 +552,92 @@ function getDataValues(TEI_file, enrollment_uid, event_uid) {
  * @param
  * @param
  */
-function checkDataValuesDifference(dhis_dataValues, new_dataValues) {
+function checkDataValuesExistence(codepatient, patient_uid, event_date, stage, dhis_dataValues, new_dataValues, previousEvent_uid) {
 
     //For each event
     //Check DE existence
     if (typeof dhis_dataValues !== "undefined") { //Event had dataValues in previous dump
         if (typeof new_dataValues !== "undefined") { //Event has dataValues in new dump
-            //TODO: missingDE, newDE, commonDE
-            //TODO: for each DE in common: compare checkDataValueDifference
-        } else { //Event used to have dataValues but doesn't have anymore
-            //TODO: remove dataValue from DHIS server
+
+            //DEs UIDs arrays
+            var dhisDEs_uids = [];
+            dhis_dataValues.forEach(DE => {
+                dhisDEs_uids.push(DE.dataElement)
+            })
+
+            var newDEs_uids = [];
+            new_dataValues.forEach(DE => {
+                newDEs_uids.push(DE.dataElement)
+            })
+
+            var missingDEs = _.difference(dhisDEs_uids, newDEs_uids);
+            var newDEs = _.difference(newDEs_uids, dhisDEs_uids); //TODO: review, something is wrong
+            var commonDEs = _.intersection(dhisDEs_uids, newDEs_uids);
+
+            if (missingDEs.length != 0) { //Some DEs for that event are missing in the current dump
+                missingDEs.forEach((DE) => {
+                    logger.info(`DE_DELETION; ${DE} dataElement will be removed for event ${previousEvent_uid} (${event_date}) , ${stage} stage, patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in new data dump`);
+                });
+            }
+            if (newDEs.length != 0) { //There are new DEs for that event in the current dump
+                newDEs.forEach((DE) => {
+                    logger.info(`DE_CREATION; ${DE} dataElement for event ${previousEvent_uid} (${event_date}), ${stage} stage, will be created for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in previous data dump`);
+                });
+            }
+
+            if (commonDEs.length != 0) { //Some events for that stage are present in both dumps
+                //TODO: for each DE in common: compare checkDataValueDifference
+                commonDEs.forEach((DE) => {
+                    checkDataValueDifference(DE, codepatient, patient_uid, dhis_dataValues[dhisDEs_uids.indexOf(DE)], new_dataValues[newDEs_uids.indexOf(DE)]);
+                })
+
+            }
+
+        } else { //Event doesn't have dataValues in new dump
+
         }
 
-    } else { //Event didn't have dataValues
-        if (typeof new_dataValues !== "undefined") { //Event didn't have DE before but has now
-            //TODO: create DE
-        } else { //Event didn't have dataVales in previous dump nor in new dump
-
+    } else { //Event didn't have dataValues in previous dump
+        if (typeof new_dataValues !== "undefined") { //Event didn't have dataValues before but has now (in new dump)
+            //TODO: create
+        } else { //Event doesn't have dataValues in previous nor current dump
+            //do nothing
         }
     }
 }
 
+/**
+ * Given a DE check the differences with the new data
+ * Logs the changes (remain the same or will be updated in the server)
+ * @param {*} DE 
+ * @param {*} codepatient 
+ * @param {*} dhisDE dataValue object : {dataElement: 'a3WwFDKNfQH', value: '2'}
+ * @param {*} newDE
+ */
+function checkDataValueDifference(DE, codepatient, patient_uid, dhisDE, newDE) {
+
+    //Has same value then log and do nothing (skip porque todo va bien)
+    //Has different value then UPDATE
+    var valueDHIS = dhisDE.value;
+    var valueNew = newDE.value;
+
+    if (typeof valueDHIS !== "undefined") { //DE has value in previous dump
+        if (typeof valueNew !== "undefined") { //DE has value in current dump
+            //compare values
+            if (valueDHIS === valueNew) {
+                //logger.info(`DE_INFO; DE ${DE} won't be updated for patient ${codepatient} (uid: ${patient_uid}) in DHIS2 server; It has the same value as the previous dump`)
+            } else {
+                logger.info(`DE_UPDATE; DE ${DE} will be updated for patient ${codepatient} (uid: ${patient_uid}) in DHIS2 server; Previous value: ${valueDHIS} , New value: ${valueNew}`)
+                //build new TEI payload
+            }
+        } else { //DE without value in current dump
+            logger.info(`DE_UPDATE; DE ${DE} will be updated for patient ${codepatient} (uid: ${patient_uid}) in DHIS2 server; Previous value: ${valueDHIS} , New value: NO VALUE`)
+        }
+    } else { //DE without value in previous dump
+        if (typeof valueNew !== "undefined") { //DE has value in current dump
+            logger.info(`DE_UPDATE; DE ${DE} will be updated for patient ${codepatient} (uid: ${patient_uid}) in DHIS2 server; Previous value: NO VALUE , New value: ${valueNew}`)
+        } else { //DE without value in current dump
+            //keep the same, do nothing
+        }
+    }
+}
