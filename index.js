@@ -335,7 +335,7 @@ function checkEnrollmentExistence(codepatient, program, previous_patient_code_ui
                     //will be reviewed for patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server;
                     //Present in previous data dump`);
 
-                    checkEnrollmentDifference(enrollment_date, codepatient, program, programLabel, previous_patient_code_uid, current_patient_code_uid);
+                    checkEnrollmentDifference(enrollment_date, codepatient, programLabel, previous_patient_code_uid, current_patient_code_uid);
                 });
             }
         } else { //enrollment in previous dump but not in current dump (same as missing enrollment)
@@ -372,18 +372,8 @@ function checkEnrollmentExistence(codepatient, program, previous_patient_code_ui
     }
 }
 
-/**
- * Checks the existence of an Enrollment in the new data dump
- * Logs the changes (remain the same or will be updated in the server)
- * @param {*} enrollment_date 
- * @param {*} codepatient 
- * @param
- * @param
- * @param
- * @param
- * @param
- */
-function checkEnrollmentDifference(enrollment_date, codepatient, program, programLabel, previous_patient_code_uid, current_patient_code_uid) {
+
+function checkEnrollmentDifference(enrollment_date, codepatient, programLabel, previous_patient_code_uid, current_patient_code_uid) {
 
     //Check enrollment events existence for each programStage
     var programStages = [];
@@ -414,7 +404,7 @@ function checkEnrollmentDifference(enrollment_date, codepatient, program, progra
     * PROGRAM STAGES
     */
     programStages.forEach((stage) => {
-        checkStageEvents(codepatient, program, programLabel, stage, dhis_enrollment_key, current_enrollment_key, enrollment_uid_previous, enrollment_uid_current, previous_patient_code_uid, current_patient_code_uid);
+        checkStageEvents(codepatient, stage, dhis_enrollment_key, current_enrollment_key, enrollment_uid_previous, enrollment_uid_current, previous_patient_code_uid, current_patient_code_uid);
     })
 
 }
@@ -431,14 +421,16 @@ function checkEnrollmentDifference(enrollment_date, codepatient, program, progra
  * @param {*} previous_patient_code_uid 
  * @param {*} current_patient_code_uid 
  */
-function checkStageEvents(codepatient, program, programLabel, stage, dhis_enrollment_key, current_enrollment_key, enrollment_uid_previous, enrollment_uid_current, previous_patient_code_uid, current_patient_code_uid) {
+function checkStageEvents(codepatient, stage, dhis_enrollment_key, current_enrollment_key, enrollment_uid_previous, enrollment_uid_current, previous_patient_code_uid, current_patient_code_uid) {
     if (typeof previous_patient_code_uid[codepatient][dhis_enrollment_key] !== "undefined") { //There are events associated to that enrollment in the previous file
 
         if (typeof current_patient_code_uid[codepatient][current_enrollment_key] !== "undefined") {
             if (stage in previous_patient_code_uid[codepatient][dhis_enrollment_key]) { //Stage exist in previous file enrollment
                 if (stage in current_patient_code_uid[codepatient][current_enrollment_key]) {//Stage exist in current file enrollment
 
-                    //Ver los eventos que contiene
+                    /**
+                    * EVENTS
+                    */
                     var previousEvents_dates = Object.keys(previous_patient_code_uid[codepatient][dhis_enrollment_key][stage]);
                     var currentEvents_dates = Object.keys(current_patient_code_uid[codepatient][current_enrollment_key][stage]);
 
@@ -469,10 +461,17 @@ function checkStageEvents(codepatient, program, programLabel, stage, dhis_enroll
                             var previousEvent_uid = previous_patient_code_uid[codepatient][dhis_enrollment_key][stage][event_date];
                             var currentEvent_uid = current_patient_code_uid[codepatient][current_enrollment_key][stage][event_date];
 
+                            /**
+                            * DATA VALUES
+                            */
                             var dhis_dataValues = getDataValues(dhisTEI_file, enrollment_uid_previous, previousEvent_uid);
                             var new_dataValues = getDataValues(newTEI_file, enrollment_uid_current, currentEvent_uid);
 
                             checkDataValuesExistence(codepatient, previous_patient_code_uid[codepatient].uid, event_date, stage, dhis_dataValues, new_dataValues, previousEvent_uid);
+                            
+                            //TODO: what else is there to compare from an event data apart from its dataValues?
+                            //here
+                        
                         });
                     }
 
@@ -544,7 +543,7 @@ function getDataValues(TEI_file, enrollment_uid, event_uid) {
 }
 
 /**
- * Given an event check the differences with the new data
+ * Given an event check the differences with its datavalues with the new data
  * Logs the changes (remain the same or will be updated in the server)
  * @param {*} event_date 
  * @param {*} codepatient 
