@@ -35,7 +35,7 @@ const PROGRAMSTAGE_PTME_ENFANT_SORTIE_LABEL = "SORTIE"
 
 //Programs list
 const program_labels = [PROGRAM_PTME_ENFANT_LABEL_ENROLLMENT, PROGRAM_PTME_MERE_LABEL_ENROLLMENT, PROGRAM_TARV_LABEL_ENROLLMENT];
-const programs = [PROGRAM_TARV,  PROGRAM_PTME_MERE, PROGRAM_PTME_ENFANT];
+const programs = [PROGRAM_PTME_ENFANT, PROGRAM_PTME_MERE, PROGRAM_TARV]; //Important: same program order for program_labels and programs
 
 //Stages list for each program
 const ENFANT_programStages = [
@@ -153,7 +153,7 @@ newTEIs_patientCodes.forEach((TEI) => {
 
 commonTEIs_patientCodes.forEach((TEI) => {
     //logger.info(`TEI_REVIEW; Patient ${TEI} (uid: ${previous_patient_code_uid[TEI].uid}) will be reviewed; Present in previous data dump`);
-    checkDifference(TEI); //TODO: in process
+    checkDifference(TEI); //TODO: in process (cascade)
 })
 
 /**
@@ -342,16 +342,16 @@ function checkEnrollmentExistence(codepatient, program, previous_patient_code_ui
             logger.info(`Enrollment_DELETION; ${program} ${(Object.values(previous_patient_code_uid[codepatient][program]))} will be removed from patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in new data dump`);
         }
     } else {
-        if (program in current_patient_code_uid[codepatient]) { //enrollment in current dump but not in previous dump (same as new enrollment)
-            logger.info(`Enrollment_CREATION; ${program} will be created for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in previous data dump`);
+        if (programLabel in current_patient_code_uid[codepatient]) { //enrollment in current dump but not in previous dump (same as new enrollment)
+            logger.info(`Enrollment_CREATION; ${programLabel} will be created for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in previous data dump`);
 
             //var currentEvents_dates = Object.keys(current_patient_code_uid[codepatient][program]);
-            var currentEnrollment_uids = Object.values(current_patient_code_uid[codepatient][program])
+            var currentEnrollment_uids = Object.values(current_patient_code_uid[codepatient][programLabel])
             var current_enrollment_keys = [];
             currentEnrollment_uids.forEach((uid) => {
                 current_enrollment_keys.push([program] + "-" + uid);
             })
-/* TODO:IN PROCESS
+
             if (current_enrollment_keys.length != 0) { //There are new events for that stage in the current dump
                 current_enrollment_keys.forEach((key) => {
                     //Para cada enrollment iterar sobre sus eventos, leerlos del nuevo dump, y crearlos con los mismo datos
@@ -366,7 +366,7 @@ function checkEnrollmentExistence(codepatient, program, previous_patient_code_ui
 
                 });
             }
-*/
+
 
         }
     }
