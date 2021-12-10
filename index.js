@@ -34,7 +34,8 @@ const PROGRAMSTAGE_PTME_ENFANT_SORTIE_LABEL = "SORTIE"
 
 
 //Programs list
-const programs = [PROGRAM_PTME_ENFANT_LABEL_ENROLLMENT, PROGRAM_PTME_MERE_LABEL_ENROLLMENT, PROGRAM_TARV_LABEL_ENROLLMENT];
+const program_labels = [PROGRAM_PTME_ENFANT_LABEL_ENROLLMENT, PROGRAM_PTME_MERE_LABEL_ENROLLMENT, PROGRAM_TARV_LABEL_ENROLLMENT];
+const programs = [PROGRAM_TARV,  PROGRAM_PTME_MERE, PROGRAM_PTME_ENFANT];
 
 //Stages list for each program
 const ENFANT_programStages = [
@@ -305,11 +306,13 @@ function checkTEADifference(TEA, codepatient, dhisTEA, newTEA) {
  * @param {*} previous_patient_code_uid 
  */
 function checkEnrollmentExistence(codepatient, program, previous_patient_code_uid, current_patient_code_uid) {
-    if (program in previous_patient_code_uid[codepatient]) {
-        if (program in current_patient_code_uid[codepatient]) {
+    var programIndex = programs.indexOf(program);
+    var programLabel = program_labels[programIndex];
+    if (programLabel in previous_patient_code_uid[codepatient]) {
+        if (programLabel in current_patient_code_uid[codepatient]) {
 
-            var previousEnrollment_dates = Object.keys(previous_patient_code_uid[codepatient][program]) //Array of dates('2019-11-18') 
-            var currentEnrollment_dates = Object.keys(current_patient_code_uid[codepatient][program])
+            var previousEnrollment_dates = Object.keys(previous_patient_code_uid[codepatient][programLabel]) //Array of dates('2019-11-18') 
+            var currentEnrollment_dates = Object.keys(current_patient_code_uid[codepatient][programLabel])
 
             var missingEnrollments = _.difference(previousEnrollment_dates, currentEnrollment_dates);
             var newEnrollments = _.difference(currentEnrollment_dates, previousEnrollment_dates);
@@ -317,7 +320,7 @@ function checkEnrollmentExistence(codepatient, program, previous_patient_code_ui
 
             if (missingEnrollments.length != 0) { //Some enrollments are missing in the current dump
                 missingEnrollments.forEach((enrollment_date) => {
-                    logger.info(`Enrollment_DELETION; ${program} (${previous_patient_code_uid[codepatient][program][enrollment_date]}) will be removed from patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in new data dump`);
+                    logger.info(`Enrollment_DELETION; ${program} (${previous_patient_code_uid[codepatient][programLabel][enrollment_date]}) will be removed from patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in new data dump`);
                 });
             }
             if (newEnrollments.length != 0) { //There are new enrollments in the current dump
@@ -332,7 +335,7 @@ function checkEnrollmentExistence(codepatient, program, previous_patient_code_ui
                     //will be reviewed for patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server;
                     //Present in previous data dump`);
 
-                    checkEnrollmentDifference(enrollment_date, codepatient, program, previous_patient_code_uid, current_patient_code_uid); //TODO  
+                    checkEnrollmentDifference(enrollment_date, codepatient, program, programLabel, previous_patient_code_uid, current_patient_code_uid); //TODO  
                 });
             }
         } else { //enrollment in previous dump but not in current dump (same as missing enrollment)
@@ -348,7 +351,7 @@ function checkEnrollmentExistence(codepatient, program, previous_patient_code_ui
             currentEnrollment_uids.forEach((uid) => {
                 current_enrollment_keys.push([program] + "-" + uid);
             })
-/* IN PROCESS
+/* TODO:IN PROCESS
             if (current_enrollment_keys.length != 0) { //There are new events for that stage in the current dump
                 current_enrollment_keys.forEach((key) => {
                     //Para cada enrollment iterar sobre sus eventos, leerlos del nuevo dump, y crearlos con los mismo datos
@@ -380,27 +383,27 @@ function checkEnrollmentExistence(codepatient, program, previous_patient_code_ui
  * @param
  * @param
  */
-function checkEnrollmentDifference(enrollment_date, codepatient, program, previous_patient_code_uid, current_patient_code_uid) {
+function checkEnrollmentDifference(enrollment_date, codepatient, program, programLabel, previous_patient_code_uid, current_patient_code_uid) {
 
     //Check enrollment events existence for each programStage
     var programStages = [];
     var dhis_enrollment_key = "";
     var current_enrollment_key = "";
-    var enrollment_uid_previous = previous_patient_code_uid[codepatient][program][enrollment_date];
-    var enrollment_uid_current = current_patient_code_uid[codepatient][program][enrollment_date];
-    if (program == PROGRAM_PTME_ENFANT_LABEL_ENROLLMENT) {
+    var enrollment_uid_previous = previous_patient_code_uid[codepatient][programLabel][enrollment_date];
+    var enrollment_uid_current = current_patient_code_uid[codepatient][programLabel][enrollment_date];
+    if (programLabel == PROGRAM_PTME_ENFANT_LABEL_ENROLLMENT) {
         //Assign corresponding programStages
         programStages = ENFANT_programStages;
         //Build Enrollment Keys (eg. "PTME_ENFANT-scWpqiXLR5u")
         dhis_enrollment_key = PROGRAM_PTME_ENFANT + "-" + enrollment_uid_previous;
         current_enrollment_key = PROGRAM_PTME_ENFANT + "-" + enrollment_uid_current;
 
-    } else if (program == PROGRAM_PTME_MERE_LABEL_ENROLLMENT) {
+    } else if (programLabel == PROGRAM_PTME_MERE_LABEL_ENROLLMENT) {
         programStages = MERE_programStages;
         dhis_enrollment_key = PROGRAM_PTME_MERE + "-" + enrollment_uid_previous;
         current_enrollment_key = PROGRAM_PTME_MERE + "-" + enrollment_uid_current;
 
-    } else if (program == PROGRAM_TARV_LABEL_ENROLLMENT) {
+    } else if (programLabel == PROGRAM_TARV_LABEL_ENROLLMENT) {
         programStages = TARV_programStages;
         dhis_enrollment_key = PROGRAM_TARV + "-" + enrollment_uid_previous;
         current_enrollment_key = PROGRAM_TARV + "-" + enrollment_uid_current;
@@ -411,7 +414,7 @@ function checkEnrollmentDifference(enrollment_date, codepatient, program, previo
     * PROGRAM STAGES
     */
     programStages.forEach((stage) => {
-        checkStageEvents(codepatient, program, stage, dhis_enrollment_key, current_enrollment_key, enrollment_uid_previous, enrollment_uid_current, previous_patient_code_uid, current_patient_code_uid);
+        checkStageEvents(codepatient, program, programLabel, stage, dhis_enrollment_key, current_enrollment_key, enrollment_uid_previous, enrollment_uid_current, previous_patient_code_uid, current_patient_code_uid);
     })
 
 }
@@ -428,7 +431,7 @@ function checkEnrollmentDifference(enrollment_date, codepatient, program, previo
  * @param {*} previous_patient_code_uid 
  * @param {*} current_patient_code_uid 
  */
-function checkStageEvents(codepatient, program, stage, dhis_enrollment_key, current_enrollment_key, enrollment_uid_previous, enrollment_uid_current, previous_patient_code_uid, current_patient_code_uid) {
+function checkStageEvents(codepatient, program, programLabel, stage, dhis_enrollment_key, current_enrollment_key, enrollment_uid_previous, enrollment_uid_current, previous_patient_code_uid, current_patient_code_uid) {
     if (typeof previous_patient_code_uid[codepatient][dhis_enrollment_key] !== "undefined") { //There are events associated to that enrollment in the previous file
 
         if (typeof current_patient_code_uid[codepatient][current_enrollment_key] !== "undefined") {
