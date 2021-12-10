@@ -265,7 +265,7 @@ function checkTEAexistence(codepatient, dhisTEI_file, newTEI_file, previous_pati
 
         //Skip TEA_CODE_PATIENT (will always be the same at this point)
         if (TEA != TEA_CODE_PATIENT) {
-            checkTEADifference(TEA, codepatient, dhisTEAs_data[dhisTEAs_uids.indexOf(TEA)], newTEAs_data[newTEAs_uids.indexOf(TEA)]); //TODO: 
+            checkTEADifference(TEA, codepatient, dhisTEAs_data[dhisTEAs_uids.indexOf(TEA)], newTEAs_data[newTEAs_uids.indexOf(TEA)]); 
         }
     });
 }
@@ -335,7 +335,7 @@ function checkEnrollmentExistence(codepatient, program, previous_patient_code_ui
                     //will be reviewed for patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server;
                     //Present in previous data dump`);
 
-                    checkEnrollmentDifference(enrollment_date, codepatient, program, programLabel, previous_patient_code_uid, current_patient_code_uid); //TODO  
+                    checkEnrollmentDifference(enrollment_date, codepatient, program, programLabel, previous_patient_code_uid, current_patient_code_uid);
                 });
             }
         } else { //enrollment in previous dump but not in current dump (same as missing enrollment)
@@ -421,7 +421,7 @@ function checkEnrollmentDifference(enrollment_date, codepatient, program, progra
 
 
 /**
- * Given a program stage get the events it contains for a give patient 
+ * Given a program stage get the events it contains for a given patient 
  * and check the differences with the new data
  * Logs the changes (remain the same or will be updated in the server)
  * @param {*} stage 
@@ -472,7 +472,6 @@ function checkStageEvents(codepatient, program, programLabel, stage, dhis_enroll
                             var dhis_dataValues = getDataValues(dhisTEI_file, enrollment_uid_previous, previousEvent_uid);
                             var new_dataValues = getDataValues(newTEI_file, enrollment_uid_current, currentEvent_uid);
 
-                            //checkEventDifference(event_date, codepatient, program, stage, dhisTEI_file, newTEI_file, dhis_enrollment_key, current_enrollment_key, enrollment_uid_previous, enrollment_uid_current, previousEvent_uid, currentEvent_uid, previous_patient_code_uid, current_patient_code_uid); //TODO  
                             checkDataValuesExistence(codepatient, previous_patient_code_uid[codepatient].uid, event_date, stage, dhis_dataValues, new_dataValues, previousEvent_uid);
                         });
                     }
@@ -494,9 +493,6 @@ function checkStageEvents(codepatient, program, programLabel, stage, dhis_enroll
 
     } else { //No events associated to that enrollment in the previous file
         if (typeof current_patient_code_uid[codepatient][current_enrollment_key] !== "undefined") { //There weren't before, there are now
-            //logger.info(`Enrollment_CREATION; ${[enrollment_uid_current]} enrollment and all its associated events will be created for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in previous data dump`);
-            //TODO:Events_CREATION?
-
             if (stage in current_patient_code_uid[codepatient][current_enrollment_key]) {//Stage exist in current file enrollment
 
                 var currentEvents_dates = Object.keys(current_patient_code_uid[codepatient][current_enrollment_key][stage]);
@@ -506,6 +502,9 @@ function checkStageEvents(codepatient, program, programLabel, stage, dhis_enroll
                         logger.info(`Event_CREATION; ${[stage]} event on ${event_date} will be created for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in previous data dump`);
                     });
                 }
+            } else {
+                logger.info(`Data_Error; There is an empty enrollment generated (${current_enrollment_key}) for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in the new data dump; Review SIDAInfo-DHIS2 script`);
+
             }
 
 
@@ -574,7 +573,7 @@ function checkDataValuesExistence(codepatient, patient_uid, event_date, stage, d
             })
 
             var missingDEs = _.difference(dhisDEs_uids, newDEs_uids);
-            var newDEs = _.difference(newDEs_uids, dhisDEs_uids); //TODO: review, something is wrong
+            var newDEs = _.difference(newDEs_uids, dhisDEs_uids);
             var commonDEs = _.intersection(dhisDEs_uids, newDEs_uids);
 
             if (missingDEs.length != 0) { //Some DEs for that event are missing in the current dump
@@ -589,7 +588,6 @@ function checkDataValuesExistence(codepatient, patient_uid, event_date, stage, d
             }
 
             if (commonDEs.length != 0) { //Some events for that stage are present in both dumps
-                //TODO: for each DE in common: compare checkDataValueDifference
                 commonDEs.forEach((DE) => {
                     checkDataValueDifference(DE, codepatient, patient_uid, dhis_dataValues[dhisDEs_uids.indexOf(DE)], new_dataValues[newDEs_uids.indexOf(DE)]);
                 })
@@ -597,12 +595,17 @@ function checkDataValuesExistence(codepatient, patient_uid, event_date, stage, d
             }
 
         } else { //Event doesn't have dataValues in new dump
-
+            dhis_dataValues.forEach((DE) => {
+                logger.info(`DE_DELETION; ${DE.dataElement} dataElement with value "${DE.value}" will be removed for event ${previousEvent_uid} (${event_date}) , ${stage} stage, patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in new data dump`);
+            });
         }
 
     } else { //Event didn't have dataValues in previous dump
         if (typeof new_dataValues !== "undefined") { //Event didn't have dataValues before but has now (in new dump)
-            //TODO: create
+            new_dataValues.forEach((DE) => {
+                logger.info(`DE_CREATION; ${DE.dataElement} dataElement with value (${DE.value}) for event ${previousEvent_uid} (${event_date}), ${stage} stage, will be created for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in previous data dump`);
+            });
+
         } else { //Event doesn't have dataValues in previous nor current dump
             //do nothing
         }
