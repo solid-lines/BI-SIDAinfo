@@ -209,7 +209,7 @@ function checkDifference(codepatient) {
          * ENROLLMENTS
          */
         programs.forEach((program) => {
-            checkEnrollmentExistence(codepatient, program, previous_patient_code_uid, current_patient_code_uid);
+            checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, program, previous_patient_code_uid, current_patient_code_uid);
         });
 
     } else {
@@ -298,14 +298,10 @@ function checkTEADifference(TEA, codepatient, dhisTEA, newTEA) {
 }
 
 /**
- * Checks the existence of a TEA in the new data dump
+ * Checks the existence of an Enrollment in the new data dump
  * 
- * @param {*} codepatient 
- * @param {*} dhisTEI_file 
- * @param {*} newTEI_file 
- * @param {*} previous_patient_code_uid 
  */
-function checkEnrollmentExistence(codepatient, program, previous_patient_code_uid, current_patient_code_uid) {
+function checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, program, previous_patient_code_uid, current_patient_code_uid) {
     var programIndex = programs.indexOf(program);
     var programLabel = program_labels[programIndex];
     if (programLabel in previous_patient_code_uid[codepatient]) {
@@ -335,7 +331,9 @@ function checkEnrollmentExistence(codepatient, program, previous_patient_code_ui
                     //will be reviewed for patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server;
                     //Present in previous data dump`);
 
-                    checkEnrollmentDifference(enrollment_date, codepatient, programLabel, previous_patient_code_uid, current_patient_code_uid);
+                    checkEnrollmentDifference(dhisTEI_file, newTEI_file, enrollment_date, codepatient, programLabel, previous_patient_code_uid, current_patient_code_uid);
+                    //TODO: check enrollment status?
+
                 });
             }
         } else { //enrollment in previous dump but not in current dump (same as missing enrollment)
@@ -373,7 +371,7 @@ function checkEnrollmentExistence(codepatient, program, previous_patient_code_ui
 }
 
 
-function checkEnrollmentDifference(enrollment_date, codepatient, programLabel, previous_patient_code_uid, current_patient_code_uid) {
+function checkEnrollmentDifference(dhisTEI_file, newTEI_file, enrollment_date, codepatient, programLabel, previous_patient_code_uid, current_patient_code_uid) {
 
     //Check enrollment events existence for each programStage
     var programStages = [];
@@ -406,6 +404,37 @@ function checkEnrollmentDifference(enrollment_date, codepatient, programLabel, p
     programStages.forEach((stage) => {
         checkStageEvents(codepatient, stage, dhis_enrollment_key, current_enrollment_key, enrollment_uid_previous, enrollment_uid_current, previous_patient_code_uid, current_patient_code_uid);
     })
+
+
+    /**
+     * ENROLLMENT STATUS
+     */
+    var enrollments_current = newTEI_file.enrollments;
+    var enrollments_previous = dhisTEI_file.enrollments;
+    var status_current = "";
+    var status_previous = "";
+    
+    //Current Enrollments UIDs array
+    var enrollments_current_uids = [];
+    enrollments_current.forEach(enroll => {
+        enrollments_current_uids.push(enroll.enrollment);
+    });
+
+    //Previous Enrollments UIDs array
+    var enrollments_previous_uids = [];
+    enrollments_previous.forEach(enroll => {
+        enrollments_previous_uids.push(enroll.enrollment);
+    });
+
+    /***** Extract enrollment status ******/
+    
+    status_current = enrollments_current[enrollments_current_uids.indexOf(enrollment_uid_current)].status
+
+    status_previous = enrollments_previous[enrollments_previous_uids.indexOf(enrollment_uid_previous)].status
+
+    if (status_current.toUpperCase() != status_previous.toUpperCase()) {
+        logger.info(`Enrollment_UPDATE; Enrollment status will be updated for patient ${codepatient} (enrollment_uid: ${enrollment_uid_previous}) in DHIS2 server; Previous value: ${status_previous} , New value: ${status_current}`)
+    }
 
 }
 
@@ -471,7 +500,9 @@ function checkStageEvents(codepatient, stage, dhis_enrollment_key, current_enrol
                             
                             //TODO: what else is there to compare from an event data apart from its dataValues?
                             //here
-                        
+                            //TODO: Check program is the same for that event
+                            //TODO: Check programStage is the same for that event
+                            
                         });
                     }
 
