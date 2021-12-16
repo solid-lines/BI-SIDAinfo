@@ -5,3 +5,4 @@ node_modules
 *-patient_code_uid.json
 retrieveDHISdata.js
 config.json
+actions.json

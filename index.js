@@ -62,6 +62,18 @@ const TARV_programStages = [
 const PREVIOUS = "PREVIOUS";
 const CURRENT = "CURRENT";
 
+//Actions
+const DELETE = "DELETE";
+const UPDATE = "UPDATE";
+const CREATE = "CREATE";
+
+//Resource Types
+const TEI_TYPE = "TEI";
+const ENROLLMENT_TYPE = "Enrollment";
+const TEA_TYPE = "TEA";
+const EVENT_TYPE = "EVENT";
+const DE_TYPE = "DE";
+
 /**************************************/
 
 /**
@@ -155,6 +167,11 @@ missingTEIs_patientCodes.forEach((TEI) => {
     changed_TEIs = true;
     logger.info(`TEI_DELETION; Patient ${TEI} (uid: ${previous_patient_code_uid[TEI].uid}) will be removed from DHIS2 server; Not present in new data dump`);
     teis_toBeDeleted.push(TEI);
+    var dict = {};
+    dict.action = DELETE;
+    dict.resource = TEI;
+    dict.type = TEI_TYPE;
+    listOfActions.push(dict);
 });
 
 //Log new TEIs
@@ -162,6 +179,11 @@ newTEIs_patientCodes.forEach((TEI) => {
     changed_TEIs = true;
     logger.info(`TEI_CREATION; Patient ${TEI} will be created in DHIS2 server; Not present in previous data dump`);
     teis_toBeCreated.push(TEI);
+    var dict = {};
+    dict.action = CREATE;
+    dict.resource = TEI;
+    dict.type = TEI_TYPE;
+    listOfActions.push(dict);
 })
 
 
@@ -176,6 +198,15 @@ commonTEIs_patientCodes.forEach((TEI) => {
 logger.info(`TEIs to be created: ${teis_toBeCreated.length} (${teis_toBeCreated})`);
 logger.info(`TEIs to be deleted: ${teis_toBeDeleted.length} (${teis_toBeDeleted})`);
 logger.info(`TEIs to be updated (TEA or Enrollment level): ${teis_toBeUpdated.length} (${teis_toBeUpdated})`);
+//logger.info(`Actions: ${JSON.stringify(listOfActions)}`);
+const ACTIONS_LIST_FILE = "actions.json";
+try {
+    fs.writeFileSync(ACTIONS_LIST_FILE, JSON.stringify(listOfActions));
+} catch (err) {
+    // An error occurred
+    logger.error(err);
+}
+
 
 /**
  * Read TEI files
@@ -251,7 +282,7 @@ function checkTEIDifference(codepatient) {
  * @param {*} previous_patient_code_uid 
  */
 function checkTEAexistence(codepatient, dhisTEI_file, newTEI_file, previous_patient_code_uid) {
-    
+
     var changed_TEA = false;
 
     //TEAs arrays
@@ -283,11 +314,24 @@ function checkTEAexistence(codepatient, dhisTEI_file, newTEI_file, previous_pati
     missingTEAs.forEach((TEA) => {
         changed_TEA = true;
         logger.info(`TEA_DELETION; TEA ${TEA} will be removed from patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in new data dump`);
+        var dict = {};
+        dict.action = DELETE;
+        dict.resource = TEA;
+        dict.type = TEA_TYPE;
+        dict.TEI = previous_patient_code_uid[codepatient].uid;
+        listOfActions.push(dict);
     });
 
     newTEAs.forEach((TEA) => {
         changed_TEA = true;
         logger.info(`TEA_CREATION; TEA ${TEA} will be created for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in previous data dump`);
+        var dict = {};
+        dict.action = CREATE;
+        dict.resource = TEA;
+        dict.type = TEA_TYPE;
+        dict.TEI = previous_patient_code_uid[codepatient].uid;
+        dict.value = newTEAs_data[newTEAs_uids.indexOf(TEA)].value;
+        listOfActions.push(dict);
     });
 
     commonTEAs.forEach((TEA) => {
@@ -295,7 +339,7 @@ function checkTEAexistence(codepatient, dhisTEI_file, newTEI_file, previous_pati
 
         //Skip TEA_CODE_PATIENT (will always be the same at this point)
         if (TEA != TEA_CODE_PATIENT) {
-            changed_TEA = checkTEADifference(TEA, codepatient, dhisTEAs_data[dhisTEAs_uids.indexOf(TEA)], newTEAs_data[newTEAs_uids.indexOf(TEA)]); 
+            changed_TEA = checkTEADifference(TEA, codepatient, dhisTEAs_data[dhisTEAs_uids.indexOf(TEA)], newTEAs_data[newTEAs_uids.indexOf(TEA)]);
         }
     });
 
@@ -327,7 +371,14 @@ function checkTEADifference(TEA, codepatient, dhisTEA, newTEA) {
     } else {
         updated_TEA = true;
         logger.info(`TEA_UPDATE; TEA ${TEA} will be updated for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Previous value: ${valueDHIS} , New value: ${valueNew}`)
-        //
+        var dict = {};
+        dict.action = UPDATE;
+        dict.resource = TEA;
+        dict.type = TEA_TYPE;
+        dict.TEI = previous_patient_code_uid[codepatient].uid;
+        dict.oldValue = valueDHIS;
+        dict.newValue =valueNew;
+        listOfActions.push(dict);
     }
 
     return updated_TEA;
@@ -454,7 +505,7 @@ function checkEnrollmentDifference(dhisTEI_file, newTEI_file, enrollment_date, c
     var enrollments_previous = dhisTEI_file.enrollments;
     var status_current = "";
     var status_previous = "";
-    
+
     //Current Enrollments UIDs array
     var enrollments_current_uids = [];
     enrollments_current.forEach(enroll => {
@@ -468,7 +519,7 @@ function checkEnrollmentDifference(dhisTEI_file, newTEI_file, enrollment_date, c
     });
 
     /***** Extract enrollment status ******/
-    
+
     status_current = enrollments_current[enrollments_current_uids.indexOf(enrollment_uid_current)].status
 
     status_previous = enrollments_previous[enrollments_previous_uids.indexOf(enrollment_uid_previous)].status
@@ -538,10 +589,10 @@ function checkStageEvents(codepatient, stage, dhis_enrollment_key, current_enrol
                             var new_dataValues = getDataValues(newTEI_file, enrollment_uid_current, currentEvent_uid);
 
                             checkDataValuesExistence(codepatient, previous_patient_code_uid[codepatient].uid, event_date, stage, dhis_dataValues, new_dataValues, previousEvent_uid);
-                            
+
                             //TODO: what else is there to compare from an event data apart from its dataValues?
                             //here
-                            
+
                         });
                     }
 
