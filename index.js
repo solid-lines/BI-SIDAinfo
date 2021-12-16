@@ -128,9 +128,19 @@ if (!fs.existsSync(PATIENT_UID_FILE_CURRENT)) {
 
 /**************************************/
 
+var listOfActions = [];
+
 /**
  * TEIS
  */
+
+var changed_TEIs = false;
+
+//List of TEIs codepatient
+var teis_toBeUpdated = [];
+var teis_toBeCreated = [];
+var teis_toBeDeleted = [];
+
 var previousTEIs_PatientCodes = Object.keys(previous_patient_code_uid);
 var currentTEIs_PatientCodes = Object.keys(current_patient_code_uid);
 
@@ -142,19 +152,30 @@ logger.info(`TEIs list from CURRENT data dump: ${currentTEIs_PatientCodes}`);*/
 
 //Log missing TEIs
 missingTEIs_patientCodes.forEach((TEI) => {
+    changed_TEIs = true;
     logger.info(`TEI_DELETION; Patient ${TEI} (uid: ${previous_patient_code_uid[TEI].uid}) will be removed from DHIS2 server; Not present in new data dump`);
+    teis_toBeDeleted.push(TEI);
 });
 
 //Log new TEIs
 newTEIs_patientCodes.forEach((TEI) => {
+    changed_TEIs = true;
     logger.info(`TEI_CREATION; Patient ${TEI} will be created in DHIS2 server; Not present in previous data dump`);
+    teis_toBeCreated.push(TEI);
 })
 
 
 commonTEIs_patientCodes.forEach((TEI) => {
     //logger.info(`TEI_REVIEW; Patient ${TEI} (uid: ${previous_patient_code_uid[TEI].uid}) will be reviewed; Present in previous data dump`);
-    checkDifference(TEI); //TODO: in process (cascade)
+    changed_TEIs = checkTEIDifference(TEI); //TODO: in process (cascade)
+    if (changed_TEIs) {
+        teis_toBeUpdated.push(TEI);
+    }
 })
+
+logger.info(`TEIs to be created: ${teis_toBeCreated.length} (${teis_toBeCreated})`);
+logger.info(`TEIs to be deleted: ${teis_toBeDeleted.length} (${teis_toBeDeleted})`);
+logger.info(`TEIs to be updated (TEA or Enrollment level): ${teis_toBeUpdated.length} (${teis_toBeUpdated})`);
 
 /**
  * Read TEI files
@@ -185,8 +206,10 @@ function readTEIFile(TEI_uid, dump) {
  * Logs the changes (remain the same or will be updated in the server)
  * @param {*} codepatient 
  */
-function checkDifference(codepatient) {
+function checkTEIDifference(codepatient) {
 
+    var changed_TEA = false;
+    var changed_enroll = false;
 
     //TEI uids
     var dhisTEI_uid = previous_patient_code_uid[codepatient].uid;
@@ -203,18 +226,20 @@ function checkDifference(codepatient) {
         /**
          * ATTRIBUTES (TEA)
          */
-        checkTEAexistence(codepatient, dhisTEI_file, newTEI_file, previous_patient_code_uid);
+        changed_TEA = checkTEAexistence(codepatient, dhisTEI_file, newTEI_file, previous_patient_code_uid);
 
         /**
          * ENROLLMENTS
          */
         programs.forEach((program) => {
-            checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, program, previous_patient_code_uid, current_patient_code_uid);
+            changed_enroll = checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, program, previous_patient_code_uid, current_patient_code_uid);
         });
 
     } else {
         logger.error(`FileError; Process stopped because of a missing file`)
     }
+
+    return (changed_TEA || changed_enroll);
 }
 
 /**
@@ -226,6 +251,9 @@ function checkDifference(codepatient) {
  * @param {*} previous_patient_code_uid 
  */
 function checkTEAexistence(codepatient, dhisTEI_file, newTEI_file, previous_patient_code_uid) {
+    
+    var changed_TEA = false;
+
     //TEAs arrays
     var dhisTEAs_data = dhisTEI_file.attributes;
     var newTEAs_data = newTEI_file.attributes;
@@ -253,10 +281,12 @@ function checkTEAexistence(codepatient, dhisTEI_file, newTEI_file, previous_pati
     var commonTEAs = _.intersection(dhisTEAs_uids, newTEAs_uids);
 
     missingTEAs.forEach((TEA) => {
+        changed_TEA = true;
         logger.info(`TEA_DELETION; TEA ${TEA} will be removed from patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in new data dump`);
     });
 
     newTEAs.forEach((TEA) => {
+        changed_TEA = true;
         logger.info(`TEA_CREATION; TEA ${TEA} will be created for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in previous data dump`);
     });
 
@@ -265,9 +295,11 @@ function checkTEAexistence(codepatient, dhisTEI_file, newTEI_file, previous_pati
 
         //Skip TEA_CODE_PATIENT (will always be the same at this point)
         if (TEA != TEA_CODE_PATIENT) {
-            checkTEADifference(TEA, codepatient, dhisTEAs_data[dhisTEAs_uids.indexOf(TEA)], newTEAs_data[newTEAs_uids.indexOf(TEA)]); 
+            changed_TEA = checkTEADifference(TEA, codepatient, dhisTEAs_data[dhisTEAs_uids.indexOf(TEA)], newTEAs_data[newTEAs_uids.indexOf(TEA)]); 
         }
     });
+
+    return changed_TEA;
 }
 
 /**
@@ -284,6 +316,7 @@ function checkTEAexistence(codepatient, dhisTEI_file, newTEI_file, previous_pati
  */
 function checkTEADifference(TEA, codepatient, dhisTEA, newTEA) {
 
+    var updated_TEA = false;
     //Has same value then log and do nothing (skip porque todo va bien)
     //Has different value then UPDATE
     var valueDHIS = dhisTEA.value;
@@ -292,9 +325,12 @@ function checkTEADifference(TEA, codepatient, dhisTEA, newTEA) {
     if (valueDHIS === valueNew) {
         //logger.info(`TEA_INFO; TEA ${TEA} won't be updated for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; It has the same value as the previous dump`)
     } else {
+        updated_TEA = true;
         logger.info(`TEA_UPDATE; TEA ${TEA} will be updated for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Previous value: ${valueDHIS} , New value: ${valueNew}`)
-        //build new TEI payload
+        //
     }
+
+    return updated_TEA;
 }
 
 /**
@@ -302,6 +338,7 @@ function checkTEADifference(TEA, codepatient, dhisTEA, newTEA) {
  * 
  */
 function checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, program, previous_patient_code_uid, current_patient_code_uid) {
+    var changed_enroll = false;
     var programIndex = programs.indexOf(program);
     var programLabel = program_labels[programIndex];
     if (programLabel in previous_patient_code_uid[codepatient]) {
@@ -315,11 +352,13 @@ function checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, progra
             var commonEnrollments = _.intersection(previousEnrollment_dates, currentEnrollment_dates);
 
             if (missingEnrollments.length != 0) { //Some enrollments are missing in the current dump
+                changed_enroll = true;
                 missingEnrollments.forEach((enrollment_date) => {
                     logger.info(`Enrollment_DELETION; ${program} (${previous_patient_code_uid[codepatient][programLabel][enrollment_date]}) will be removed from patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in new data dump`);
                 });
             }
             if (newEnrollments.length != 0) { //There are new enrollments in the current dump
+                changed_enroll = true;
                 newEnrollments.forEach((enrollment_date) => {
                     logger.info(`Enrollment_CREATION; ${program} will be created for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in previous data dump`);
                 });
@@ -331,16 +370,17 @@ function checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, progra
                     //will be reviewed for patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server;
                     //Present in previous data dump`);
 
-                    checkEnrollmentDifference(dhisTEI_file, newTEI_file, enrollment_date, codepatient, programLabel, previous_patient_code_uid, current_patient_code_uid);
-                    //TODO: check enrollment status?
+                    changed_enroll = checkEnrollmentDifference(dhisTEI_file, newTEI_file, enrollment_date, codepatient, programLabel, previous_patient_code_uid, current_patient_code_uid);
 
                 });
             }
         } else { //enrollment in previous dump but not in current dump (same as missing enrollment)
+            changed_enroll = true;
             logger.info(`Enrollment_DELETION; ${program} ${(Object.values(previous_patient_code_uid[codepatient][program]))} will be removed from patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in new data dump`);
         }
     } else {
         if (programLabel in current_patient_code_uid[codepatient]) { //enrollment in current dump but not in previous dump (same as new enrollment)
+            changed_enroll = true;
             logger.info(`Enrollment_CREATION; ${programLabel} will be created for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in previous data dump`);
 
             //var currentEvents_dates = Object.keys(current_patient_code_uid[codepatient][program]);
@@ -368,6 +408,7 @@ function checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, progra
 
         }
     }
+    return changed_enroll;
 }
 
 
@@ -500,8 +541,6 @@ function checkStageEvents(codepatient, stage, dhis_enrollment_key, current_enrol
                             
                             //TODO: what else is there to compare from an event data apart from its dataValues?
                             //here
-                            //TODO: Check program is the same for that event
-                            //TODO: Check programStage is the same for that event
                             
                         });
                     }
@@ -533,7 +572,7 @@ function checkStageEvents(codepatient, stage, dhis_enrollment_key, current_enrol
                     });
                 }
             } else {
-                logger.info(`Data_Error; There is an empty enrollment generated (${current_enrollment_key}) for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in the new data dump; Review SIDAInfo-DHIS2 script`);
+                logger.error(`Data_Error; There is an empty enrollment generated (${current_enrollment_key}) for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in the new data dump; Review SIDAInfo-DHIS2 script`);
 
             }
 
@@ -576,13 +615,6 @@ function getDataValues(TEI_file, enrollment_uid, event_uid) {
 /**
  * Given an event check the differences with its datavalues with the new data
  * Logs the changes (remain the same or will be updated in the server)
- * @param {*} event_date 
- * @param {*} codepatient 
- * @param
- * @param
- * @param
- * @param
- * @param
  */
 function checkDataValuesExistence(codepatient, patient_uid, event_date, stage, dhis_dataValues, new_dataValues, previousEvent_uid) {
 
