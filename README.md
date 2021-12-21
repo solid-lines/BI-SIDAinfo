@@ -20,3 +20,6 @@ This is the node script created for updating the DHIS2 data from the SIDAinfo da
 - Run the script using the arguments: ```node .\index.js diff --org_unit=XXXXXXXXXXXXX --export_date_previous=YYYY_MM_DD --export_date_current=YYYY_MM_DD```
 - Arguments: ORGUNIT, EXPORT_DATE_PREVIOUS, EXPORT_DATE_CURRENT
 - Need help? run ```node generate help```
+
+## Comments
+- OrganisationUnit is not reviewed (it's assumed that is the same since it comes from the same source file given as an argument)
