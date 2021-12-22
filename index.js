@@ -167,10 +167,7 @@ missingTEIs_patientCodes.forEach((TEI) => {
     changed_TEIs = true;
     logger.info(`TEI_DELETION; Patient ${TEI} (uid: ${previous_patient_code_uid[TEI].uid}) will be removed from DHIS2 server; Not present in new data dump`);
     teis_toBeDeleted.push(TEI);
-    var dict = {};
-    dict.action = DELETE;
-    dict.resource = TEI;
-    dict.type = TEI_TYPE;
+    var dict = getAction_TEI(DELETE, TEI);
     listOfActions.push(dict);
 });
 
@@ -179,10 +176,7 @@ newTEIs_patientCodes.forEach((TEI) => {
     changed_TEIs = true;
     logger.info(`TEI_CREATION; Patient ${TEI} will be created in DHIS2 server; Not present in previous data dump`);
     teis_toBeCreated.push(TEI);
-    var dict = {};
-    dict.action = CREATE;
-    dict.resource = TEI;
-    dict.type = TEI_TYPE;
+    var dict = getAction_TEI(CREATE, TEI);
     listOfActions.push(dict);
 })
 
@@ -345,23 +339,14 @@ function checkTEAexistence(codepatient, dhisTEI_file, newTEI_file, previous_pati
     missingTEAs.forEach((TEA) => {
         changed_missing = true;
         logger.info(`TEA_DELETION; TEA ${TEA} will be removed from patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in new data dump`);
-        var dict = {};
-        dict.action = DELETE;
-        dict.resource = TEA;
-        dict.type = TEA_TYPE;
-        dict.TEI = previous_patient_code_uid[codepatient].uid;
+        var dict = getAction_TEA(DELETE, previous_patient_code_uid[codepatient].uid, TEA, dhisTEAs_data[dhisTEAs_uids.indexOf(TEA)].value);
         listOfActions.push(dict);
     });
 
     newTEAs.forEach((TEA) => {
         changed_new = true;
         logger.info(`TEA_CREATION; TEA ${TEA} will be created for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in previous data dump`);
-        var dict = {};
-        dict.action = CREATE;
-        dict.resource = TEA;
-        dict.type = TEA_TYPE;
-        dict.TEI = previous_patient_code_uid[codepatient].uid;
-        dict.value = newTEAs_data[newTEAs_uids.indexOf(TEA)].value;
+        var dict = getAction_TEA(CREATE, previous_patient_code_uid[codepatient].uid, TEA, newTEAs_data[newTEAs_uids.indexOf(TEA)].value);
         listOfActions.push(dict);
     });
 
@@ -407,13 +392,7 @@ function checkTEADifference(TEA, codepatient, dhisTEA, newTEA) {
     } else {
         updated_TEA = true;
         logger.info(`TEA_UPDATE; TEA ${TEA} will be updated for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Previous value: ${valueDHIS} , New value: ${valueNew}`)
-        var dict = {};
-        dict.action = UPDATE;
-        dict.resource = TEA;
-        dict.type = TEA_TYPE;
-        dict.TEI = previous_patient_code_uid[codepatient].uid;
-        dict.previousValue = valueDHIS;
-        dict.currentValue = valueNew;
+        var dict = getAction_TEA(UPDATE, previous_patient_code_uid[codepatient].uid, TEA, valueDHIS, valueNew);
         listOfActions.push(dict);
     }
 
@@ -531,7 +510,7 @@ function checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, progra
                                 var event = {};
                                 event.action = CREATE;
                                 event.resource = date; //Event UID
-                                event.type = EVENT_TYPE      +  "*******";
+                                event.type = EVENT_TYPE + "*******";
                                 event.TEI = previous_patient_code_uid[codepatient].uid;
                                 event.stage = stage;
                                 //TODO: dict.eventData = ;
@@ -1041,4 +1020,25 @@ function checkDataValueDifference(previousEvent_uid, DE, codepatient, patient_ui
     }
 
     return changed;
+}
+
+/****************** ACTIONS FUNCTIONS **********************/
+
+function getAction_TEI(action, TEI) {
+    var dict = {};
+    dict.action = action;
+    dict.resource = TEI;
+    dict.type = TEI_TYPE;
+    return dict;
+}
+
+function getAction_TEA(action, TEI, TEA, previousValue, currentValue) {
+    var dict = {};
+    dict.action = action;
+    dict.resource = TEA;
+    dict.type = TEA_TYPE;
+    dict.TEI = TEI;
+    dict.previousValue = previousValue;
+    dict.currentValue = currentValue;
+    return dict;
 }
