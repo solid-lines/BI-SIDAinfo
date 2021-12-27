@@ -1,0 +1,27 @@
+{
+  "name": "sidainfo_updates",
+  "version": "1.0.0",
+  "description": "This is the node script created for updating the DHIS2 data from the SIDAinfo data dump for PSI Burundi.",
+  "main": "index.js",
+  "dependencies": {
+    "dateformat": "^5.0.2",
+    "dotenv": "^10.0.0",
+    "lodash": "^4.17.21",
+    "winston": "^3.3.3",
+    "yargs": "^17.3.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/solid-lines/SIDAInfo-Updates.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/solid-lines/SIDAInfo-Updates/issues"
+  },
+  "homepage": "https://github.com/solid-lines/SIDAInfo-Updates#readme"
+}
