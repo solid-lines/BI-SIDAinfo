@@ -445,6 +445,7 @@ function checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, progra
                     dict.TEI = previous_patient_code_uid[codepatient].uid;
                     dict.program = program;
                     dict.value = enrollment_date;
+                    dict.status = getEnrollmentStatus( newTEI_file.enrollments, current_patient_code_uid[codepatient][programLabel][enrollment_date]);
                     listOfActions.push(dict);
                 });
             }
@@ -483,17 +484,20 @@ function checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, progra
 
             //var currentEvents_dates = Object.keys(current_patient_code_uid[codepatient][program]);
             var currentEnrollment_uids = Object.values(current_patient_code_uid[codepatient][programLabel])
+            var currentEnrollment_dates = Object.keys(current_patient_code_uid[codepatient][programLabel])
             var current_enrollment_keys = [];
             currentEnrollment_uids.forEach((uid) => {
+                var date = currentEnrollment_dates[currentEnrollment_uids.indexOf(uid)];
                 current_enrollment_keys.push([program] + "-" + uid);
-                //TODO: add action for enrollment_creation Enrollment and its events
                 var dict = {};
                 dict.action = CREATE;
                 dict.type = ENROLLMENT_TYPE;
-                dict.value = uid; //Para identificar los eventos que hay que crear asociados a cada enrollment
+                //dict.value = uid; //Para identificar los eventos que hay que crear asociados a cada enrollment
+                dict.value = date;
                 dict.TEI = previous_patient_code_uid[codepatient].uid;
                 dict.program = program;
-                var enrollmentEvents = [];
+                dict.status = getEnrollmentStatus( newTEI_file.enrollments, current_patient_code_uid[codepatient][programLabel][date]);
+                //var enrollmentEvents = [];
                 if (current_enrollment_keys.length != 0) { //There are new events for that stage in the current dump
                     current_enrollment_keys.forEach((key) => {
                         //Para cada enrollment iterar sobre sus eventos, leerlos del nuevo dump, y crearlos con los mismo datos
@@ -510,23 +514,40 @@ function checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, progra
                                 var event = {};
                                 event.action = CREATE;
                                 event.resource = date; //Event UID
-                                event.type = EVENT_TYPE + "*******";
+                                event.type = EVENT_TYPE;
                                 event.TEI = previous_patient_code_uid[codepatient].uid;
                                 event.stage = stage;
-                                //TODO: dict.eventData = ;
-                                enrollmentEvents.push(event);
+                                event.eventData = getEventData(newTEI_file.enrollments, uid, date);
+                                //enrollmentEvents.push(event);
+                                listOfActions.push(event);
 
                             })
                         })
 
                     });
-                    dict.enrollmentEvents = enrollmentEvents;
+                    //dict.enrollmentEvents = enrollmentEvents;
                     listOfActions.push(dict);
                 }
             })
         }
     }
     return (changed_enroll_new || changed_enroll_missing || changed_enroll_common);
+}
+
+function getEventData(enrollmentData, enrollmentUID, eventDate) {
+
+    var enroll = enrollmentData.filter((enroll) => {
+        if (enroll.enrollment == enrollmentUID) {
+            return enroll;
+        }
+    });
+    var event = enroll[0].events.filter(function (entry) {
+        if (entry.eventDate == eventDate) {
+            return entry;
+        }
+    });
+
+    return event;
 }
 
 
@@ -576,26 +597,11 @@ function checkEnrollmentDifference(dhisTEI_file, newTEI_file, enrollment_date, c
      */
     var enrollments_current = newTEI_file.enrollments;
     var enrollments_previous = dhisTEI_file.enrollments;
-    var status_current = "";
-    var status_previous = "";
-
-    //Current Enrollments UIDs array
-    var enrollments_current_uids = [];
-    enrollments_current.forEach(enroll => {
-        enrollments_current_uids.push(enroll.enrollment);
-    });
-
-    //Previous Enrollments UIDs array
-    var enrollments_previous_uids = [];
-    enrollments_previous.forEach(enroll => {
-        enrollments_previous_uids.push(enroll.enrollment);
-    });
 
     /***** Extract enrollment status ******/
 
-    status_current = enrollments_current[enrollments_current_uids.indexOf(enrollment_uid_current)].status
-
-    status_previous = enrollments_previous[enrollments_previous_uids.indexOf(enrollment_uid_previous)].status
+    var status_current = getEnrollmentStatus(enrollments_current, enrollment_uid_current);
+    var status_previous = getEnrollmentStatus(enrollments_previous, enrollment_uid_previous);
 
     if (status_current.toUpperCase() != status_previous.toUpperCase()) {
         changed = true;
@@ -615,6 +621,15 @@ function checkEnrollmentDifference(dhisTEI_file, newTEI_file, enrollment_date, c
 
 }
 
+function getEnrollmentStatus(enrollmentsData, enrollmentUID) {
+    //Enrollments UIDs array
+    var enrollments_uids = [];
+    enrollmentsData.forEach(enroll => {
+        enrollments_uids.push(enroll.enrollment);
+    });
+
+    return enrollmentsData[enrollments_uids.indexOf(enrollmentUID)].status;
+}
 
 /**
  * Given a program stage get the events it contains for a given patient 
