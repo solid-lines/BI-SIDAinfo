@@ -123,19 +123,31 @@ if (argv._.includes('diff')) {
 /**
  * Read input files
  */
-const PATIENT_UID_FILE_PREVIOUS = SOURCE_DATE_PREVIOUS + "-" + SOURCE_OU_CODE + "-patient_code_uid.json";
+//const PATIENT_UID_FILE_PREVIOUS = SOURCE_DATE_PREVIOUS + "-" + SOURCE_OU_CODE + "-patient_code_uid.json";
+const PATIENT_UID_FILE_PREVIOUS = "./DHIS2_data/patient_code_uid.json";
+
 if (!fs.existsSync(PATIENT_UID_FILE_PREVIOUS)) {
     logger.error(`ArgError; Patient_uid_file (${PATIENT_UID_FILE_PREVIOUS}) from previous data dump doesn't exist`)
 } else {
     var previous_patient_code_uid = JSON.parse(fs.readFileSync(PATIENT_UID_FILE_PREVIOUS))
 }
 
-const PATIENT_UID_FILE_CURRENT = SOURCE_DATE_CURRENT + "-" + SOURCE_OU_CODE + "-patient_code_uid.json";
+//const PATIENT_UID_FILE_CURRENT = SOURCE_DATE_CURRENT + "-" + SOURCE_OU_CODE + "-patient_code_uid.json";
+const PATIENT_UID_FILE_CURRENT = "new_dump_additions-patient_code_uid.json";
 
 if (!fs.existsSync(PATIENT_UID_FILE_CURRENT)) {
     logger.error(`ArgError; Patient_uid_file (${PATIENT_UID_FILE_CURRENT}) from current data dump doesn't exist`)
 } else {
     var current_patient_code_uid = JSON.parse(fs.readFileSync(PATIENT_UID_FILE_CURRENT))
+}
+
+//Files
+const TEIS_FILE = "./DHIS2_data/teis.json";
+var dhis_teis;
+if (!fs.existsSync(TEIS_FILE)) {
+    logger.error(`ArgError; TEIs file (${TEIS_FILE}) from dhis data doesn't exist`)
+} else {
+    dhis_teis = JSON.parse(fs.readFileSync(TEIS_FILE))
 }
 
 /**************************************************************************/
@@ -168,6 +180,7 @@ missingTEIs_patientCodes.forEach((TEI) => {
     logger.info(`TEI_DELETION; Patient ${TEI} (uid: ${previous_patient_code_uid[TEI].uid}) will be removed from DHIS2 server; Not present in new data dump`);
     teis_toBeDeleted.push(TEI);
     var dict = getAction_TEI(DELETE, TEI);
+    dict.uid = previous_patient_code_uid[TEI].uid;
     listOfActions.push(dict);
 });
 
@@ -244,6 +257,30 @@ function readTEIFile(TEI_uid, dump) {
 
 }
 
+function readDHIS_TEIs(TEI_uid) {
+
+    var TEI_data = dhis_teis.filter((TEI) => {
+        if (TEI.trackedEntityInstance == TEI_uid) {
+            return TEI;
+        }
+    });
+
+    if (TEI_data.length > 1) { //Misma TEI aparece varias veces en teis.json (de DHIS2) si está enrolled en varios programs
+        var enrollments = [];
+        var enrollment_uids = [];
+        TEI_data.forEach((TEI) => {
+            TEI.enrollments.forEach((enroll) => {
+                if (!enrollment_uids.includes(enroll.enrollment)){
+                    enrollments.push(enroll);
+                    enrollment_uids.push(enroll.enrollment);
+                }
+            })
+        });
+        TEI_data[0].enrollments = enrollments; //Todos los enrollments en un solo TEI obj.
+    }
+    return TEI_data[0];
+}
+
 /**
  * Given a patient already in DHIS, check the differences in the data
  * Logs the changes (remain the same or will be updated in the server)
@@ -259,7 +296,8 @@ function checkTEIDifference(codepatient) {
     var newTEI_uid = current_patient_code_uid[codepatient].uid;
 
     //DHIS uploaded file
-    var dhisTEI_file = readTEIFile(dhisTEI_uid, PREVIOUS);
+    //var dhisTEI_file = readTEIFile(dhisTEI_uid, PREVIOUS);readDHIS_TEIs
+    var dhisTEI_file = readDHIS_TEIs(dhisTEI_uid);
 
     //New dump file
     var newTEI_file = readTEIFile(newTEI_uid, CURRENT);
@@ -386,6 +424,9 @@ function checkTEADifference(TEA, codepatient, dhisTEA, newTEA) {
     //Has different value then UPDATE
     var valueDHIS = dhisTEA.value;
     var valueNew = newTEA.value;
+    if (valueNew === true) {
+        valueNew = "true";
+    }
 
     if (valueDHIS === valueNew) {
         //logger.info(`TEA_INFO; TEA ${TEA} won't be updated for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; It has the same value as the previous dump`)
@@ -445,7 +486,7 @@ function checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, progra
                     dict.TEI = previous_patient_code_uid[codepatient].uid;
                     dict.program = program;
                     dict.value = enrollment_date;
-                    dict.status = getEnrollmentStatus( newTEI_file.enrollments, current_patient_code_uid[codepatient][programLabel][enrollment_date]);
+                    dict.status = getEnrollmentStatus(newTEI_file.enrollments, current_patient_code_uid[codepatient][programLabel][enrollment_date]);
                     listOfActions.push(dict);
                 });
             }
@@ -496,7 +537,7 @@ function checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, progra
                 dict.value = date;
                 dict.TEI = previous_patient_code_uid[codepatient].uid;
                 dict.program = program;
-                dict.status = getEnrollmentStatus( newTEI_file.enrollments, current_patient_code_uid[codepatient][programLabel][date]);
+                dict.status = getEnrollmentStatus(newTEI_file.enrollments, current_patient_code_uid[codepatient][programLabel][date]);
                 //var enrollmentEvents = [];
                 if (current_enrollment_keys.length != 0) { //There are new events for that stage in the current dump
                     current_enrollment_keys.forEach((key) => {
@@ -698,7 +739,7 @@ function checkStageEvents(programLabel, codepatient, stage, dhis_enrollment_key,
                             //will be reviewed for patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server;
                             //Present in previous data dump`);
 
-                            var dhisTEI_file = readTEIFile(previous_patient_code_uid[codepatient].uid, PREVIOUS);
+                            var dhisTEI_file = readDHIS_TEIs(previous_patient_code_uid[codepatient].uid);
                             var newTEI_file = readTEIFile(current_patient_code_uid[codepatient].uid, CURRENT);
 
                             var previousEvent_uid = previous_patient_code_uid[codepatient][dhis_enrollment_key][stage][event_date];
@@ -984,11 +1025,14 @@ function checkDataValueDifference(previousEvent_uid, DE, codepatient, patient_ui
     //Has different value then UPDATE
     var valueDHIS = dhisDE.value;
     var valueNew = newDE.value;
+    if(valueNew === true) {
+        valueNew = "true";
+    }
 
     if (typeof valueDHIS !== "undefined") { //DE has value in previous dump
         if (typeof valueNew !== "undefined") { //DE has value in current dump
             //compare values
-            if (valueDHIS === valueNew) {
+            if (valueDHIS == valueNew) {
                 //logger.info(`DE_INFO; DE ${DE} won't be updated for patient ${codepatient} (uid: ${patient_uid}) in DHIS2 server; It has the same value as the previous dump`)
             } else {
                 changed = true;
