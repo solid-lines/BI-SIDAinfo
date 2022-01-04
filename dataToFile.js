@@ -70,7 +70,8 @@ var stagesDict = {};
 const ENFANT_FILE = "DHIS2_data/enfant.json";
 const MERE_FILE = "DHIS2_data/mere.json";
 const TARV_FILE = "DHIS2_data/tarv.json";
-const OUT_FILE = "DHIS2_data/patient_code_uid.json";
+const PATIENT_CODE_UID = "DHIS2_data/patient_code_uid.json";
+const TEIS_FILE = "DHIS2_data/teis.json";
 
 //DHIS2 retrieved data
 var dhis_data = [];
@@ -108,14 +109,16 @@ dhis_data.forEach((TEI) => {
         //Events info
         //Extract stage keys
         var enrollmentUID_label = getEnrollmentUIDLabel(enroll);
-        patient_code_uid[patient][enrollmentUID_label] = {};
+        //patient_code_uid[patient][enrollmentUID_label] = {};
         enroll.events.forEach((event) => {
+            if (typeof patient_code_uid[patient][enrollmentUID_label] === "undefined") {
+                patient_code_uid[patient][enrollmentUID_label] = {};
+            }
             //Check stage
             var stage = event.programStage;
             if (typeof patient_code_uid[patient][enrollmentUID_label][stagesDict[stage]] === "undefined") {
                 patient_code_uid[patient][enrollmentUID_label][stagesDict[stage]] = {}
                 patient_code_uid[patient][enrollmentUID_label][stagesDict[stage]] = getEvents_format(enroll.events, stage);
-                console.log();
             }
         });
 
@@ -126,7 +129,8 @@ dhis_data.forEach((TEI) => {
 
 
 //Main
-saveJSONFile(OUT_FILE, patient_code_uid);
+saveJSONFile(PATIENT_CODE_UID, patient_code_uid);
+saveJSONFile(TEIS_FILE, dhis_data);
 
 
 
