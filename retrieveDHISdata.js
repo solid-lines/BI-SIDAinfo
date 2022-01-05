@@ -3,6 +3,7 @@ const { logger, logger_fr } = require('./logger.js');
 const endpointConfig = require('./config.json');
 const { reject } = require("async");
 var fs = require('fs');
+var dataToFile = require('./dataToFile.js');
 
 //PROGRAMS
 const PROGRAM_TARV = "e3swbbSnbQ2";
@@ -33,9 +34,16 @@ if (!fs.existsSync(DHIS2data_folder)) {
     fs.mkdirSync(DHIS2data_folder);
 }
 
+main();
 
 //Main
-saveTEIs(orgUnit);
+async function main() {
+    await saveTEIs(orgUnit).catch((err) => {
+        logger.error(err)
+    });;
+    dataToFile.formatData(SOURCE_ID);
+}
+
 
 //Get TEIs given a PROGRAM and an ORGUNIT
 async function getTEIs(programUID, orgUnit) {

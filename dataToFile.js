@@ -67,77 +67,80 @@ stagesDict[PROGRAMSTAGE_PTME_ENFANT_PCR_INITIAL] = PROGRAMSTAGE_PTME_ENFANT_PCR_
 stagesDict[PROGRAMSTAGE_PTME_ENFANT_PCR_SUIVI] = PROGRAMSTAGE_PTME_ENFANT_PCR_SUIVI_LABEL
 stagesDict[PROGRAMSTAGE_PTME_ENFANT_SORTIE] = PROGRAMSTAGE_PTME_ENFANT_SORTIE_LABEL
 
-const SOURCE_ID = "003BDI017S020203"; //TODO: parametrizar
-const parent_DHIS2data_folder = "DHIS2_data"
-const DHIS2data_folder = parent_DHIS2data_folder + "/" + SOURCE_ID
+
+function formatData(source_id) {
+    //const SOURCE_ID = "003BDI017S020203"; //TODO: parametrizar
+    const SOURCE_ID = source_id;
+    const parent_DHIS2data_folder = "DHIS2_data"
+    const DHIS2data_folder = parent_DHIS2data_folder + "/" + SOURCE_ID
 
 
-const ENFANT_FILE = DHIS2data_folder + "/enfant.json";
-const MERE_FILE = DHIS2data_folder + "/mere.json";
-const TARV_FILE = DHIS2data_folder + "/tarv.json";
-const PATIENT_CODE_UID = DHIS2data_folder + "/patient_code_uid.json";
-const TEIS_FILE = DHIS2data_folder + "/teis.json";
+    const ENFANT_FILE = DHIS2data_folder + "/enfant.json";
+    const MERE_FILE = DHIS2data_folder + "/mere.json";
+    const TARV_FILE = DHIS2data_folder + "/tarv.json";
+    const PATIENT_CODE_UID = DHIS2data_folder + "/patient_code_uid.json";
+    const TEIS_FILE = DHIS2data_folder + "/teis.json";
 
-//DHIS2 retrieved data
-var dhis_data = [];
-var patient_code_uid = {};
-//***** READ FILES ******/
-var enfant_data = JSON.parse(fs.readFileSync(ENFANT_FILE));
-var mere_data = JSON.parse(fs.readFileSync(MERE_FILE));
-var tarv_data = JSON.parse(fs.readFileSync(TARV_FILE));
+    //DHIS2 retrieved data
+    var dhis_data = [];
+    var patient_code_uid = {};
+    //***** READ FILES ******/
+    var enfant_data = JSON.parse(fs.readFileSync(ENFANT_FILE));
+    var mere_data = JSON.parse(fs.readFileSync(MERE_FILE));
+    var tarv_data = JSON.parse(fs.readFileSync(TARV_FILE));
 
-//Merge TEIs
-dhis_data = [
-    ...enfant_data,
-    ...mere_data,
-    ...tarv_data
-];
+    //Merge TEIs
+    dhis_data = [
+        ...enfant_data,
+        ...mere_data,
+        ...tarv_data
+    ];
 
-//Fill patient_code_uid
-dhis_data.forEach((TEI) => {
-    //CODE PATIENT key
-    var patient = getPatientCode(TEI);
+    //Fill patient_code_uid
+    dhis_data.forEach((TEI) => {
+        //CODE PATIENT key
+        var patient = getPatientCode(TEI);
 
-    if (typeof patient_code_uid[patient] === "undefined") {
-        //TEI uid
-        patient_code_uid[patient] = { "uid": TEI.trackedEntityInstance };
-    }
-
-
-    //Enrollments keys
-    TEI.enrollments.forEach((enroll) => {
-        //Enrollment info
-        var enrollmentLabel = getEnrollmentLabel(enroll);
-        patient_code_uid[patient][enrollmentLabel] = {};
-        patient_code_uid[patient][enrollmentLabel][getDHIS2dateFormat(enroll.enrollmentDate)] = enroll.enrollment;
-
-        //Events info
-        //Extract stage keys
-        var enrollmentUID_label = getEnrollmentUIDLabel(enroll);
-        //patient_code_uid[patient][enrollmentUID_label] = {};
-        enroll.events.forEach((event) => {
-            if (typeof patient_code_uid[patient][enrollmentUID_label] === "undefined") {
-                patient_code_uid[patient][enrollmentUID_label] = {};
-            }
-            //Check stage
-            var stage = event.programStage;
-            if (typeof patient_code_uid[patient][enrollmentUID_label][stagesDict[stage]] === "undefined") {
-                patient_code_uid[patient][enrollmentUID_label][stagesDict[stage]] = {}
-                patient_code_uid[patient][enrollmentUID_label][stagesDict[stage]] = getEvents_format(enroll.events, stage);
-            }
-        });
+        if (typeof patient_code_uid[patient] === "undefined") {
+            //TEI uid
+            patient_code_uid[patient] = { "uid": TEI.trackedEntityInstance };
+        }
 
 
+        //Enrollments keys
+        TEI.enrollments.forEach((enroll) => {
+            //Enrollment info
+            var enrollmentLabel = getEnrollmentLabel(enroll);
+            patient_code_uid[patient][enrollmentLabel] = {};
+            patient_code_uid[patient][enrollmentLabel][getDHIS2dateFormat(enroll.enrollmentDate)] = enroll.enrollment;
 
-    })
-});
+            //Events info
+            //Extract stage keys
+            var enrollmentUID_label = getEnrollmentUIDLabel(enroll);
+            //patient_code_uid[patient][enrollmentUID_label] = {};
+            enroll.events.forEach((event) => {
+                if (typeof patient_code_uid[patient][enrollmentUID_label] === "undefined") {
+                    patient_code_uid[patient][enrollmentUID_label] = {};
+                }
+                //Check stage
+                var stage = event.programStage;
+                if (typeof patient_code_uid[patient][enrollmentUID_label][stagesDict[stage]] === "undefined") {
+                    patient_code_uid[patient][enrollmentUID_label][stagesDict[stage]] = {}
+                    patient_code_uid[patient][enrollmentUID_label][stagesDict[stage]] = getEvents_format(enroll.events, stage);
+                }
+            });
 
 
-//Main
-saveJSONFile(PATIENT_CODE_UID, patient_code_uid);
-saveJSONFile(TEIS_FILE, dhis_data);
+
+        })
+    });
 
 
+    //Main
+    saveJSONFile(PATIENT_CODE_UID, patient_code_uid);
+    saveJSONFile(TEIS_FILE, dhis_data);
+
+}
 
 /******** FUNCTIONS  *******/
 
@@ -205,3 +208,5 @@ function saveJSONFile(filename, json_data) {
 function getDHIS2dateFormat(date) {
     return date.substr(0, 10);
 }
+
+module.exports = { formatData };

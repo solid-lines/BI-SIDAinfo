@@ -12,8 +12,7 @@ This is the node script created for updating the DHIS2 data from the SIDAinfo da
 1. Run SIDAInfo-DHIS2 script to generate the file new_dump_additions-patient_code_uid
 2. Save the file in the root directory
 3. Save generated teis folders in SIDAInfo-Updates/teis
-4. Run ```retrieveDHISdata.js```to download the data from the DHIS2 server
-5. Run ```dataToFile.js``` to generate the files from DHIS2 server data (files will be stored in DHIS2_data folder)
+4. Run ```retrieveDHISdata.js```to download the data from the DHIS2 server (formatted files will be stored in DHIS2_data folder)
 
 
 ## Folders in the script
