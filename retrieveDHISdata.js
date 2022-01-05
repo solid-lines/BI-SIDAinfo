@@ -10,7 +10,7 @@ const PROGRAM_PTME_MERE = "MVooF5iCp8L";
 const PROGRAM_PTME_ENFANT = "PiXg9cX1i0y";
 
 //ORGUNITS
-/*const OU_MAPPING = {
+const OU_MAPPING = {
     "003BDI003S010912": "FG6tYYTDf5d", // Centre Akabanga Rumonge
     "003BDI006S010120": "g9r6PbRYVAi", // Centre Akabanga Gitega
     "003BDI010S020502": "nniW4f9J1tB", // Centre Akabanga Nyanza-Lac
@@ -19,8 +19,20 @@ const PROGRAM_PTME_ENFANT = "PiXg9cX1i0y";
     "003BDI014S010120": "ZAZapFNLXru", // Centre Akabanga Ngozi
     "003BDI017S010401": "YIJAETW8k0a", // Centre Akabanga Bujumbura
     "003BDI017S020203": "DLsHsaJhtnk", // Hôpital Militaire de Kamenge
-}*/
-const orgUnit = "DLsHsaJhtnk";
+};
+
+//TODO: provide orgUnit as an argument for retrieveDHISdata.js
+//const orgUnit = "DLsHsaJhtnk";
+const SOURCE_ID = "003BDI017S020203"; //TODO: parametrizar
+const orgUnit = OU_MAPPING[SOURCE_ID];
+const parent_DHIS2data_folder = "DHIS2_data"
+const DHIS2data_folder = parent_DHIS2data_folder + "/" + SOURCE_ID
+
+//check if TEIs folder exists. If not, create it
+if (!fs.existsSync(DHIS2data_folder)) {
+    fs.mkdirSync(DHIS2data_folder);
+}
+
 
 //Main
 saveTEIs(orgUnit);
@@ -28,7 +40,6 @@ saveTEIs(orgUnit);
 //Get TEIs given a PROGRAM and an ORGUNIT
 async function getTEIs(programUID, orgUnit) {
 
-    logger.debug(programUID)
     return new Promise((resolve) => {
         let TEIs;
         try {
@@ -97,9 +108,9 @@ async function saveTEIs(orgUnit) {
     });
 
     /**** Save to JSON file ****/
-    const ENFANT_DHIS2_FILE = "DHIS2_data/enfant.json";
-    const MERE_DHIS2_FILE = "DHIS2_data/mere.json";
-    const TARV_DHIS2_FILE = "DHIS2_data/tarv.json";
+    const ENFANT_DHIS2_FILE = DHIS2data_folder + "/enfant.json";
+    const MERE_DHIS2_FILE = DHIS2data_folder + "/mere.json";
+    const TARV_DHIS2_FILE = DHIS2data_folder + "/tarv.json";
     try {
         fs.writeFileSync(ENFANT_DHIS2_FILE, JSON.stringify(enfant_teis));
         fs.writeFileSync(MERE_DHIS2_FILE, JSON.stringify(mere_teis));
