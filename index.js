@@ -86,18 +86,13 @@ const argv = yargs
             alias: ['o', 'ou'],
             type: 'text',
         },
-        export_date_previous: {
-            description: 'the previous export date (YYYY_MM_DD)',
-            alias: ['ep', 'epd'],
-            type: 'text',
-        },
         export_date_current: {
             description: 'the current export date (YYYY_MM_DD)',
             alias: ['ec', 'ecd'],
             type: 'text',
         },
     })
-    .demandOption(['org_unit', 'export_date_previous', 'export_date_current'], 'Please provide both Organization Unit code and export dates arguments to work with this tool')
+    .demandOption(['org_unit', 'export_date_current'], 'Please provide both Organization Unit code and export date arguments to work with this tool')
     .help()
     .alias('help', 'h')
     .argv;
@@ -108,11 +103,9 @@ const argv = yargs
  * Parsing arguments
  */
 let SOURCE_OU_CODE;
-let SOURCE_DATE_PREVIOUS;
 let SOURCE_DATE_CURRENT;
 if (argv._.includes('diff')) {
     SOURCE_OU_CODE = argv.org_unit;
-    SOURCE_DATE_PREVIOUS = argv.export_date_previous;
     SOURCE_DATE_CURRENT = argv.export_date_current;
 } else {
     process.exit(1)
@@ -123,8 +116,7 @@ if (argv._.includes('diff')) {
 /**
  * Read input files
  */
-//const PATIENT_UID_FILE_PREVIOUS = SOURCE_DATE_PREVIOUS + "-" + SOURCE_OU_CODE + "-patient_code_uid.json";
-const PATIENT_UID_FILE_PREVIOUS = "./DHIS2_data/patient_code_uid.json";
+const PATIENT_UID_FILE_PREVIOUS = "./DHIS2_data/" + SOURCE_OU_CODE + "/patient_code_uid.json";
 
 if (!fs.existsSync(PATIENT_UID_FILE_PREVIOUS)) {
     logger.error(`ArgError; Patient_uid_file (${PATIENT_UID_FILE_PREVIOUS}) from previous data dump doesn't exist`)
@@ -142,7 +134,7 @@ if (!fs.existsSync(PATIENT_UID_FILE_CURRENT)) {
 }
 
 //Files
-const TEIS_FILE = "./DHIS2_data/teis.json";
+const TEIS_FILE = "./DHIS2_data/" + SOURCE_OU_CODE + "/teis.json";
 var dhis_teis;
 if (!fs.existsSync(TEIS_FILE)) {
     logger.error(`ArgError; TEIs file (${TEIS_FILE}) from dhis data doesn't exist`)
@@ -236,17 +228,10 @@ try {
 /**
  * Read TEI files
  */
-function readTEIFile(TEI_uid, dump) {
-    /****************** Read TEI files ********************/
-    var source_date;
-    if (dump == CURRENT) {
-        source_date = SOURCE_DATE_CURRENT;
-    } else {
-        source_date = SOURCE_DATE_PREVIOUS;
-    }
+function readDUMP_TEIs(TEI_uid) {
 
     var TEI_file;
-    const TEI_fileName = "./teis/" + SOURCE_OU_CODE + "_" + source_date + "/" + TEI_uid + ".json";
+    const TEI_fileName = "./teis/" + SOURCE_OU_CODE + "_" + SOURCE_DATE_CURRENT + "/" + TEI_uid + ".json";
     if (!fs.existsSync(TEI_fileName)) {
         logger.error(`FileError; TEI file (${TEI_fileName}) (previous dump) doesn't exist`)
     } else {
@@ -300,7 +285,7 @@ function checkTEIDifference(codepatient) {
     var dhisTEI_file = readDHIS_TEIs(dhisTEI_uid);
 
     //New dump file
-    var newTEI_file = readTEIFile(newTEI_uid, CURRENT);
+    var newTEI_file = readDUMP_TEIs(newTEI_uid);
 
     if (typeof dhisTEI_file !== "undefined" && typeof newTEI_file !== "undefined") {
 
@@ -740,7 +725,7 @@ function checkStageEvents(programLabel, codepatient, stage, dhis_enrollment_key,
                             //Present in previous data dump`);
 
                             var dhisTEI_file = readDHIS_TEIs(previous_patient_code_uid[codepatient].uid);
-                            var newTEI_file = readTEIFile(current_patient_code_uid[codepatient].uid, CURRENT);
+                            var newTEI_file = readDUMP_TEIs(current_patient_code_uid[codepatient].uid);
 
                             var previousEvent_uid = previous_patient_code_uid[codepatient][dhis_enrollment_key][stage][event_date];
                             var currentEvent_uid = current_patient_code_uid[codepatient][current_enrollment_key][stage][event_date];
