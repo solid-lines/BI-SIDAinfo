@@ -15,6 +15,12 @@ const PROGRAM_TARV = "TARV"
 const PROGRAM_PTME_MERE = "PTME_MERE"
 const PROGRAM_PTME_ENFANT = "PTME_ENFANT"
 
+const PROGRAMS_MAPPING = {
+    "TARV": "e3swbbSnbQ2", 
+    "PTME_MERE": "MVooF5iCp8L", 
+    "PTME_ENFANT": "PiXg9cX1i0y"
+};
+
 const PROGRAMSTAGE_TARV_PREMIER_DEBUT_ARV_LABEL = "PREMIER_DEBUT_ARV"
 const PROGRAMSTAGE_TARV_TARV_LABEL = "TARV"
 const PROGRAMSTAGE_TARV_CONSULTATION_LABEL = "CONSULTATION"
@@ -456,14 +462,13 @@ function checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, progra
             if (missingEnrollments.length != 0) { //Some enrollments are missing in the current dump
                 changed_enroll_missing = true;
                 missingEnrollments.forEach((enrollment_date) => {
-                    //if (previous_patient_code_uid[codepatient][programLabel][enrollment_date] in ["gLIFm0XojDB", "QRXEs6OJEDE", "kFzWdrL2yRb"]) {
                     logger.info(`Enrollment_DELETION; ${program} (${previous_patient_code_uid[codepatient][programLabel][enrollment_date]}) (${enrollment_date}) will be removed from patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in new data dump`);
                     var dict = {};
                     dict.action = DELETE;
                     dict.resource = previous_patient_code_uid[codepatient][programLabel][enrollment_date]; //Enrollment_uid
                     dict.type = ENROLLMENT_TYPE;
                     dict.TEI = previous_patient_code_uid[codepatient].uid;
-                    dict.program = program;
+                    dict.program = PROGRAMS_MAPPING[program];
                     //dict.value = enrollment_date;
                     listOfActions.push(dict);
                 });
@@ -476,7 +481,7 @@ function checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, progra
                     dict.action = CREATE;
                     dict.type = ENROLLMENT_TYPE;
                     dict.TEI = previous_patient_code_uid[codepatient].uid;
-                    dict.program = program;
+                    dict.program = PROGRAMS_MAPPING[program];
                     dict.value = enrollment_date;
                     dict.status = getEnrollmentStatus(newTEI_file.enrollments, current_patient_code_uid[codepatient][programLabel][enrollment_date]);
                     listOfActions.push(dict);
@@ -503,10 +508,10 @@ function checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, progra
             logger.info(`Enrollment_DELETION; ${program} ${(Object.values(previous_patient_code_uid[codepatient][programLabel]))} and all its associated events will be removed from patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in new data dump`);
             var dict = {};
             dict.action = DELETE;
-            dict.resource = Object.values(previous_patient_code_uid[codepatient][programLabel]); //Enrollment_uid
+            dict.resource = Object.values(previous_patient_code_uid[codepatient][programLabel])[0]; //Enrollment_uid
             dict.type = ENROLLMENT_TYPE;
             dict.TEI = previous_patient_code_uid[codepatient].uid;
-            dict.program = program;
+            dict.program = PROGRAMS_MAPPING[program];
             //dict.value = enrollment_date;
             listOfActions.push(dict);
         }
@@ -528,7 +533,7 @@ function checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, progra
                 //dict.value = uid; //Para identificar los eventos que hay que crear asociados a cada enrollment
                 dict.value = date;
                 dict.TEI = previous_patient_code_uid[codepatient].uid;
-                dict.program = program;
+                dict.program = PROGRAMS_MAPPING[program];
                 dict.status = getEnrollmentStatus(newTEI_file.enrollments, current_patient_code_uid[codepatient][programLabel][date]);
                 //var enrollmentEvents = [];
                 if (current_enrollment_keys.length != 0) { //There are new events for that stage in the current dump
@@ -644,7 +649,7 @@ function checkEnrollmentDifference(dhisTEI_file, newTEI_file, enrollment_date, c
         dict.resource = previous_patient_code_uid[codepatient][programLabel][enrollment_date]; //Enrollment_uid
         dict.type = ENROLLMENT_TYPE;
         dict.TEI = previous_patient_code_uid[codepatient].uid;
-        dict.program = programLabel;
+        dict.program = PROGRAMS_MAPPING[programLabel];
         dict.previousValue = status_previous;
         dict.currentValue = status_current;
         listOfActions.push(dict);
@@ -813,7 +818,7 @@ function checkStageEvents(programLabel, codepatient, stage, dhis_enrollment_key,
             dict.resource = enrollment_uid_current; //Enrollment_uid
             dict.type = ENROLLMENT_TYPE;
             dict.TEI = previous_patient_code_uid[codepatient].uid;
-            dict.program = programLabel;
+            dict.program = PROGRAMS_MAPPING[programLabel];
             listOfActions.push(dict);
         }
 
