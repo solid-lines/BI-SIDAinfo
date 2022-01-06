@@ -182,6 +182,7 @@ newTEIs_patientCodes.forEach((TEI) => {
     logger.info(`TEI_CREATION; Patient ${TEI} will be created in DHIS2 server; Not present in previous data dump`);
     teis_toBeCreated.push(TEI);
     var dict = getAction_TEI(CREATE, TEI);
+    dict.uid = current_patient_code_uid[TEI].uid;
     listOfActions.push(dict);
 })
 
@@ -214,7 +215,13 @@ logger.info(`Total TEIs (common + new - missing): ${commonTEIs_patientCodes.leng
 /**
  * WRITE actions to file
  */
-const ACTIONS_LIST_FILE = "actions.json";
+const ACTIONS_LIST_FILE = "./actions/" + SOURCE_OU_CODE + "/actions.json";
+const ACTIONS_FOLDER = "actions/" + SOURCE_OU_CODE;
+
+//check if folder exists. If not, create it
+if (!fs.existsSync(ACTIONS_FOLDER)) {
+    fs.mkdirSync(ACTIONS_FOLDER);
+}
 try {
     fs.writeFileSync(ACTIONS_LIST_FILE, JSON.stringify(listOfActions));
 } catch (err) {
@@ -233,7 +240,7 @@ function readDUMP_TEIs(TEI_uid) {
     var TEI_file;
     const TEI_fileName = "./teis/" + SOURCE_OU_CODE + "_" + SOURCE_DATE_CURRENT + "/" + TEI_uid + ".json";
     if (!fs.existsSync(TEI_fileName)) {
-        logger.error(`FileError; TEI file (${TEI_fileName}) (previous dump) doesn't exist`)
+        logger.error(`FileError; TEI file (${TEI_fileName}) (from data dump) doesn't exist`)
     } else {
         TEI_file = JSON.parse(fs.readFileSync(TEI_fileName))
     }
