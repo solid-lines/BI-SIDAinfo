@@ -111,7 +111,14 @@ function formatData(source_id) {
         TEI.enrollments.forEach((enroll) => {
             //Enrollment info
             var enrollmentLabel = getEnrollmentLabel(enroll);
-            patient_code_uid[patient][enrollmentLabel] = {};
+            const programName = getProgramName(enroll.program)
+            if (programName === MERE){ // There could be more than one enrollment in Mere program
+                if (!(enrollmentLabel in patient_code_uid[patient])) {
+                    patient_code_uid[patient][enrollmentLabel] = {};
+                }
+            } else {
+                patient_code_uid[patient][enrollmentLabel] = {};
+            }
             patient_code_uid[patient][enrollmentLabel][getDHIS2dateFormat(enroll.enrollmentDate)] = enroll.enrollment;
 
             //Events info
