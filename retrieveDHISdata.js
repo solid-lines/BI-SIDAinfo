@@ -25,7 +25,7 @@ const OU_MAPPING = {
 //TODO: provide orgUnit as an argument for retrieveDHISdata.js
 const SOURCE_ID = "003BDI017S020203"; //TODO: parametrizar
 const orgUnit = OU_MAPPING[SOURCE_ID];
-const parent_DHIS2data_folder = "DHIS2_data"
+const parent_DHIS2data_folder = "PREVIOUS_DHIS2_data"
 const DHIS2data_folder = parent_DHIS2data_folder + "/" + SOURCE_ID
 
 //check if folder exists. If not, create it

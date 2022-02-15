@@ -71,7 +71,7 @@ stagesDict[PROGRAMSTAGE_PTME_ENFANT_SORTIE] = PROGRAMSTAGE_PTME_ENFANT_SORTIE_LA
 function formatData(source_id) {
     //const SOURCE_ID = "003BDI017S020203"; //TODO: parametrizar
     const SOURCE_ID = source_id;
-    const parent_DHIS2data_folder = "DHIS2_data"
+    const parent_DHIS2data_folder = "PREVIOUS_DHIS2_data"
     const DHIS2data_folder = parent_DHIS2data_folder + "/" + SOURCE_ID
 
 

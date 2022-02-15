@@ -122,7 +122,10 @@ if (argv._.includes('diff')) {
 /**
  * Read input files
  */
-const PATIENT_UID_FILE_PREVIOUS = "./DHIS2_data/" + SOURCE_OU_CODE + "/patient_code_uid.json";
+
+const PREVIOUS_FOLDER = "PREVIOUS_DHIS2_data"
+
+const PATIENT_UID_FILE_PREVIOUS = "./" + PREVIOUS_FOLDER + "/" + SOURCE_OU_CODE + "/patient_code_uid.json";
 
 if (!fs.existsSync(PATIENT_UID_FILE_PREVIOUS)) {
     logger.error(`ArgError; Patient_uid_file (${PATIENT_UID_FILE_PREVIOUS}) from previous data dump doesn't exist`)
@@ -140,7 +143,7 @@ if (!fs.existsSync(PATIENT_UID_FILE_CURRENT)) {
 }
 
 //Files
-const TEIS_FILE = "./DHIS2_data/" + SOURCE_OU_CODE + "/teis.json";
+const TEIS_FILE = "./" + PREVIOUS_FOLDER + "/" + SOURCE_OU_CODE + "/teis.json";
 var dhis_teis;
 if (!fs.existsSync(TEIS_FILE)) {
     logger.error(`ArgError; TEIs file (${TEIS_FILE}) from dhis data doesn't exist`)
