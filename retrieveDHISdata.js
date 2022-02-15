@@ -23,7 +23,6 @@ const OU_MAPPING = {
 };
 
 //TODO: provide orgUnit as an argument for retrieveDHISdata.js
-//const orgUnit = "DLsHsaJhtnk";
 const SOURCE_ID = "003BDI017S020203"; //TODO: parametrizar
 const orgUnit = OU_MAPPING[SOURCE_ID];
 const parent_DHIS2data_folder = "DHIS2_data"
@@ -102,16 +101,19 @@ async function getTEIs(programUID, orgUnit) {
 
 
 async function saveTEIs(orgUnit) {
-    //Get TEIs from 3 programs given an orgUnit
-    var enfant_teis = await getTEIs(PROGRAM_PTME_ENFANT, orgUnit).catch((err) => {
+    //Get TEIs from 3 programs for a given orgUnit
+    logger.info("Retrieving enfant_teis")
+    const enfant_teis = await getTEIs(PROGRAM_PTME_ENFANT, orgUnit).catch((err) => {
         logger.error(err)
     });
 
-    var mere_teis = await getTEIs(PROGRAM_PTME_MERE, orgUnit).catch((err) => {
+    logger.info("Retrieving mere_teis")
+    const mere_teis = await getTEIs(PROGRAM_PTME_MERE, orgUnit).catch((err) => {
         logger.error(err)
     });
 
-    var tarv_teis = await getTEIs(PROGRAM_TARV, orgUnit).catch((err) => {
+    logger.info("Retrieving tarv_teis")
+    const tarv_teis = await getTEIs(PROGRAM_TARV, orgUnit).catch((err) => {
         logger.error(err)
     });
 
@@ -119,6 +121,15 @@ async function saveTEIs(orgUnit) {
     const ENFANT_DHIS2_FILE = DHIS2data_folder + "/enfant.json";
     const MERE_DHIS2_FILE = DHIS2data_folder + "/mere.json";
     const TARV_DHIS2_FILE = DHIS2data_folder + "/tarv.json";
+
+    if (typeof enfant_teis === "undefined"){
+        logger.error("No enfant TEIs retrieved");
+    } else if (typeof mere_teis !== "undefined") {
+        logger.error("No mere TEIs retrieved");
+    } else if (typeof tarv_teis !== "undefined") {
+        logger.error("No tarv TEIs retrieved");
+    }
+
     try {
         fs.writeFileSync(ENFANT_DHIS2_FILE, JSON.stringify(enfant_teis));
         fs.writeFileSync(MERE_DHIS2_FILE, JSON.stringify(mere_teis));
@@ -128,6 +139,3 @@ async function saveTEIs(orgUnit) {
         logger.error(err);
     }
 }
-
-
-
