@@ -92,13 +92,13 @@ const argv = yargs
             alias: ['o', 'ou'],
             type: 'text',
         },
-        export_date_current: {
-            description: 'the current export date (YYYY_MM_DD)',
+        export_dump_date: {
+            description: 'the export date dump (YYYY_MM_DD)',
             alias: ['ec', 'ecd'],
             type: 'text',
         },
     })
-    .demandOption(['org_unit', 'export_date_current'], 'Please provide both Organization Unit code and export date arguments to work with this tool')
+    .demandOption(['org_unit', 'export_dump_date'], 'Please provide both Organization Unit code and export date arguments to work with this tool')
     .help()
     .alias('help', 'h')
     .argv;
@@ -112,7 +112,7 @@ let SOURCE_OU_CODE;
 let SOURCE_DATE_CURRENT;
 if (argv._.includes('diff')) {
     SOURCE_OU_CODE = argv.org_unit;
-    SOURCE_DATE_CURRENT = argv.export_date_current;
+    SOURCE_DATE_CURRENT = argv.export_dump_date;
 } else {
     process.exit(1)
 }
