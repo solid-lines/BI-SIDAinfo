@@ -314,7 +314,9 @@ function checkTEIDifference(codepatient) {
          * ENROLLMENTS
          */
         programs.forEach((program) => {
-            changed_enroll = checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, program, previous_patient_code_uid, current_patient_code_uid);
+            if (checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, program, previous_patient_code_uid, current_patient_code_uid)){
+                changed_enroll = true;
+            }
         });
 
     } else {
