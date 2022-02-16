@@ -469,12 +469,14 @@ function checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, progra
             //Some enrollments are missing in the current dump
             missingEnrollments.forEach((enrollment_date) => {
                 changed_enroll_missing = true;
-                logger.info(`Enrollment_DELETION; Program:${program} Enrollment:(${previous_patient_code_uid[codepatient][programLabel][enrollment_date]}) (${enrollment_date}) will be removed from patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in new data dump`);
+                enrollment_uid = previous_patient_code_uid[codepatient][programLabel][enrollment_date]; //Enrollment_uid
+                tei_uid = previous_patient_code_uid[codepatient].uid;
+                logger.info(`Enrollment_DELETION; Program:${program} Enrollment:(${enrollment_uid}) (${enrollment_date}) will be removed from patient ${codepatient}  (uid: ${tei_uid}) in DHIS2 server; Not present in new data dump`);
                 var dict = {};
                 dict.action = DELETE;
                 dict.type = ENROLLMENT_TYPE;
-                dict.uid = previous_patient_code_uid[codepatient][programLabel][enrollment_date]; //Enrollment_uid
-                dict.TEI = previous_patient_code_uid[codepatient].uid;
+                dict.uid = enrollment_uid
+                dict.TEI = tei_uid
                 dict.program = PROGRAMS_MAPPING[program];
                 dict.enrollmentDate = enrollment_date;
                 listOfActions.push(dict);
@@ -519,7 +521,6 @@ function checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, progra
             // could be one or more enrollments
             const previous_enrollments = previous_patient_code_uid[codepatient][programLabel]
             for (const [enrollment_date, enrollment_uid] of Object.entries(previous_enrollments)) {
-                logger.info(enrollment_date, enrollment_uid);
                 logger.info(`Enrollment_DELETION; Program: ${program}. Enrollment: ${enrollment_uid} (${enrollment_date}) will be removed from patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in new data dump`);
                 var dict = {};
                 dict.action = DELETE;
@@ -537,13 +538,14 @@ function checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, progra
 
             const new_enrollments = current_patient_code_uid[codepatient][programLabel]
             for (const [enrollment_date, enrollment_uid] of Object.entries(new_enrollments)) {
-                logger.info(`Enrollment_CREATION; Program: ${program}. Enrollment: ${enrollment_uid} (${enrollment_date}) will be created from patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in previous data dump`);
+                tei_uid = previous_patient_code_uid[codepatient].uid;
+                logger.info(`Enrollment_CREATION; Program: ${program}. Enrollment: ${enrollment_uid} (${enrollment_date}) will be created from patient ${codepatient}  (uid: ${tei_uid}) in DHIS2 server; Not present in previous data dump`);
                 var dict = {};
                 dict.action = CREATE;
                 dict.type = ENROLLMENT_TYPE;
                 dict.uid = enrollment_uid; //Para identificar los eventos que hay que crear asociados a cada enrollment
                 dict.enrollmentDate = enrollment_date;
-                dict.TEI = previous_patient_code_uid[codepatient].uid;
+                dict.TEI = tei_uid;
                 dict.program = PROGRAMS_MAPPING[program]; // program uid
                 dict.status = getEnrollmentStatus(newTEI_file.enrollments, enrollment_uid);
 
