@@ -127,9 +127,11 @@ async function saveTEIs(orgUnit) {
 
     if (typeof enfant_teis === "undefined"){
         logger.error("No enfant TEIs retrieved");
-    } else if (typeof mere_teis !== "undefined") {
+    }
+    if (typeof mere_teis === "undefined") {
         logger.error("No mere TEIs retrieved");
-    } else if (typeof tarv_teis !== "undefined") {
+    }
+    if (typeof tarv_teis === "undefined") {
         logger.error("No tarv TEIs retrieved");
     }
 
