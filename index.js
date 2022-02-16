@@ -471,10 +471,10 @@ function checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, progra
                     var dict = {};
                     dict.action = DELETE;
                     dict.type = ENROLLMENT_TYPE;
-                    dict.resource = previous_patient_code_uid[codepatient][programLabel][enrollment_date]; //Enrollment_uid
+                    dict.uid = previous_patient_code_uid[codepatient][programLabel][enrollment_date]; //Enrollment_uid
                     dict.TEI = previous_patient_code_uid[codepatient].uid;
                     dict.program = PROGRAMS_MAPPING[program];
-                    //dict.value = enrollment_date;
+                    dict.enrollmentDate = enrollment_date;
                     listOfActions.push(dict);
                 });
             }
@@ -485,9 +485,10 @@ function checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, progra
                     var dict = {};
                     dict.action = CREATE;
                     dict.type = ENROLLMENT_TYPE;
+                    dict.uid = current_patient_code_uid[codepatient][programLabel][enrollment_date];
                     dict.TEI = previous_patient_code_uid[codepatient].uid;
                     dict.program = PROGRAMS_MAPPING[program];
-                    dict.value = enrollment_date;
+                    dict.enrollmentDate = enrollment_date;
                     dict.status = getEnrollmentStatus(newTEI_file.enrollments, current_patient_code_uid[codepatient][programLabel][enrollment_date]);
                     listOfActions.push(dict);
                 });
@@ -541,8 +542,9 @@ function checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, progra
                 var dict = {};
                 dict.action = CREATE;
                 dict.type = ENROLLMENT_TYPE;
+                dict.uid = uid;
                 //dict.value = uid; //Para identificar los eventos que hay que crear asociados a cada enrollment
-                dict.value = date;
+                dict.enrollmentDate = date;
                 dict.TEI = previous_patient_code_uid[codepatient].uid;
                 dict.program = PROGRAMS_MAPPING[program];
                 dict.status = getEnrollmentStatus(newTEI_file.enrollments, current_patient_code_uid[codepatient][programLabel][date]);
@@ -658,7 +660,7 @@ function checkEnrollmentDifference(dhisTEI_file, newTEI_file, enrollment_date, c
         var dict = {};
         dict.action = UPDATE;
         dict.type = ENROLLMENT_TYPE;
-        dict.resource = previous_patient_code_uid[codepatient][programLabel][enrollment_date]; //Enrollment_uid
+        dict.uid = previous_patient_code_uid[codepatient][programLabel][enrollment_date]; //Enrollment_uid
         dict.TEI = previous_patient_code_uid[codepatient].uid;
         dict.program = PROGRAMS_MAPPING[programLabel];
         dict.previousValue = status_previous;
@@ -828,7 +830,7 @@ function checkStageEvents(programLabel, codepatient, stage, dhis_enrollment_key,
             var dict = {};
             dict.action = DELETE;
             dict.type = ENROLLMENT_TYPE;
-            dict.resource = enrollment_uid_current; //Enrollment_uid
+            dict.uid = enrollment_uid_current; //Enrollment_uid
             dict.TEI = previous_patient_code_uid[codepatient].uid;
             dict.program = PROGRAMS_MAPPING[programLabel];
             listOfActions.push(dict);
@@ -1096,7 +1098,7 @@ function getAction_TEI(action, TEI) {
     var dict = {};
     dict.action = action;
     dict.type = TEI_TYPE;
-    dict.resource = TEI;
+    dict.patient_code = TEI;
     return dict;
 }
 
@@ -1104,7 +1106,7 @@ function getAction_TEA(action, TEI, TEA, previousValue, currentValue) {
     var dict = {};
     dict.action = action;
     dict.type = TEA_TYPE;
-    dict.resource = TEA;
+    dict.TEA = TEA;
     dict.TEI = TEI;
     if (typeof currentValue === 'undefined'){ // CREATE or DELETE
         dict.value = previousValue
