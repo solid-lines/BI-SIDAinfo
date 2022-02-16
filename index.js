@@ -65,9 +65,6 @@ const TARV_programStages = [
     PROGRAMSTAGE_TARV_SORTIE_LABEL
 ];
 
-const PREVIOUS = "PREVIOUS";
-const CURRENT = "CURRENT";
-
 //Actions
 const DELETE = "DELETE";
 const UPDATE = "UPDATE";
@@ -134,7 +131,7 @@ if (!fs.existsSync(PATIENT_UID_FILE_PREVIOUS)) {
 }
 
 //const PATIENT_UID_FILE_CURRENT = SOURCE_DATE_CURRENT + "-" + SOURCE_OU_CODE + "-patient_code_uid.json";
-const PATIENT_UID_FILE_CURRENT = "new_dump_additions-patient_code_uid.json";
+const PATIENT_UID_FILE_CURRENT = "patient_code_uid-FINAL.json";
 
 if (!fs.existsSync(PATIENT_UID_FILE_CURRENT)) {
     logger.error(`ArgError; Patient_uid_file (${PATIENT_UID_FILE_CURRENT}) from current data dump doesn't exist`)
@@ -169,11 +166,21 @@ var teis_toBeDeleted = [];
 var previousTEIs_PatientCodes = Object.keys(previous_patient_code_uid);
 var currentTEIs_PatientCodes = Object.keys(current_patient_code_uid);
 
-var missingTEIs_patientCodes = _.difference(previousTEIs_PatientCodes, currentTEIs_PatientCodes);
 var newTEIs_patientCodes = _.difference(currentTEIs_PatientCodes, previousTEIs_PatientCodes);
+var missingTEIs_patientCodes = _.difference(previousTEIs_PatientCodes, currentTEIs_PatientCodes);
 var commonTEIs_patientCodes = _.intersection(previousTEIs_PatientCodes, currentTEIs_PatientCodes);
 /*logger.info(`TEIs list from PREVIOUS data dump: ${previousTEIs_PatientCodes}`);
 logger.info(`TEIs list from CURRENT data dump: ${currentTEIs_PatientCodes}`);*/
+
+//Log new TEIs
+newTEIs_patientCodes.forEach((TEI) => {
+    changed_TEIs = true;
+    logger.info(`TEI_CREATION; Patient ${TEI} will be created in DHIS2 server; Not present in previous data dump`);
+    teis_toBeCreated.push(TEI);
+    var dict = getAction_TEI(CREATE, TEI);
+    dict.uid = current_patient_code_uid[TEI].uid;
+    listOfActions.push(dict);
+})
 
 //Log missing TEIs
 missingTEIs_patientCodes.forEach((TEI) => {
@@ -185,15 +192,6 @@ missingTEIs_patientCodes.forEach((TEI) => {
     listOfActions.push(dict);
 });
 
-//Log new TEIs
-newTEIs_patientCodes.forEach((TEI) => {
-    changed_TEIs = true;
-    logger.info(`TEI_CREATION; Patient ${TEI} will be created in DHIS2 server; Not present in previous data dump`);
-    teis_toBeCreated.push(TEI);
-    var dict = getAction_TEI(CREATE, TEI);
-    dict.uid = current_patient_code_uid[TEI].uid;
-    listOfActions.push(dict);
-})
 
 var teis_toUpdateTEA = [];
 var teis_toUpdateEnroll = [];
@@ -297,7 +295,6 @@ function checkTEIDifference(codepatient) {
     var newTEI_uid = current_patient_code_uid[codepatient].uid;
 
     //DHIS uploaded file
-    //var dhisTEI_file = readTEIFile(dhisTEI_uid, PREVIOUS);readDHIS_TEIs
     var dhisTEI_file = readDHIS_TEIs(dhisTEI_uid);
 
     //New dump file
