@@ -1098,7 +1098,11 @@ function getAction_TEA(action, TEI, TEA, previousValue, currentValue) {
     dict.type = TEA_TYPE;
     dict.resource = TEA;
     dict.TEI = TEI;
-    dict.previousValue = previousValue;
-    dict.currentValue = currentValue;
+    if (typeof currentValue === 'undefined'){ // CREATE or DELETE
+        dict.value = previousValue
+    } else { // UPDATE
+        dict.previousValue = previousValue;
+        dict.currentValue = currentValue;
+    }
     return dict;
 }
