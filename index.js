@@ -469,8 +469,8 @@ function checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, progra
                     logger.info(`Enrollment_DELETION; ${program} (${previous_patient_code_uid[codepatient][programLabel][enrollment_date]}) (${enrollment_date}) will be removed from patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in new data dump`);
                     var dict = {};
                     dict.action = DELETE;
-                    dict.resource = previous_patient_code_uid[codepatient][programLabel][enrollment_date]; //Enrollment_uid
                     dict.type = ENROLLMENT_TYPE;
+                    dict.resource = previous_patient_code_uid[codepatient][programLabel][enrollment_date]; //Enrollment_uid
                     dict.TEI = previous_patient_code_uid[codepatient].uid;
                     dict.program = PROGRAMS_MAPPING[program];
                     //dict.value = enrollment_date;
@@ -512,8 +512,8 @@ function checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, progra
             logger.info(`Enrollment_DELETION; ${program} ${(Object.values(previous_patient_code_uid[codepatient][programLabel]))} and all its associated events will be removed from patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in new data dump`);
             var dict = {};
             dict.action = DELETE;
-            dict.resource = Object.values(previous_patient_code_uid[codepatient][programLabel])[0]; //Enrollment_uid
             dict.type = ENROLLMENT_TYPE;
+            dict.resource = Object.values(previous_patient_code_uid[codepatient][programLabel])[0]; //Enrollment_uid
             dict.TEI = previous_patient_code_uid[codepatient].uid;
             dict.program = PROGRAMS_MAPPING[program];
             //dict.value = enrollment_date;
@@ -650,8 +650,8 @@ function checkEnrollmentDifference(dhisTEI_file, newTEI_file, enrollment_date, c
         logger.info(`Enrollment_UPDATE; Enrollment status will be updated for patient ${codepatient} (enrollment_uid: ${enrollment_uid_previous}) in DHIS2 server; Previous value: ${status_previous} , New value: ${status_current}`)
         var dict = {};
         dict.action = UPDATE;
-        dict.resource = previous_patient_code_uid[codepatient][programLabel][enrollment_date]; //Enrollment_uid
         dict.type = ENROLLMENT_TYPE;
+        dict.resource = previous_patient_code_uid[codepatient][programLabel][enrollment_date]; //Enrollment_uid
         dict.TEI = previous_patient_code_uid[codepatient].uid;
         dict.program = PROGRAMS_MAPPING[programLabel];
         dict.previousValue = status_previous;
@@ -710,8 +710,8 @@ function checkStageEvents(programLabel, codepatient, stage, dhis_enrollment_key,
                             logger.info(`Event_DELETION; ${stage} event (${previous_patient_code_uid[codepatient][dhis_enrollment_key][stage][event_date]}) on ${event_date} will be removed from patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in new data dump`);
                             var dict = {};
                             dict.action = DELETE;
-                            dict.resource = previous_patient_code_uid[codepatient][dhis_enrollment_key][stage][event_date]; //Event UID
                             dict.type = EVENT_TYPE;
+                            dict.resource = previous_patient_code_uid[codepatient][dhis_enrollment_key][stage][event_date]; //Event UID
                             dict.TEI = previous_patient_code_uid[codepatient].uid;
                             dict.enrollment = enrollment_uid_previous;
                             dict.stage = stage;
@@ -724,8 +724,8 @@ function checkStageEvents(programLabel, codepatient, stage, dhis_enrollment_key,
                             logger.info(`Event_CREATION; ${[stage]} event on ${event_date} will be created for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in previous data dump`);
                             var dict = {};
                             dict.action = CREATE;
-                            dict.resource = event_date; //Event UID
                             dict.type = EVENT_TYPE;
+                            dict.resource = event_date; //Event UID
                             dict.TEI = previous_patient_code_uid[codepatient].uid;
                             dict.enrollment = enrollment_uid_previous;
                             dict.stage = stage;
@@ -787,8 +787,8 @@ function checkStageEvents(programLabel, codepatient, stage, dhis_enrollment_key,
                             logger.info(`Event_DELETION; ${stage} event (${previous_patient_code_uid[codepatient][dhis_enrollment_key][stage][event_date]}) on ${event_date} will be removed from patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in new data dump`);
                             var dict = {};
                             dict.action = DELETE;
-                            dict.resource = previous_patient_code_uid[codepatient][dhis_enrollment_key][stage][event_date]; //Event UID
                             dict.type = EVENT_TYPE;
+                            dict.resource = previous_patient_code_uid[codepatient][dhis_enrollment_key][stage][event_date]; //Event UID
                             dict.TEI = previous_patient_code_uid[codepatient].uid;
                             dict.enrollment = enrollment_uid_previous;
                             dict.stage = stage;
@@ -803,8 +803,8 @@ function checkStageEvents(programLabel, codepatient, stage, dhis_enrollment_key,
                         logger.info(`Event_CREATION; ${[stage]} event on ${date} will be created for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in previous data dump`);
                         var dict = {};
                         dict.action = CREATE;
-                        dict.resource = date; //Event date
                         dict.type = EVENT_TYPE;
+                        dict.resource = date; //Event date
                         dict.TEI = previous_patient_code_uid[codepatient].uid;
                         dict.enrollment = enrollment_uid_previous;
                         dict.stage = stage;
@@ -819,8 +819,8 @@ function checkStageEvents(programLabel, codepatient, stage, dhis_enrollment_key,
             logger.info(`Enrollment_DELETION; ${[enrollment_uid_current]} enrollment and all its associated events will be removed for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in new data dump`);
             var dict = {};
             dict.action = DELETE;
-            dict.resource = enrollment_uid_current; //Enrollment_uid
             dict.type = ENROLLMENT_TYPE;
+            dict.resource = enrollment_uid_current; //Enrollment_uid
             dict.TEI = previous_patient_code_uid[codepatient].uid;
             dict.program = PROGRAMS_MAPPING[programLabel];
             listOfActions.push(dict);
@@ -840,8 +840,8 @@ function checkStageEvents(programLabel, codepatient, stage, dhis_enrollment_key,
                         logger.info(`Event_CREATION; ${[stage]} event on ${event_date} will be created for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in previous data dump`);
                         var dict = {};
                         dict.action = CREATE;
-                        dict.resource = event_date; //Event UID
                         dict.type = EVENT_TYPE;
+                        dict.resource = event_date; //Event UID
                         dict.TEI = previous_patient_code_uid[codepatient].uid;
                         dict.enrollment = enrollment_uid_previous;
                         dict.stage = stage;
@@ -927,8 +927,8 @@ function checkDataValuesExistence(enrollment_uid_previous, codepatient, patient_
                     logger.info(`DE_DELETION; ${DE} dataElement will be removed for event ${previousEvent_uid} (${event_date}) , ${stage} stage, patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in new data dump`);
                     var dict = {};
                     dict.action = DELETE;
-                    dict.resource = DE; //DE UID
                     dict.type = DE_TYPE;
+                    dict.resource = DE; //DE UID
                     dict.TEI = previous_patient_code_uid[codepatient].uid;
                     dict.enrollment = enrollment_uid_previous;
                     dict.stage = stage;
@@ -942,8 +942,8 @@ function checkDataValuesExistence(enrollment_uid_previous, codepatient, patient_
                     logger.info(`DE_CREATION; ${DE} dataElement for event ${previousEvent_uid} (${event_date}), ${stage} stage, will be created for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in previous data dump`);
                     var dict = {};
                     dict.action = CREATE;
-                    dict.resource = DE; //DE UID
                     dict.type = DE_TYPE;
+                    dict.resource = DE; //DE UID
                     dict.TEI = previous_patient_code_uid[codepatient].uid;
                     dict.enrollment = enrollment_uid_previous;
                     dict.stage = stage;
@@ -971,8 +971,8 @@ function checkDataValuesExistence(enrollment_uid_previous, codepatient, patient_
                 logger.info(`DE_DELETION; ${DE.dataElement} dataElement with value "${DE.value}" will be removed for event ${previousEvent_uid} (${event_date}) , ${stage} stage, patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in new data dump`);
                 var dict = {};
                 dict.action = DELETE;
-                dict.resource = DE.dataElement; //DE UID
                 dict.type = DE_TYPE;
+                dict.resource = DE.dataElement; //DE UID
                 dict.TEI = previous_patient_code_uid[codepatient].uid;
                 dict.enrollment = enrollment_uid_previous;
                 dict.stage = stage;
@@ -992,8 +992,8 @@ function checkDataValuesExistence(enrollment_uid_previous, codepatient, patient_
                 logger.info(`DE_CREATION; ${DE.dataElement} dataElement with value (${DE.value}) for event ${previousEvent_uid} (${event_date}), ${stage} stage, will be created for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in previous data dump`);
                 var dict = {};
                 dict.action = CREATE;
-                dict.resource = DE.dataElement; //DE UID
                 dict.type = DE_TYPE;
+                dict.resource = DE.dataElement; //DE UID
                 dict.TEI = previous_patient_code_uid[codepatient].uid;
                 dict.enrollment = enrollment_uid_previous;
                 dict.stage = stage;
@@ -1040,8 +1040,8 @@ function checkDataValueDifference(previousEvent_uid, DE, codepatient, patient_ui
                 logger.info(`DE_UPDATE; DE ${DE} will be updated for patient ${codepatient} (uid: ${patient_uid}) in DHIS2 server; Previous value: ${valueDHIS} , New value: ${valueNew}`)
                 var dict = {};
                 dict.action = UPDATE;
-                dict.resource = DE; //DE UID
                 dict.type = DE_TYPE;
+                dict.resource = DE; //DE UID
                 dict.TEI = previous_patient_code_uid[codepatient].uid;
                 dict.event = previousEvent_uid;
                 dict.previousValue = valueDHIS;
@@ -1053,8 +1053,8 @@ function checkDataValueDifference(previousEvent_uid, DE, codepatient, patient_ui
             logger.info(`DE_UPDATE; DE ${DE} will be updated for patient ${codepatient} (uid: ${patient_uid}) in DHIS2 server; Previous value: ${valueDHIS} , New value: NO VALUE`)
             var dict = {};
             dict.action = UPDATE;
-            dict.resource = DE; //DE UID
             dict.type = DE_TYPE;
+            dict.resource = DE; //DE UID
             dict.TEI = previous_patient_code_uid[codepatient].uid;
             dict.event = previousEvent_uid;
             dict.previousValue = valueDHIS;
@@ -1067,8 +1067,8 @@ function checkDataValueDifference(previousEvent_uid, DE, codepatient, patient_ui
             logger.info(`DE_UPDATE; DE ${DE} will be updated for patient ${codepatient} (uid: ${patient_uid}) in DHIS2 server; Previous value: NO VALUE , New value: ${valueNew}`)
             var dict = {};
             dict.action = UPDATE;
-            dict.resource = DE; //DE UID
             dict.type = DE_TYPE;
+            dict.resource = DE; //DE UID
             dict.TEI = previous_patient_code_uid[codepatient].uid;
             dict.event = previousEvent_uid;
             dict.previousValue = "";
@@ -1087,16 +1087,16 @@ function checkDataValueDifference(previousEvent_uid, DE, codepatient, patient_ui
 function getAction_TEI(action, TEI) {
     var dict = {};
     dict.action = action;
-    dict.resource = TEI;
     dict.type = TEI_TYPE;
+    dict.resource = TEI;
     return dict;
 }
 
 function getAction_TEA(action, TEI, TEA, previousValue, currentValue) {
     var dict = {};
     dict.action = action;
-    dict.resource = TEA;
     dict.type = TEA_TYPE;
+    dict.resource = TEA;
     dict.TEI = TEI;
     dict.previousValue = previousValue;
     dict.currentValue = currentValue;
