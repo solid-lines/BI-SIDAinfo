@@ -194,6 +194,7 @@ missingTEIs_patientCodes.forEach((TEI) => {
 });
 
 
+
 var teis_toUpdateTEA = [];
 var teis_toUpdateEnroll = [];
 
@@ -454,7 +455,8 @@ function checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, progra
 
     var programIndex = programs.indexOf(program);
     var programLabel = program_labels[programIndex];
-    if (programLabel in previous_patient_code_uid[codepatient]) {
+
+    if (programLabel in previous_patient_code_uid[codepatient]) { // Enrollment in the previous data dump
         if (programLabel in current_patient_code_uid[codepatient]) { // There is/are enrollment/s about this particular program in both dump files
 
             var previousEnrollment_dates = Object.keys(previous_patient_code_uid[codepatient][programLabel]) //Array of dates('2019-11-18') 
@@ -481,15 +483,17 @@ function checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, progra
             //There are new enrollments in the current dump
             newEnrollments.forEach((enrollment_date) => {
                 changed_enroll_new = true;
-                logger.info(`Enrollment_CREATION; ${program} (${enrollment_date}) will be created for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in previous data dump`);
+                enrollment_uid = current_patient_code_uid[codepatient][programLabel][enrollment_date]
+                tei_uid = previous_patient_code_uid[codepatient].uid
+                logger.info(`Enrollment_CREATION; Program: ${program}. Enrollment: ${enrollment_uid} (${enrollment_date}) will be created from patient ${codepatient}  (uid: ${tei_uid}) in DHIS2 server; Not present in previous data dump`);
                 var dict = {};
                 dict.action = CREATE;
                 dict.type = ENROLLMENT_TYPE;
-                dict.uid = current_patient_code_uid[codepatient][programLabel][enrollment_date];
-                dict.TEI = previous_patient_code_uid[codepatient].uid;
+                dict.uid = enrollment_uid;
+                dict.TEI = tei_uid;
                 dict.program = PROGRAMS_MAPPING[program];
                 dict.enrollmentDate = enrollment_date;
-                dict.status = getEnrollmentStatus(newTEI_file.enrollments, current_patient_code_uid[codepatient][programLabel][enrollment_date]);
+                dict.status = getEnrollmentStatus(newTEI_file.enrollments, enrollment_uid);
                 listOfActions.push(dict);
             });
 
@@ -527,59 +531,26 @@ function checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, progra
                 listOfActions.push(dict);
             }
         }
-    } else {
+    } else { // Enrollment NOT in the previous data dump
         if (programLabel in current_patient_code_uid[codepatient]) { //enrollment in current dump but not in previous dump (same as new enrollment)
             changed_enroll_new = true;
-            logger.info(`Enrollment_CREATION; ${programLabel} will be created for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in previous data dump`);
 
-            //var currentEvents_dates = Object.keys(current_patient_code_uid[codepatient][program]);
-            var currentEnrollment_uids = Object.values(current_patient_code_uid[codepatient][programLabel])
-            var currentEnrollment_dates = Object.keys(current_patient_code_uid[codepatient][programLabel])
-            var current_enrollment_keys = [];
-            currentEnrollment_uids.forEach((uid) => {
-                var date = currentEnrollment_dates[currentEnrollment_uids.indexOf(uid)];
-                current_enrollment_keys.push([program] + "-" + uid);
+            const new_enrollments = current_patient_code_uid[codepatient][programLabel]
+            for (const [enrollment_date, enrollment_uid] of Object.entries(new_enrollments)) {
+                logger.info(`Enrollment_CREATION; Program: ${program}. Enrollment: ${enrollment_uid} (${enrollment_date}) will be created from patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in previous data dump`);
                 var dict = {};
                 dict.action = CREATE;
                 dict.type = ENROLLMENT_TYPE;
-                dict.uid = uid;
-                //dict.value = uid; //Para identificar los eventos que hay que crear asociados a cada enrollment
-                dict.enrollmentDate = date;
+                dict.uid = enrollment_uid; //Para identificar los eventos que hay que crear asociados a cada enrollment
+                dict.enrollmentDate = enrollment_date;
                 dict.TEI = previous_patient_code_uid[codepatient].uid;
-                dict.program = PROGRAMS_MAPPING[program];
-                dict.status = getEnrollmentStatus(newTEI_file.enrollments, current_patient_code_uid[codepatient][programLabel][date]);
-                //var enrollmentEvents = [];
+                dict.program = PROGRAMS_MAPPING[program]; // program uid
+                dict.status = getEnrollmentStatus(newTEI_file.enrollments, enrollment_uid);
 
-                //There are new events for that stage in the current dump
-                current_enrollment_keys.forEach((key) => {
-                    //Para cada enrollment iterar sobre sus eventos, leerlos del nuevo dump, y crearlos con los mismo datos
-                    var stages = Object.keys(current_patient_code_uid[codepatient][key]);
-
-                    stages.forEach((stage) => {
-
-                        var events = Object.keys(current_patient_code_uid[codepatient][key][stage]);
-
-                        events.forEach((date) => {
-                            logger.info(`Event_CREATION; ${[program]} event on ${date} for a new enrollment will be created for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in previous data dump`);
-                            //How to point to the newly created enrollment?
-
-                            var event = {};
-                            event.action = CREATE;
-                            event.resource = date; //Event UID
-                            event.type = EVENT_TYPE;
-                            event.TEI = previous_patient_code_uid[codepatient].uid;
-                            event.stage = stage;
-                            event.eventData = getEventData(newTEI_file.enrollments, uid, date);
-                            //enrollmentEvents.push(event);
-                            listOfActions.push(event);
-
-                        })
-                    })
-
-                });
-                //dict.enrollmentEvents = enrollmentEvents;
                 listOfActions.push(dict);
-            })
+            }
+        } else {
+            // Not Enrollment in the previous data dump AND not enrollment in the current dump.
         }
     }
     return (changed_enroll_new || changed_enroll_missing || changed_enroll_common);
