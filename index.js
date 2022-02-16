@@ -509,15 +509,21 @@ function checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, progra
             }
         } else { //enrollment in previous dump but not in current dump (same as missing enrollment)
             changed_enroll_missing = true;
-            logger.info(`Enrollment_DELETION; ${program} ${(Object.values(previous_patient_code_uid[codepatient][programLabel]))} and all its associated events will be removed from patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in new data dump`);
-            var dict = {};
-            dict.action = DELETE;
-            dict.type = ENROLLMENT_TYPE;
-            dict.resource = Object.values(previous_patient_code_uid[codepatient][programLabel])[0]; //Enrollment_uid
-            dict.TEI = previous_patient_code_uid[codepatient].uid;
-            dict.program = PROGRAMS_MAPPING[program];
-            //dict.value = enrollment_date;
-            listOfActions.push(dict);
+            
+            // could be one or more enrollments
+            const previous_enrollments = previous_patient_code_uid[codepatient][programLabel]
+            for (const [enrollment_date, enrollment_uid] of Object.entries(previous_enrollments)) {
+                logger.info(enrollment_date, enrollment_uid);
+                logger.info(`Enrollment_DELETION; Program: ${program}. Enrollment: ${enrollment_uid} (${enrollment_date}) will be removed from patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in new data dump`);
+                var dict = {};
+                dict.action = DELETE;
+                dict.type = ENROLLMENT_TYPE;
+                dict.uid = enrollment_uid
+                dict.TEI = previous_patient_code_uid[codepatient].uid;
+                dict.program = PROGRAMS_MAPPING[program];
+                dict.enrollmentDate = enrollment_date;
+                listOfActions.push(dict);
+            }
         }
     } else {
         if (programLabel in current_patient_code_uid[codepatient]) { //enrollment in current dump but not in previous dump (same as new enrollment)
