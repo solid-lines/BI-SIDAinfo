@@ -28,8 +28,11 @@ const orgUnit = OU_MAPPING[SOURCE_ID];
 const parent_DHIS2data_folder = "PREVIOUS_DHIS2_data"
 const DHIS2data_folder = parent_DHIS2data_folder + "/" + SOURCE_ID
 
-//check if folder exists. If not, create it
+//check if folder exists. If not, create it. If yes, remove directory & create it again
 if (!fs.existsSync(DHIS2data_folder)) {
+    fs.mkdirSync(DHIS2data_folder);
+} else {
+    fs.rmSync(DHIS2data_folder, { recursive: true, force: true }); // remove directory and its content
     fs.mkdirSync(DHIS2data_folder);
 }
 
