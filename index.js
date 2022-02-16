@@ -2,6 +2,7 @@ var fs = require('fs');
 const yargs = require('yargs');
 const { logger, logger_fr } = require('./logger.js');
 var _ = require('lodash');
+const utils = require('./utils.js')
 
 //UIDs
 const TEA_CODE_PATIENT = "dsWUbqvV9GW";
@@ -229,8 +230,9 @@ const ACTIONS_FOLDER = "actions/" + SOURCE_OU_CODE;
 if (!fs.existsSync(ACTIONS_FOLDER)) {
     fs.mkdirSync(ACTIONS_FOLDER);
 }
+
 try {
-    fs.writeFileSync(ACTIONS_LIST_FILE, JSON.stringify(listOfActions));
+    utils.saveJSONFile(ACTIONS_LIST_FILE, listOfActions);
 } catch (err) {
     // An error occurred
     logger.error(err);

@@ -4,6 +4,7 @@ const endpointConfig = require('./config.json');
 const { reject } = require("async");
 var fs = require('fs');
 var dataToFile = require('./dataToFile.js');
+const utils = require('./utils.js')
 
 //PROGRAMS
 const PROGRAM_TARV = "e3swbbSnbQ2";
@@ -136,9 +137,12 @@ async function saveTEIs(orgUnit) {
     }
 
     try {
-        fs.writeFileSync(ENFANT_DHIS2_FILE, JSON.stringify(enfant_teis));
-        fs.writeFileSync(MERE_DHIS2_FILE, JSON.stringify(mere_teis));
-        fs.writeFileSync(TARV_DHIS2_FILE, JSON.stringify(tarv_teis));
+        logger.info("Saving enfant.json file")
+        utils.saveJSONFile(ENFANT_DHIS2_FILE, enfant_teis);
+        logger.info("Saving mere.json file")
+        utils.saveJSONFile(MERE_DHIS2_FILE, mere_teis);
+        logger.info("Saving tarv.json file")
+        utils.saveJSONFile(TARV_DHIS2_FILE, tarv_teis);
     } catch (err) {
         // An error occurred
         logger.error(err);

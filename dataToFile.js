@@ -1,4 +1,6 @@
 var fs = require('fs');
+const { logger } = require('./logger.js');
+const utils = require('./utils.js')
 
 const PATIENT_CODE_TEA = "dsWUbqvV9GW";
 //PROGRAMS
@@ -69,6 +71,9 @@ stagesDict[PROGRAMSTAGE_PTME_ENFANT_SORTIE] = PROGRAMSTAGE_PTME_ENFANT_SORTIE_LA
 
 
 function formatData(source_id) {
+
+    logger.info("Processing retrieved data")
+
     //const SOURCE_ID = "003BDI017S020203"; //TODO: parametrizar
     const SOURCE_ID = source_id;
     const parent_DHIS2data_folder = "PREVIOUS_DHIS2_data"
@@ -136,16 +141,15 @@ function formatData(source_id) {
                     patient_code_uid[patient][enrollmentUID_label][stagesDict[stage]] = getEvents_format(enroll.events, stage);
                 }
             });
-
-
-
         })
     });
 
 
     //Main
-    saveJSONFile(PATIENT_CODE_UID, patient_code_uid);
-    saveJSONFile(TEIS_FILE, dhis_data);
+    logger.info("Saving teis.json file")
+    utils.saveJSONFile(TEIS_FILE, dhis_data);
+    logger.info("Saving patient_code_uid.json file")
+    utils.saveJSONFile(PATIENT_CODE_UID, patient_code_uid);
 
 }
 
@@ -202,15 +206,6 @@ function getEvents_format(events_data, stage) {
     return events;
 }
 
-/*** Utils ***/
-function saveJSONFile(filename, json_data) {
-    try {
-        fs.writeFileSync(filename, JSON.stringify(json_data, null, 2));
-    } catch (err) {
-        // An error occurred
-        logger.error(err);
-    }
-}
 
 function getDHIS2dateFormat(date) {
     return date.substr(0, 10);
