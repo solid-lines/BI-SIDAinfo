@@ -173,7 +173,7 @@ var commonTEIs_patientCodes = _.intersection(previousTEIs_PatientCodes, currentT
 /*logger.info(`TEIs list from PREVIOUS data dump: ${previousTEIs_PatientCodes}`);
 logger.info(`TEIs list from CURRENT data dump: ${currentTEIs_PatientCodes}`);*/
 
-//Log new TEIs
+// CREATE TEIs
 newTEIs_patientCodes.forEach((TEI) => {
     changed_TEIs = true;
     logger.info(`TEI_CREATION; Patient ${TEI} will be created in DHIS2 server; Not present in previous data dump`);
@@ -183,7 +183,7 @@ newTEIs_patientCodes.forEach((TEI) => {
     listOfActions.push(dict);
 })
 
-//Log missing TEIs
+// DELETE TEIs
 missingTEIs_patientCodes.forEach((TEI) => {
     changed_TEIs = true;
     logger.info(`TEI_DELETION; Patient ${TEI} (uid: ${previous_patient_code_uid[TEI].uid}) will be removed from DHIS2 server; Not present in new data dump`);
@@ -198,7 +198,6 @@ var teis_toUpdateTEA = [];
 var teis_toUpdateEnroll = [];
 
 commonTEIs_patientCodes.forEach((TEI) => {
-    //logger.info(`TEI_REVIEW; Patient ${TEI} (uid: ${previous_patient_code_uid[TEI].uid}) will be reviewed; Present in previous data dump`);
     var changes = checkTEIDifference(TEI); //TODO: in process (cascade)
     changed_TEIs = changes.changed_TEI;
     if (changed_TEIs) {
@@ -238,6 +237,8 @@ try {
     logger.error(err);
 }
 
+//***********************************************************************************************/
+//***********************************************************************************************/
 //***********************************************************************************************/
 
 
@@ -454,7 +455,7 @@ function checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, progra
     var programIndex = programs.indexOf(program);
     var programLabel = program_labels[programIndex];
     if (programLabel in previous_patient_code_uid[codepatient]) {
-        if (programLabel in current_patient_code_uid[codepatient]) {
+        if (programLabel in current_patient_code_uid[codepatient]) { // There is/are enrollment/s about this particular program in both dump files
 
             var previousEnrollment_dates = Object.keys(previous_patient_code_uid[codepatient][programLabel]) //Array of dates('2019-11-18') 
             var currentEnrollment_dates = Object.keys(current_patient_code_uid[codepatient][programLabel])
@@ -466,7 +467,7 @@ function checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, progra
             if (missingEnrollments.length != 0) { //Some enrollments are missing in the current dump
                 changed_enroll_missing = true;
                 missingEnrollments.forEach((enrollment_date) => {
-                    logger.info(`Enrollment_DELETION; ${program} (${previous_patient_code_uid[codepatient][programLabel][enrollment_date]}) (${enrollment_date}) will be removed from patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in new data dump`);
+                    logger.info(`Enrollment_DELETION; Program:${program} Enrollment:(${previous_patient_code_uid[codepatient][programLabel][enrollment_date]}) (${enrollment_date}) will be removed from patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in new data dump`);
                     var dict = {};
                     dict.action = DELETE;
                     dict.type = ENROLLMENT_TYPE;
@@ -821,8 +822,9 @@ function checkStageEvents(programLabel, codepatient, stage, dhis_enrollment_key,
                 }
             }
         } else { //No events associated to that enrollment in the current file
+            // TODO check this assumption
             changed_missing = true;
-            logger.info(`Enrollment_DELETION; ${[enrollment_uid_current]} enrollment and all its associated events will be removed for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in new data dump`);
+            logger.info(`REVIEW-Enrollment_DELETION; ${[enrollment_uid_current]} enrollment and all its associated events will be removed for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Not present in new data dump`);
             var dict = {};
             dict.action = DELETE;
             dict.type = ENROLLMENT_TYPE;
