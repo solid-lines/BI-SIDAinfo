@@ -176,7 +176,7 @@ logger.info(`TEIs list from CURRENT data dump: ${currentTEIs_PatientCodes}`);*/
 // CREATE TEIs
 newTEIs_patientCodes.forEach((TEI) => {
     changed_TEIs = true;
-    logger.info(`TEI_CREATION; Patient ${TEI} will be created in DHIS2 server; Not present in previous data dump`);
+    logger.info(`TEI_CREATION; Patient ${TEI} will be created. Not present in previous data dump`);
     teis_toBeCreated.push(TEI);
     var dict = getAction_TEI(CREATE, TEI);
     dict.uid = current_all_patient_index[TEI].uid;
@@ -186,7 +186,7 @@ newTEIs_patientCodes.forEach((TEI) => {
 // DELETE TEIs
 missingTEIs_patientCodes.forEach((TEI) => {
     changed_TEIs = true;
-    logger.info(`TEI_DELETION; Patient ${TEI} (uid: ${previous_all_patient_index[TEI].uid}) will be removed from DHIS2 server; Not present in new data dump`);
+    logger.info(`TEI_DELETION; Patient ${TEI} (${previous_all_patient_index[TEI].uid}) will be deleted from DHIS2 server; Not present in new data dump`);
     teis_toBeDeleted.push(TEI);
     var dict = getAction_TEI(DELETE, TEI);
     dict.uid = previous_all_patient_index[TEI].uid;
@@ -380,20 +380,20 @@ function checkTEAexistence(codepatient, dhisTEI_file, newTEI_file, previous_all_
 
     missingTEAs.forEach((TEA) => {
         changed_missing = true;
-        logger.info(`TEA_DELETION; TEA ${TEA} will be removed from patient ${codepatient}  (uid: ${previous_all_patient_index[codepatient].uid}) in DHIS2 server; Not present in new data dump`);
+        logger.info(`TEA_DELETION; TEA ${TEA} will be deleted from patient ${codepatient} (${previous_all_patient_index[codepatient].uid}). Not present in new data dump`);
         var dict = getAction_TEA(DELETE, previous_all_patient_index[codepatient].uid, TEA, dhisTEAs_data[dhisTEAs_uids.indexOf(TEA)].value);
         listOfActions.push(dict);
     });
 
     newTEAs.forEach((TEA) => {
         changed_new = true;
-        logger.info(`TEA_CREATION; TEA ${TEA} will be created for patient ${codepatient} (uid: ${previous_all_patient_index[codepatient].uid}) in DHIS2 server; Not present in previous data dump`);
+        logger.info(`TEA_CREATION; TEA ${TEA} will be created for patient ${codepatient} (${previous_all_patient_index[codepatient].uid}). Not present in previous data dump`);
         var dict = getAction_TEA(CREATE, previous_all_patient_index[codepatient].uid, TEA, newTEAs_data[newTEAs_uids.indexOf(TEA)].value);
         listOfActions.push(dict);
     });
 
     commonTEAs.forEach((TEA) => {
-        //logger.info(`TEA_REVIEW; TEA ${TEA} will be reviewed for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Present in previous data dump`);
+        //logger.info(`TEA_REVIEW; TEA ${TEA} will be reviewed for patient ${codepatient} (${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; Present in previous data dump`);
 
         //Skip TEA_CODE_PATIENT (will always be the same at this point)
         if (TEA != TEA_CODE_PATIENT) {
@@ -433,10 +433,10 @@ function checkTEADifference(TEA, codepatient, dhisTEA, newTEA) {
     }
 
     if (valueDHIS === valueNew) {
-        //logger.info(`TEA_INFO; TEA ${TEA} won't be updated for patient ${codepatient} (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; It has the same value as the previous dump`)
+        //logger.info(`TEA_INFO; TEA ${TEA} won't be updated for patient ${codepatient} (${previous_patient_code_uid[codepatient].uid}) in DHIS2 server; It has the same value as the previous dump`)
     } else {
         updated_TEA = true;
-        logger.info(`TEA_UPDATE; TEA ${TEA} will be updated for patient ${codepatient} (uid: ${previous_all_patient_index[codepatient].uid}) in DHIS2 server; Previous value: ${valueDHIS} , New value: ${valueNew}`)
+        logger.info(`TEA_UPDATE; TEA ${TEA} will be updated for patient ${codepatient} (${previous_all_patient_index[codepatient].uid}). Previous value: ${valueDHIS} , New value: ${valueNew}`)
         var dict = getAction_TEA(UPDATE, previous_all_patient_index[codepatient].uid, TEA, valueDHIS, valueNew);
         listOfActions.push(dict);
     }
@@ -471,7 +471,7 @@ function checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, progra
                 changed_enroll_missing = true;
                 enrollment_uid = previous_all_patient_index[codepatient][programLabel][enrollment_date]; //Enrollment_uid
                 tei_uid = previous_all_patient_index[codepatient].uid;
-                logger.info(`Enrollment_DELETION; Program:${program} Enrollment:(${enrollment_uid}) (${enrollment_date}) will be removed from patient ${codepatient}  (uid: ${tei_uid}) in DHIS2 server; Not present in new data dump`);
+                logger.info(`Enrollment_DELETION; Program:${program} Enrollment:(${enrollment_uid}) (${enrollment_date}) will be deleted from patient ${codepatient} (${tei_uid}). Not present in new data dump`);
                 var dict = {};
                 dict.action = DELETE;
                 dict.type = ENROLLMENT_TYPE;
@@ -487,7 +487,7 @@ function checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, progra
                 changed_enroll_new = true;
                 enrollment_uid = current_all_patient_index[codepatient][programLabel][enrollment_date]
                 tei_uid = previous_all_patient_index[codepatient].uid
-                logger.info(`Enrollment_CREATION; Program: ${program}. Enrollment: ${enrollment_uid} (${enrollment_date}) will be created from patient ${codepatient}  (uid: ${tei_uid}) in DHIS2 server; Not present in previous data dump`);
+                logger.info(`Enrollment_CREATION; Program: ${program}. Enrollment: ${enrollment_uid} (${enrollment_date}) will be created from patient ${codepatient} (${tei_uid}). Not present in previous data dump`);
                 var dict = {};
                 dict.action = CREATE;
                 dict.type = ENROLLMENT_TYPE;
@@ -503,7 +503,7 @@ function checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, progra
             //Some enrollments are present in both dumps
             commonEnrollments.forEach((enrollment_date) => {
                 //logger.info(`Enrollment_REVIEW; TEI ${current_all_patient_index[codepatient].uid} Program: ${program} Enrollment date (${enrollment_date})`)
-                //will be reviewed for patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server;
+                //will be reviewed for patient ${codepatient} (${previous_patient_code_uid[codepatient].uid}) in DHIS2 server;
                 //Present in previous data dump`);
                 const checkEnrollmentDifferenceV = checkEnrollmentDifference(dhisTEI_file, newTEI_file, enrollment_date, codepatient, programLabel, previous_all_patient_index, current_all_patient_index);
                 if (checkEnrollmentDifferenceV) {
@@ -518,7 +518,7 @@ function checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, progra
             // could be one or more enrollments
             const previous_enrollments = previous_all_patient_index[codepatient][programLabel]
             for (const [enrollment_date, enrollment_uid] of Object.entries(previous_enrollments)) {
-                logger.info(`Enrollment_DELETION; Program: ${program}. Enrollment: ${enrollment_uid} (${enrollment_date}) will be removed from patient ${codepatient}  (uid: ${previous_all_patient_index[codepatient].uid}) in DHIS2 server; Not present in new data dump`);
+                logger.info(`Enrollment_DELETION; Program: ${program}. Enrollment: ${enrollment_uid} (${enrollment_date}) will be deleted from patient ${codepatient} (${previous_all_patient_index[codepatient].uid}). Not present in new data dump`);
                 var dict = {};
                 dict.action = DELETE;
                 dict.type = ENROLLMENT_TYPE;
@@ -536,7 +536,7 @@ function checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, progra
             const new_enrollments = current_all_patient_index[codepatient][programLabel]
             for (const [enrollment_date, enrollment_uid] of Object.entries(new_enrollments)) {
                 tei_uid = previous_all_patient_index[codepatient].uid;
-                logger.info(`Enrollment_CREATION; Program: ${program}. Enrollment: ${enrollment_uid} (${enrollment_date}) will be created from patient ${codepatient}  (uid: ${tei_uid}) in DHIS2 server; Not present in previous data dump`);
+                logger.info(`Enrollment_CREATION; Program: ${program}. Enrollment: ${enrollment_uid} (${enrollment_date}) will be created from patient ${codepatient} (${tei_uid}). Not present in previous data dump`);
                 var dict = {};
                 dict.action = CREATE;
                 dict.type = ENROLLMENT_TYPE;
@@ -581,7 +581,7 @@ function checkEnrollmentDifference(dhisTEI_file, newTEI_file, enrollment_date, c
     enrollment_uid = previous_all_patient_index[codepatient][programLabel][enrollment_date]
     tei_uid = previous_all_patient_index[codepatient].uid
 
-    //logger.info(`REVIEW enrollment ${programLabel}. Enrollment ${enrollment_uid} (${enrollment_date}) Patient ${codepatient}  (uid: ${tei_uid}).`);
+    //logger.info(`REVIEW enrollment ${programLabel}. Enrollment ${enrollment_uid} (${enrollment_date}) Patient ${codepatient} (${tei_uid}).`);
 
     var changed = false;
 
@@ -635,7 +635,8 @@ function checkEnrollmentDifference(dhisTEI_file, newTEI_file, enrollment_date, c
 
     if (status_current.toUpperCase() != status_previous.toUpperCase()) {
         changed = true;
-        logger.info(`Enrollment_UPDATE; Enrollment status will be updated for patient ${codepatient} (enrollment_uid: ${enrollment_uid_previous}) in DHIS2 server; Previous value: ${status_previous} , New value: ${status_current}`)
+        // TODO update this log
+        logger.info(`Enrollment_UPDATE; Enrollment status will be updated for patient ${codepatient} (enrollment ${enrollment_uid_previous}). Previous value: ${status_previous}, New value: ${status_current}`)
         var dict = {};
         dict.action = UPDATE;
         dict.type = ENROLLMENT_TYPE;
@@ -699,7 +700,7 @@ function checkStageEvents(programLabel, codepatient, stage, previous_enrollment_
                     //Some events for that stage are missing in the current dump
                     missingEvents.forEach((event_date) => {
                         changed_missing = true;
-                        logger.info(`Event_DELETION; ${stage} event (${previous_all_enrollment_events_index[stage][event_date]}) on ${event_date} will be removed from patient ${codepatient}  (uid: ${previous_all_patient_index[codepatient].uid}) in DHIS2 server; Not present in new data dump`);
+                        logger.info(`Event_DELETION; ${stage} event (${previous_all_enrollment_events_index[stage][event_date]}) on ${event_date} will be deleted from patient ${codepatient} (${previous_all_patient_index[codepatient].uid}). Not present in new data dump`);
                         var dict = {};
                         dict.action = DELETE;
                         dict.type = EVENT_TYPE;
@@ -713,7 +714,7 @@ function checkStageEvents(programLabel, codepatient, stage, previous_enrollment_
                     //There are new events for that stage in the current dump
                     newEvents.forEach((event_date) => {
                         changed_new = true;
-                        logger.info(`Event_CREATION; ${[stage]} event on ${event_date} will be created for patient ${codepatient} (uid: ${previous_all_patient_index[codepatient].uid}) in DHIS2 server; Not present in previous data dump`);
+                        logger.info(`Event_CREATION; ${[stage]} event on ${event_date} will be created for patient ${codepatient} (${previous_all_patient_index[codepatient].uid}). Not present in previous data dump`);
                         var dict = {};
                         dict.action = CREATE;
                         dict.type = EVENT_TYPE;
@@ -728,7 +729,7 @@ function checkStageEvents(programLabel, codepatient, stage, previous_enrollment_
                     //Some events for that stage are present in both dumps
                     commonEvents.forEach((event_date) => {
                         //logger.info(`Event_REVIEW; Event ${previous_patient_code_uid[codepatient][program][event_date]} (${program})
-                        //will be reviewed for patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server;
+                        //will be reviewed for patient ${codepatient} (${previous_patient_code_uid[codepatient].uid}) in DHIS2 server;
                         //Present in previous data dump`);
 
                         var dhisTEI_file = readDHIS_TEIs(previous_all_patient_index[codepatient].uid);
@@ -768,7 +769,7 @@ function checkStageEvents(programLabel, codepatient, stage, previous_enrollment_
 
                 } else { // Stage doesn't exist in current file enrollment
                     changed_missing = true;
-                    logger.info(`All_Events_ProgramStage_DELETION; ${[stage]} stage from enrollment (${enrollment_uid_current}) and all its associated events will be removed for patient ${codepatient} (uid: ${previous_all_patient_index[codepatient].uid}) in DHIS2 server; Not present in new data dump`);
+                    logger.info(`All_Events_ProgramStage_DELETION; ${[stage]} stage from enrollment (${enrollment_uid_current}) and all its associated events will be deleted for patient ${codepatient} (${previous_all_patient_index[codepatient].uid}). Not present in new data dump`);
                     var events = Object.keys(previous_all_enrollment_events_index[stage]);
                     //For each event on that stage
                     if (typeof events !== "undefined") {
@@ -784,7 +785,7 @@ function checkStageEvents(programLabel, codepatient, stage, previous_enrollment_
                             dict.enrollment = enrollment_uid_previous;
                             dict.stage = stage;
                             listOfActions.push(dict);
-                            logger.info(`Event_DELETION; Program Stage ${[stage]}. Event (${event_uid}) on ${event_date} will be deleted for patient ${codepatient} (uid: ${patient_uid}) in previous dump but not present in current data dump`);
+                            logger.info(`Event_DELETION; Program Stage ${[stage]}. Event (${event_uid}) on ${event_date} will be deleted for patient ${codepatient} (${patient_uid}) in previous dump but not present in current data dump`);
                         });
                     }
                 }
@@ -803,7 +804,7 @@ function checkStageEvents(programLabel, codepatient, stage, previous_enrollment_
                         dict.enrollment = enrollment_uid_previous;
                         dict.stage = stage;
                         listOfActions.push(dict);
-                        logger.info(`Event_CREATION; Program Stage ${[stage]}. Event (${event_uid}) on ${event_date} will be created for patient ${codepatient} (uid: ${patient_uid}) in DHIS2 server; Not present in previous data dump`);
+                        logger.info(`Event_CREATION; Program Stage ${[stage]}. Event (${event_uid}) on ${event_date} will be created for patient ${codepatient} (${patient_uid}). Not present in previous data dump`);
                     })
 
                 } else {
@@ -830,7 +831,7 @@ function checkStageEvents(programLabel, codepatient, stage, previous_enrollment_
                 dict.enrollment = enrollment_uid_previous;
                 dict.stage = stage;
                 listOfActions.push(dict);
-                logger.info(`Event_DELETION; Program Stage ${[stage]}. Event (${event_uid}) on ${event_date} will be created for patient ${codepatient} (uid: ${patient_uid}). Not present in current data dump`);
+                logger.info(`Event_DELETION; Program Stage ${[stage]}. Event (${event_uid}) on ${event_date} will be created for patient ${codepatient} (${patient_uid}). Not present in current data dump`);
             });
         }
     } else { // No events associated to that enrollment in the previous file, for any of the program stages
@@ -854,7 +855,7 @@ function checkStageEvents(programLabel, codepatient, stage, previous_enrollment_
                     dict.enrollment = enrollment_uid_previous;
                     dict.stage = stage;
                     listOfActions.push(dict);
-                    logger.info(`Event_CREATION; Program Stage ${[stage]}. Event (${event_uid}) on ${event_date} will be created for patient ${codepatient} (uid: ${patient_uid}). Not present in previous data dump`);
+                    logger.info(`Event_CREATION; Program Stage ${[stage]}. Event (${event_uid}) on ${event_date} will be created for patient ${codepatient} (${patient_uid}). Not present in previous data dump`);
                 });
             } else {
                 // No events in the current patient index for that stage
@@ -929,7 +930,7 @@ function checkDataValuesExistence(enrollment_uid_previous, codepatient, patient_
             //Some DEs for that event are missing in the current dump
             missingDEs.forEach((DE) => {
                 changed_missing = true;
-                logger.info(`DE_DELETION; ${DE} dataElement will be removed for event ${previousEvent_uid} (${event_date}) , ${stage} stage, patient ${codepatient}  (uid: ${previous_all_patient_index[codepatient].uid}) in DHIS2 server; Not present in new data dump`);
+                logger.info(`DE_DELETION; ${DE} dataElement will be deleted for event ${previousEvent_uid} (${event_date}) , ${stage} stage, patient ${codepatient} (${previous_all_patient_index[codepatient].uid}). Not present in new data dump`);
                 var dict = {};
                 dict.action = DELETE;
                 dict.type = DE_TYPE;
@@ -944,7 +945,7 @@ function checkDataValuesExistence(enrollment_uid_previous, codepatient, patient_
             //There are new DEs for that event in the current dump
             newDEs.forEach((DE) => {
                 changed_new = true;
-                logger.info(`DE_CREATION; ${DE} dataElement for event ${previousEvent_uid} (${event_date}), ${stage} stage, will be created for patient ${codepatient} (uid: ${previous_all_patient_index[codepatient].uid}) in DHIS2 server; Not present in previous data dump`);
+                logger.info(`DE_CREATION; ${DE} dataElement for event ${previousEvent_uid} (${event_date}), ${stage} stage, will be created for patient ${codepatient} (${previous_all_patient_index[codepatient].uid}). Not present in previous data dump`);
                 var dict = {};
                 dict.action = CREATE;
                 dict.type = DE_TYPE;
@@ -970,7 +971,7 @@ function checkDataValuesExistence(enrollment_uid_previous, codepatient, patient_
         } else { //Event doesn't have dataValues in new dump
             dhis_dataValues.forEach((DE) => {
                 changed_missing = true;
-                logger.info(`DE_DELETION; ${DE.dataElement} dataElement with value "${DE.value}" will be removed for event ${previousEvent_uid} (${event_date}) , ${stage} stage, patient ${codepatient}  (uid: ${previous_all_patient_index[codepatient].uid}) in DHIS2 server; Not present in new data dump`);
+                logger.info(`DE_DELETION; ${DE.dataElement} dataElement with value "${DE.value}" will be deleted for event ${previousEvent_uid} (${event_date}) , ${stage} stage, patient ${codepatient} (${previous_all_patient_index[codepatient].uid}). Not present in new data dump`);
                 var dict = {};
                 dict.action = DELETE;
                 dict.type = DE_TYPE;
@@ -991,7 +992,7 @@ function checkDataValuesExistence(enrollment_uid_previous, codepatient, patient_
             });
             new_dataValues.forEach((DE) => {
                 changed_new = true;
-                logger.info(`DE_CREATION; ${DE.dataElement} dataElement with value (${DE.value}) for event ${previousEvent_uid} (${event_date}), ${stage} stage, will be created for patient ${codepatient} (uid: ${previous_all_patient_index[codepatient].uid}) in DHIS2 server; Not present in previous data dump`);
+                logger.info(`DE_CREATION; ${DE.dataElement} dataElement with value (${DE.value}) for event ${previousEvent_uid} (${event_date}), ${stage} stage, will be created for patient ${codepatient} (${previous_all_patient_index[codepatient].uid}). Not present in previous data dump`);
                 var dict = {};
                 dict.action = CREATE;
                 dict.type = DE_TYPE;
@@ -1036,10 +1037,10 @@ function checkDataValueDifference(previousEvent_uid, DE, codepatient, patient_ui
         if (typeof valueNew !== "undefined") { //DE has value in current dump
             //compare values
             if (valueDHIS == valueNew) {
-                //logger.info(`DE_INFO; DE ${DE} won't be updated for patient ${codepatient} (uid: ${patient_uid}) in DHIS2 server; It has the same value as the previous dump`)
+                //logger.info(`DE_INFO; DE ${DE} won't be updated for patient ${codepatient} (${patient_uid}); It has the same value as the previous dump`)
             } else {
                 changed = true;
-                logger.info(`DE_UPDATE; DE ${DE} will be updated for patient ${codepatient} (uid: ${patient_uid}) in DHIS2 server; Previous value: ${valueDHIS} , New value: ${valueNew}`)
+                logger.info(`DE_UPDATE; DE ${DE} will be updated for patient ${codepatient} (${patient_uid}). Previous value: ${valueDHIS} , New value: ${valueNew}`)
                 var dict = {};
                 dict.action = UPDATE;
                 dict.type = DE_TYPE;
@@ -1052,7 +1053,7 @@ function checkDataValueDifference(previousEvent_uid, DE, codepatient, patient_ui
             }
         } else { //DE without value in current dump
             changed = true;
-            logger.info(`DE_UPDATE; DE ${DE} will be updated for patient ${codepatient} (uid: ${patient_uid}) in DHIS2 server; Previous value: ${valueDHIS} , New value: NO VALUE`)
+            logger.info(`DE_UPDATE; DE ${DE} will be updated for patient ${codepatient} (${patient_uid}). Previous value: ${valueDHIS} , New value: NO VALUE`)
             var dict = {};
             dict.action = UPDATE;
             dict.type = DE_TYPE;
@@ -1066,7 +1067,7 @@ function checkDataValueDifference(previousEvent_uid, DE, codepatient, patient_ui
     } else { //DE without value in previous dump
         if (typeof valueNew !== "undefined") { //DE has value in current dump
             changed = true;
-            logger.info(`DE_UPDATE; DE ${DE} will be updated for patient ${codepatient} (uid: ${patient_uid}) in DHIS2 server; Previous value: NO VALUE , New value: ${valueNew}`)
+            logger.info(`DE_UPDATE; DE ${DE} will be updated for patient ${codepatient} (${patient_uid}). Previous value: NO VALUE , New value: ${valueNew}`)
             var dict = {};
             dict.action = UPDATE;
             dict.type = DE_TYPE;
