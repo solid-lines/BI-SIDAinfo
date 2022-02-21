@@ -609,11 +609,10 @@ function checkEnrollmentDifference(dhisTEI_file, newTEI_file, enrollment_date, c
     * PROGRAM STAGES
     */
     programStages.forEach((stage) => {
-        if (changed) {
-            checkStageEvents(programLabel, codepatient, stage, previous_enrollment_key, current_enrollment_key, enrollment_uid_previous, enrollment_uid_current, previous_all_patient_index, current_all_patient_index);
-        } else {
-            changed = checkStageEvents(programLabel, codepatient, stage, previous_enrollment_key, current_enrollment_key, enrollment_uid_previous, enrollment_uid_current, previous_all_patient_index, current_all_patient_index);
 
+        const checkStageEventsFlag = checkStageEvents(programLabel, codepatient, stage, previous_enrollment_key, current_enrollment_key, enrollment_uid_previous, enrollment_uid_current, previous_all_patient_index, current_all_patient_index);
+        if (checkStageEventsFlag) {
+            changed = true
         }
     })
 
