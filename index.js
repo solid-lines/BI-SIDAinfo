@@ -73,7 +73,7 @@ const CREATE = "CREATE";
 
 //Resource Types
 const TEI_TYPE = "TEI";
-const ENROLLMENT_TYPE = "Enrollment";
+const ENROLLMENT_TYPE = "ENROLLMENT";
 const TEA_TYPE = "TEA";
 const EVENT_TYPE = "EVENT";
 const DE_TYPE = "DE";
@@ -455,6 +455,8 @@ function checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, progra
 
     var programIndex = programs.indexOf(program);
     var programLabel = program_labels[programIndex];
+    const final_program_label = programLabel.replace("_enrollment", "")
+    const final_program_uid = PROGRAMS_MAPPING[final_program_label]
 
     if (programLabel in previous_all_patient_index[codepatient]) { // Enrollment in the previous data dump
         if (programLabel in current_all_patient_index[codepatient]) { // There is/are enrollment/s about this particular program in both dump files
@@ -476,9 +478,10 @@ function checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, progra
                 dict.action = DELETE;
                 dict.type = ENROLLMENT_TYPE;
                 dict.uid = enrollment_uid
-                dict.TEI = tei_uid
-                dict.program = PROGRAMS_MAPPING[program];
                 dict.enrollmentDate = enrollment_date;
+                dict.TEI = tei_uid
+                dict.program = final_program_uid;
+                dict.programLabel = final_program_label;
                 listOfActions.push(dict);
             });
 
@@ -492,9 +495,10 @@ function checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, progra
                 dict.action = CREATE;
                 dict.type = ENROLLMENT_TYPE;
                 dict.uid = enrollment_uid;
-                dict.TEI = tei_uid;
-                dict.program = PROGRAMS_MAPPING[program];
                 dict.enrollmentDate = enrollment_date;
+                dict.TEI = tei_uid;
+                dict.program = final_program_uid;
+                dict.programLabel = final_program_label;
                 dict.status = getEnrollmentStatus(newTEI_file.enrollments, enrollment_uid);
                 listOfActions.push(dict);
             });
@@ -523,9 +527,10 @@ function checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, progra
                 dict.action = DELETE;
                 dict.type = ENROLLMENT_TYPE;
                 dict.uid = enrollment_uid
-                dict.TEI = previous_all_patient_index[codepatient].uid;
-                dict.program = PROGRAMS_MAPPING[program];
                 dict.enrollmentDate = enrollment_date;
+                dict.TEI = previous_all_patient_index[codepatient].uid;
+                dict.program = final_program_uid;
+                dict.programLabel = final_program_label;
                 listOfActions.push(dict);
             }
         }
@@ -543,7 +548,8 @@ function checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, progra
                 dict.uid = enrollment_uid; //Para identificar los eventos que hay que crear asociados a cada enrollment
                 dict.enrollmentDate = enrollment_date;
                 dict.TEI = tei_uid;
-                dict.program = PROGRAMS_MAPPING[program]; // program uid
+                dict.program = final_program_uid;
+                dict.programLabel = final_program_label;
                 dict.status = getEnrollmentStatus(newTEI_file.enrollments, enrollment_uid);
 
                 listOfActions.push(dict);
@@ -578,8 +584,11 @@ function getEventData(enrollmentData, enrollmentUID, eventDate) {
  */
 function checkEnrollmentDifference(dhisTEI_file, newTEI_file, enrollment_date, codepatient, programLabel, previous_all_patient_index, current_all_patient_index) {
 
-    enrollment_uid = previous_all_patient_index[codepatient][programLabel][enrollment_date]
-    tei_uid = previous_all_patient_index[codepatient].uid
+    const enrollment_uid = previous_all_patient_index[codepatient][programLabel][enrollment_date]
+    const tei_uid = previous_all_patient_index[codepatient].uid
+
+    const final_program_label = programLabel.replace("_enrollment", "")
+    const final_program_uid = PROGRAMS_MAPPING[final_program_label]
 
     //logger.info(`REVIEW enrollment ${programLabel}. Enrollment ${enrollment_uid} (${enrollment_date}) Patient ${codepatient} (${tei_uid}).`);
 
@@ -597,12 +606,10 @@ function checkEnrollmentDifference(dhisTEI_file, newTEI_file, enrollment_date, c
         //Build Enrollment Keys (eg. "PTME_ENFANT-scWpqiXLR5u")
         previous_enrollment_key = PROGRAM_PTME_ENFANT + "-" + enrollment_uid_previous;
         current_enrollment_key = PROGRAM_PTME_ENFANT + "-" + enrollment_uid_current;
-
     } else if (programLabel == PROGRAM_PTME_MERE_LABEL_ENROLLMENT) {
         programStages = MERE_programStages;
         previous_enrollment_key = PROGRAM_PTME_MERE + "-" + enrollment_uid_previous;
         current_enrollment_key = PROGRAM_PTME_MERE + "-" + enrollment_uid_current;
-
     } else if (programLabel == PROGRAM_TARV_LABEL_ENROLLMENT) {
         programStages = TARV_programStages;
         previous_enrollment_key = PROGRAM_TARV + "-" + enrollment_uid_previous;
@@ -642,7 +649,8 @@ function checkEnrollmentDifference(dhisTEI_file, newTEI_file, enrollment_date, c
         dict.type = ENROLLMENT_TYPE;
         dict.uid = previous_all_patient_index[codepatient][programLabel][enrollment_date]; //Enrollment_uid
         dict.TEI = previous_all_patient_index[codepatient].uid;
-        dict.program = PROGRAMS_MAPPING[programLabel];
+        dict.program = final_program_uid;
+        dict.programLabel = final_program_label;
         dict.previousValue = status_previous;
         dict.currentValue = status_current;
         listOfActions.push(dict);
@@ -677,6 +685,9 @@ function checkStageEvents(programLabel, codepatient, stage, previous_enrollment_
     var changed_new = false;
     var changed_missing = false;
     var changed_common = false;
+    const final_program_label = programLabel.replace("_enrollment", "")
+    const final_program_uid = PROGRAMS_MAPPING[final_program_label]
+
 
     const previous_all_enrollment_events_index = previous_all_patient_index[codepatient][previous_enrollment_key]; // diccionario con los stages y cada stage tiene una lista de eventos
     const current_all_enrollment_events_index = current_all_patient_index[codepatient][current_enrollment_key];
@@ -707,7 +718,9 @@ function checkStageEvents(programLabel, codepatient, stage, previous_enrollment_
                         dict.resource = previous_all_enrollment_events_index[stage][event_date]; //Event UID
                         dict.TEI = previous_all_patient_index[codepatient].uid;
                         dict.enrollment = enrollment_uid_previous;
-                        dict.stage = stage;
+                        dict.program = final_program_uid;
+                        dict.programLabel = final_program_label;
+                        dict.programStage = stage;
                         listOfActions.push(dict);
                     });
 
@@ -721,7 +734,9 @@ function checkStageEvents(programLabel, codepatient, stage, previous_enrollment_
                         dict.resource = event_date; //Event UID
                         dict.TEI = previous_all_patient_index[codepatient].uid;
                         dict.enrollment = enrollment_uid_previous;
-                        dict.stage = stage;
+                        dict.program = final_program_uid;
+                        dict.programLabel = final_program_label;
+                        dict.programStage = stage;
                         //TODO: dict.eventData = ;
                         listOfActions.push(dict);
                     });
@@ -756,7 +771,7 @@ function checkStageEvents(programLabel, codepatient, stage, previous_enrollment_
                                 dict.type = EVENT_TYPE;
                                 dict.TEI = previous_patient_code_uid[codepatient].uid;
                                 dict.enrollment = enrollment_uid_previous;
-                                dict.stage = stage;
+                                dict.programStage = stage;
                                 //TODO: dict.eventData = ;
                                 listOfActions.push(dict);
                             }*/
@@ -783,7 +798,9 @@ function checkStageEvents(programLabel, codepatient, stage, previous_enrollment_
                             dict.eventDate = event_date;
                             dict.TEI = patient_uid;
                             dict.enrollment = enrollment_uid_previous;
-                            dict.stage = stage;
+                            dict.program = final_program_uid;
+                            dict.programLabel = final_program_label;
+                            dict.programStage = stage;
                             listOfActions.push(dict);
                             logger.info(`Event_DELETION; Program Stage ${[stage]}. Event (${event_uid}) on ${event_date} will be deleted for patient ${codepatient} (${patient_uid}) in previous dump but not present in current data dump`);
                         });
@@ -802,7 +819,9 @@ function checkStageEvents(programLabel, codepatient, stage, previous_enrollment_
                         dict.uid = event_uid;
                         dict.TEI = patient_uid;
                         dict.enrollment = enrollment_uid_previous;
-                        dict.stage = stage;
+                        dict.program = final_program_uid;
+                        dict.programLabel = final_program_label;
+                        dict.programStage = stage;
                         listOfActions.push(dict);
                         logger.info(`Event_CREATION; Program Stage ${[stage]}. Event (${event_uid}) on ${event_date} will be created for patient ${codepatient} (${patient_uid}). Not present in previous data dump`);
                     })
@@ -829,7 +848,9 @@ function checkStageEvents(programLabel, codepatient, stage, previous_enrollment_
                 dict.eventDate = event_date;
                 dict.TEI = patient_uid;
                 dict.enrollment = enrollment_uid_previous;
-                dict.stage = stage;
+                dict.program = final_program_uid;
+                dict.programLabel = final_program_label;
+                dict.programStage = stage;
                 listOfActions.push(dict);
                 logger.info(`Event_DELETION; Program Stage ${[stage]}. Event (${event_uid}) on ${event_date} will be created for patient ${codepatient} (${patient_uid}). Not present in current data dump`);
             });
@@ -853,7 +874,9 @@ function checkStageEvents(programLabel, codepatient, stage, previous_enrollment_
                     dict.eventDate = event_date;
                     dict.TEI = patient_uid;
                     dict.enrollment = enrollment_uid_previous;
-                    dict.stage = stage;
+                    dict.programStage = stage;
+                    dict.program = final_program_uid;
+                    dict.programLabel = final_program_label;
                     listOfActions.push(dict);
                     logger.info(`Event_CREATION; Program Stage ${[stage]}. Event (${event_uid}) on ${event_date} will be created for patient ${codepatient} (${patient_uid}). Not present in previous data dump`);
                 });
@@ -937,7 +960,7 @@ function checkDataValuesExistence(enrollment_uid_previous, codepatient, patient_
                 dict.resource = DE; //DE UID
                 dict.TEI = previous_all_patient_index[codepatient].uid;
                 dict.enrollment = enrollment_uid_previous;
-                dict.stage = stage;
+                dict.programStage = stage;
                 dict.event = previousEvent_uid;
                 listOfActions.push(dict);
             });
@@ -952,7 +975,7 @@ function checkDataValuesExistence(enrollment_uid_previous, codepatient, patient_
                 dict.resource = DE; //DE UID
                 dict.TEI = previous_all_patient_index[codepatient].uid;
                 dict.enrollment = enrollment_uid_previous;
-                dict.stage = stage;
+                dict.programStage = stage;
                 dict.event = previousEvent_uid;
                 dict.dataValue = new_dataValues[newDEs_uids.indexOf(DE)].value;
                 listOfActions.push(dict);
@@ -978,7 +1001,7 @@ function checkDataValuesExistence(enrollment_uid_previous, codepatient, patient_
                 dict.resource = DE.dataElement; //DE UID
                 dict.TEI = previous_all_patient_index[codepatient].uid;
                 dict.enrollment = enrollment_uid_previous;
-                dict.stage = stage;
+                dict.programStage = stage;
                 dict.event = previousEvent_uid;
                 listOfActions.push(dict);
             });
@@ -999,7 +1022,7 @@ function checkDataValuesExistence(enrollment_uid_previous, codepatient, patient_
                 dict.resource = DE.dataElement; //DE UID
                 dict.TEI = previous_all_patient_index[codepatient].uid;
                 dict.enrollment = enrollment_uid_previous;
-                dict.stage = stage;
+                dict.programStage = stage;
                 dict.event = previousEvent_uid;
                 dict.dataValue = new_dataValues[newDEs_uids.indexOf(DE.dataElement)].value;
                 listOfActions.push(dict);
