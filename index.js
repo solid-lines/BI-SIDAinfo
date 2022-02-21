@@ -314,7 +314,7 @@ function checkTEIDifference(codepatient) {
         /**
          * ENROLLMENTS
          */
-        programs.forEach((program) => {
+        programs.forEach((program) => { // iterate over programs
             if (checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, program, previous_patient_code_uid, current_patient_code_uid)){
                 changed_enroll = true;
             }
@@ -502,15 +502,12 @@ function checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, progra
 
             //Some enrollments are present in both dumps
             commonEnrollments.forEach((enrollment_date) => {
-                //logger.info(`Enrollment_REVIEW; Enrollment ${previous_patient_code_uid[codepatient][program][enrollment_date]} (${program})
+                logger.info(`Enrollment_REVIEW; TEI ${current_patient_code_uid[codepatient].uid} Program: ${program} Enrollment date (${enrollment_date})`)
                 //will be reviewed for patient ${codepatient}  (uid: ${previous_patient_code_uid[codepatient].uid}) in DHIS2 server;
                 //Present in previous data dump`);
-
-                if (changed_enroll_common) {
-                    checkEnrollmentDifference(dhisTEI_file, newTEI_file, enrollment_date, codepatient, programLabel, previous_patient_code_uid, current_patient_code_uid);
-                } else {
-                    changed_enroll_common = checkEnrollmentDifference(dhisTEI_file, newTEI_file, enrollment_date, codepatient, programLabel, previous_patient_code_uid, current_patient_code_uid);
-
+                const checkEnrollmentDifferenceV = checkEnrollmentDifference(dhisTEI_file, newTEI_file, enrollment_date, codepatient, programLabel, previous_patient_code_uid, current_patient_code_uid);
+                if (checkEnrollmentDifferenceV) {
+                    changed_enroll_common = true
                 }
 
             });
@@ -574,10 +571,15 @@ function getEventData(enrollmentData, enrollmentUID, eventDate) {
     return event;
 }
 
-
+/**
+ * Check Enrollment status difference
+ * Check Events related to this enrollment difference
+ */
 function checkEnrollmentDifference(dhisTEI_file, newTEI_file, enrollment_date, codepatient, programLabel, previous_patient_code_uid, current_patient_code_uid) {
 
     var changed = false;
+
+    
     //Check enrollment events existence for each programStage
     var programStages = [];
     var dhis_enrollment_key = "";
@@ -614,7 +616,6 @@ function checkEnrollmentDifference(dhisTEI_file, newTEI_file, enrollment_date, c
 
         }
     })
-
 
     /**
      * ENROLLMENT STATUS
