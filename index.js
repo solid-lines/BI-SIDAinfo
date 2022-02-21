@@ -473,7 +473,7 @@ function checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, progra
                 changed_enroll_missing = true;
                 enrollment_uid = previous_all_patient_index[codepatient][programLabel][enrollment_date]; //Enrollment_uid
                 tei_uid = previous_all_patient_index[codepatient].uid;
-                logger.info(`Enrollment_DELETION; Program:${program} Enrollment:(${enrollment_uid}) (${enrollment_date}) will be deleted from patient ${codepatient} (${tei_uid}). Not present in new data dump`);
+                logger.info(`Enrollment_DELETION; Program: ${final_program_label} (${final_program_uid}). Enrollment: ${enrollment_date} (${enrollment_uid}) will be deleted from patient ${codepatient} (${tei_uid}). Not present in new data dump`);
                 var dict = {};
                 dict.action = DELETE;
                 dict.type = ENROLLMENT_TYPE;
@@ -490,7 +490,7 @@ function checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, progra
                 changed_enroll_new = true;
                 enrollment_uid = current_all_patient_index[codepatient][programLabel][enrollment_date]
                 tei_uid = previous_all_patient_index[codepatient].uid
-                logger.info(`Enrollment_CREATION; Program: ${program}. Enrollment: ${enrollment_uid} (${enrollment_date}) will be created from patient ${codepatient} (${tei_uid}). Not present in previous data dump`);
+                logger.info(`Enrollment_CREATION; Program: ${final_program_label} (${final_program_uid}). Enrollment: ${enrollment_date} (${enrollment_uid}) will be created from patient ${codepatient} (${tei_uid}). Not present in previous data dump`);
                 var dict = {};
                 dict.action = CREATE;
                 dict.type = ENROLLMENT_TYPE;
@@ -522,7 +522,7 @@ function checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, progra
             // could be one or more enrollments
             const previous_enrollments = previous_all_patient_index[codepatient][programLabel]
             for (const [enrollment_date, enrollment_uid] of Object.entries(previous_enrollments)) {
-                logger.info(`Enrollment_DELETION; Program: ${program}. Enrollment: ${enrollment_uid} (${enrollment_date}) will be deleted from patient ${codepatient} (${previous_all_patient_index[codepatient].uid}). Not present in new data dump`);
+                logger.info(`Enrollment_DELETION; Program: ${final_program_label} (${final_program_uid}). Enrollment: ${enrollment_date} (${enrollment_uid}) will be deleted from patient ${codepatient} (${previous_all_patient_index[codepatient].uid}). Not present in new data dump`);
                 var dict = {};
                 dict.action = DELETE;
                 dict.type = ENROLLMENT_TYPE;
@@ -541,7 +541,7 @@ function checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, progra
             const new_enrollments = current_all_patient_index[codepatient][programLabel]
             for (const [enrollment_date, enrollment_uid] of Object.entries(new_enrollments)) {
                 tei_uid = previous_all_patient_index[codepatient].uid;
-                logger.info(`Enrollment_CREATION; Program: ${program}. Enrollment: ${enrollment_uid} (${enrollment_date}) will be created from patient ${codepatient} (${tei_uid}). Not present in previous data dump`);
+                logger.info(`Enrollment_CREATION; Program: ${final_program_label} (${final_program_uid}). Enrollment: ${enrollment_date} (${enrollment_uid}) will be created from patient ${codepatient} (${tei_uid}). Not present in previous data dump`);
                 var dict = {};
                 dict.action = CREATE;
                 dict.type = ENROLLMENT_TYPE;
@@ -642,18 +642,18 @@ function checkEnrollmentDifference(dhisTEI_file, newTEI_file, enrollment_date, c
 
     if (status_current.toUpperCase() != status_previous.toUpperCase()) {
         changed = true;
-        // TODO update this log
-        logger.info(`Enrollment_UPDATE; Enrollment status will be updated for patient ${codepatient} (enrollment ${enrollment_uid_previous}). Previous value: ${status_previous}, New value: ${status_current}`)
         var dict = {};
         dict.action = UPDATE;
         dict.type = ENROLLMENT_TYPE;
-        dict.uid = previous_all_patient_index[codepatient][programLabel][enrollment_date]; //Enrollment_uid
-        dict.TEI = previous_all_patient_index[codepatient].uid;
+        dict.uid = enrollment_uid;
+        dict.enrollmentDate = enrollment_date;
+        dict.TEI = tei_uid;
         dict.program = final_program_uid;
         dict.programLabel = final_program_label;
         dict.previousValue = status_previous;
         dict.currentValue = status_current;
         listOfActions.push(dict);
+        logger.info(`Enrollment_UPDATE; Program: ${final_program_label} (${final_program_uid}). Enrollment: ${enrollment_date} (${enrollment_uid}) STATUS will be updated from patient ${codepatient} (${tei_uid}). Previous value: ${status_previous}, New value: ${status_current}`)
     }
 
     return changed;
@@ -711,7 +711,7 @@ function checkStageEvents(programLabel, codepatient, stage, previous_enrollment_
                     //Some events for that stage are missing in the current dump
                     missingEvents.forEach((event_date) => {
                         changed_missing = true;
-                        logger.info(`Event_DELETION; ${stage} event (${previous_all_enrollment_events_index[stage][event_date]}) on ${event_date} will be deleted from patient ${codepatient} (${previous_all_patient_index[codepatient].uid}). Not present in new data dump`);
+                        logger.info(`Event_DELETION; Program: ${final_program_label} (${final_program_uid}). ProgramState: ${stage}. Event (${previous_all_enrollment_events_index[stage][event_date]}) on ${event_date} will be deleted from patient ${codepatient} (${previous_all_patient_index[codepatient].uid}). Not present in new data dump`);
                         var dict = {};
                         dict.action = DELETE;
                         dict.type = EVENT_TYPE;
@@ -727,7 +727,7 @@ function checkStageEvents(programLabel, codepatient, stage, previous_enrollment_
                     //There are new events for that stage in the current dump
                     newEvents.forEach((event_date) => {
                         changed_new = true;
-                        logger.info(`Event_CREATION; ${[stage]} event on ${event_date} will be created for patient ${codepatient} (${previous_all_patient_index[codepatient].uid}). Not present in previous data dump`);
+                        logger.info(`Event_CREATION; Program: ${final_program_label} (${final_program_uid}). ProgramStage: ${[stage]}. Event on ${event_date} will be created for patient ${codepatient} (${previous_all_patient_index[codepatient].uid}). Not present in previous data dump`);
                         var dict = {};
                         dict.action = CREATE;
                         dict.type = EVENT_TYPE;
@@ -802,7 +802,7 @@ function checkStageEvents(programLabel, codepatient, stage, previous_enrollment_
                             dict.programLabel = final_program_label;
                             dict.programStage = stage;
                             listOfActions.push(dict);
-                            logger.info(`Event_DELETION; Program Stage ${[stage]}. Event (${event_uid}) on ${event_date} will be deleted for patient ${codepatient} (${patient_uid}) in previous dump but not present in current data dump`);
+                            logger.info(`Event_DELETION; Program: ${final_program_label} (${final_program_uid}). Program Stage ${[stage]}. Event (${event_uid}) on ${event_date} will be deleted for patient ${codepatient} (${patient_uid}) in previous dump but not present in current data dump`);
                         });
                     }
                 }
@@ -823,7 +823,7 @@ function checkStageEvents(programLabel, codepatient, stage, previous_enrollment_
                         dict.programLabel = final_program_label;
                         dict.programStage = stage;
                         listOfActions.push(dict);
-                        logger.info(`Event_CREATION; Program Stage ${[stage]}. Event (${event_uid}) on ${event_date} will be created for patient ${codepatient} (${patient_uid}). Not present in previous data dump`);
+                        logger.info(`Event_CREATION; Program: ${final_program_label} (${final_program_uid}). Program Stage ${[stage]}. Event (${event_uid}) on ${event_date} will be created for patient ${codepatient} (${patient_uid}). Not present in previous data dump`);
                     })
 
                 } else {
@@ -832,9 +832,8 @@ function checkStageEvents(programLabel, codepatient, stage, previous_enrollment_
             }
         } else { // No events associated to that enrollment in the current file
 
-            // TODO iterate over the events
             var previousEvents_dates = Object.keys(previous_all_enrollment_events_index[stage]);
-            logger.info(`*****************All_Events_ProgramStage_DELETION; ${previous_enrollment_key} ${[stage]}`);
+            logger.info(`All_Events_ProgramStage_DELETION; ${previous_enrollment_key} ${[stage]}`);
 
             //There are new events for that stage in the current dump
             previousEvents_dates.forEach((event_date) => {
@@ -852,7 +851,7 @@ function checkStageEvents(programLabel, codepatient, stage, previous_enrollment_
                 dict.programLabel = final_program_label;
                 dict.programStage = stage;
                 listOfActions.push(dict);
-                logger.info(`Event_DELETION; Program Stage ${[stage]}. Event (${event_uid}) on ${event_date} will be created for patient ${codepatient} (${patient_uid}). Not present in current data dump`);
+                logger.info(`Event_DELETION; Program: ${final_program_label} (${final_program_uid}). Program Stage ${[stage]}. Event (${event_uid}) on ${event_date} will be created for patient ${codepatient} (${patient_uid}). Not present in current data dump`);
             });
         }
     } else { // No events associated to that enrollment in the previous file, for any of the program stages
@@ -878,7 +877,7 @@ function checkStageEvents(programLabel, codepatient, stage, previous_enrollment_
                     dict.program = final_program_uid;
                     dict.programLabel = final_program_label;
                     listOfActions.push(dict);
-                    logger.info(`Event_CREATION; Program Stage ${[stage]}. Event (${event_uid}) on ${event_date} will be created for patient ${codepatient} (${patient_uid}). Not present in previous data dump`);
+                    logger.info(`Event_CREATION; Program: ${final_program_label} (${final_program_uid}). Program Stage ${[stage]}. Event (${event_uid}) on ${event_date} will be created for patient ${codepatient} (${patient_uid}). Not present in previous data dump`);
                 });
             } else {
                 // No events in the current patient index for that stage
