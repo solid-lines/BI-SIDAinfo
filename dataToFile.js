@@ -83,7 +83,7 @@ function formatData(source_id) {
     const ENFANT_FILE = DHIS2data_folder + "/enfant.json";
     const MERE_FILE = DHIS2data_folder + "/mere.json";
     const TARV_FILE = DHIS2data_folder + "/tarv.json";
-    const PATIENT_CODE_UID = DHIS2data_folder + "/patient_code_uid.json";
+    const PATIENT_CODE_UID = DHIS2data_folder + "/previous_all_patient_index.json";
     const TEIS_FILE = DHIS2data_folder + "/teis.json";
 
     //DHIS2 retrieved data
