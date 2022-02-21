@@ -572,6 +572,7 @@ function getEventData(enrollmentData, enrollmentUID, eventDate) {
 }
 
 /**
+ * For a particular program and particular enrollmentDate
  * Check Enrollment status difference
  * Check Events related to this enrollment difference
  */
@@ -579,10 +580,9 @@ function checkEnrollmentDifference(dhisTEI_file, newTEI_file, enrollment_date, c
 
     var changed = false;
 
-    
     //Check enrollment events existence for each programStage
     var programStages = [];
-    var dhis_enrollment_key = "";
+    var previous_enrollment_key = "";
     var current_enrollment_key = "";
     var enrollment_uid_previous = previous_all_patient_index[codepatient][programLabel][enrollment_date];
     var enrollment_uid_current = current_all_patient_index[codepatient][programLabel][enrollment_date];
@@ -590,17 +590,17 @@ function checkEnrollmentDifference(dhisTEI_file, newTEI_file, enrollment_date, c
         //Assign corresponding programStages
         programStages = ENFANT_programStages;
         //Build Enrollment Keys (eg. "PTME_ENFANT-scWpqiXLR5u")
-        dhis_enrollment_key = PROGRAM_PTME_ENFANT + "-" + enrollment_uid_previous;
+        previous_enrollment_key = PROGRAM_PTME_ENFANT + "-" + enrollment_uid_previous;
         current_enrollment_key = PROGRAM_PTME_ENFANT + "-" + enrollment_uid_current;
 
     } else if (programLabel == PROGRAM_PTME_MERE_LABEL_ENROLLMENT) {
         programStages = MERE_programStages;
-        dhis_enrollment_key = PROGRAM_PTME_MERE + "-" + enrollment_uid_previous;
+        previous_enrollment_key = PROGRAM_PTME_MERE + "-" + enrollment_uid_previous;
         current_enrollment_key = PROGRAM_PTME_MERE + "-" + enrollment_uid_current;
 
     } else if (programLabel == PROGRAM_TARV_LABEL_ENROLLMENT) {
         programStages = TARV_programStages;
-        dhis_enrollment_key = PROGRAM_TARV + "-" + enrollment_uid_previous;
+        previous_enrollment_key = PROGRAM_TARV + "-" + enrollment_uid_previous;
         current_enrollment_key = PROGRAM_TARV + "-" + enrollment_uid_current;
     }
 
@@ -610,9 +610,9 @@ function checkEnrollmentDifference(dhisTEI_file, newTEI_file, enrollment_date, c
     */
     programStages.forEach((stage) => {
         if (changed) {
-            checkStageEvents(programLabel, codepatient, stage, dhis_enrollment_key, current_enrollment_key, enrollment_uid_previous, enrollment_uid_current, previous_all_patient_index, current_all_patient_index);
+            checkStageEvents(programLabel, codepatient, stage, previous_enrollment_key, current_enrollment_key, enrollment_uid_previous, enrollment_uid_current, previous_all_patient_index, current_all_patient_index);
         } else {
-            changed = checkStageEvents(programLabel, codepatient, stage, dhis_enrollment_key, current_enrollment_key, enrollment_uid_previous, enrollment_uid_current, previous_all_patient_index, current_all_patient_index);
+            changed = checkStageEvents(programLabel, codepatient, stage, previous_enrollment_key, current_enrollment_key, enrollment_uid_previous, enrollment_uid_current, previous_all_patient_index, current_all_patient_index);
 
         }
     })
