@@ -1015,10 +1015,10 @@ function checkDataValuesExistence(enrollment_uid, codepatient, patient_uid, even
                 logger.info(`DE_CREATE; Patient ${codepatient} (${patient_uid}). Program: ${program_label} (${program_uid}). Program Stage ${[stage]}. Event (${event_uid}) ${event_date}. DataElement (${de_uid}) with value ${de_value} will be created. Not present in previous data dump`);
             });
 
-            // TODO update this code
+            // TODO update this source code
             //Some events for that stage are present in both dumps
             commonDEs.forEach((DE) => {
-                const changed_commonV = changed_common = checkDataValueDifference(event_uid, DE, codepatient, patient_uid, previous_dataValues[dhisDEs_uids.indexOf(DE)], current_dataValues[newDEs_uids.indexOf(DE)]);
+                const changed_commonV = checkDataValueDifference(event_uid, event_date, DE, codepatient, patient_uid, previous_dataValues[dhisDEs_uids.indexOf(DE)], current_dataValues[newDEs_uids.indexOf(DE)], enrollment_uid, program_uid, program_label, stage);
                 if (changed_commonV) {
                     changed_common = true
                 }
@@ -1085,70 +1085,48 @@ function checkDataValuesExistence(enrollment_uid, codepatient, patient_uid, even
 /**
  * Given a DE check the differences with the new data
  * Logs the changes (remain the same or will be updated in the server)
- * @param {*} DE 
+ * @param {*} de_uid 
  * @param {*} codepatient 
- * @param {*} dhisDE dataValue object : {dataElement: 'a3WwFDKNfQH', value: '2'}
- * @param {*} newDE
+ * @param {*} previous_dv dataValue object : {dataElement: 'a3WwFDKNfQH', value: '2'}
+ * @param {*} current_dv
  */
-function checkDataValueDifference(previousEvent_uid, DE, codepatient, patient_uid, dhisDE, newDE) {
+function checkDataValueDifference(event_uid, event_date, de_uid, codepatient, patient_uid, previous_dv, current_dv, enrollment_uid, program_uid, program_label, programStage) {
 
     var changed = false;
 
     //Has same value then log and do nothing
     //Has different value then UPDATE
-    var valueDHIS = dhisDE.value;
-    var valueNew = newDE.value;
-    if(valueNew === true) {
-        valueNew = "true";
+    var previous_value = previous_dv.value;
+    var current_value = current_dv.value;
+
+    if (typeof previous_value === "undefined" || typeof current_value === "undefined") {
+        logger.error(`Review the script code. Debug event (${event_uid}). Previous DE ${JSON.stringify(previous_dv)}. Current DE ${JSON.stringify(current_dv)}]`)
     }
 
-    if (typeof valueDHIS !== "undefined") { //DE has value in previous dump
-        if (typeof valueNew !== "undefined") { //DE has value in current dump
-            //compare values
-            if (valueDHIS == valueNew) {
-                //logger.info(`DE_INFO; DE ${DE} won't be updated for patient ${codepatient} (${patient_uid}); It has the same value as the previous dump`)
-            } else {
-                changed = true;
-                logger.info(`DE_UPDATE; DE ${DE} will be updated for patient ${codepatient} (${patient_uid}). Previous value: ${valueDHIS} , New value: ${valueNew}`)
-                var dict = {};
-                dict.action = UPDATE;
-                dict.type = DE_TYPE;
-                dict.resource = DE; //DE UID
-                dict.TEI = previous_all_patient_index[codepatient].uid;
-                dict.event = previousEvent_uid;
-                dict.previousValue = valueDHIS;
-                dict.currentValue = valueNew;
-                listOfActions.push(dict);
-            }
-        } else { //DE without value in current dump
-            changed = true;
-            logger.info(`DE_UPDATE; DE ${DE} will be updated for patient ${codepatient} (${patient_uid}). Previous value: ${valueDHIS} , New value: NO VALUE`)
-            var dict = {};
-            dict.action = UPDATE;
-            dict.type = DE_TYPE;
-            dict.resource = DE; //DE UID
-            dict.TEI = previous_all_patient_index[codepatient].uid;
-            dict.event = previousEvent_uid;
-            dict.previousValue = valueDHIS;
-            dict.currentValue = "";
-            listOfActions.push(dict);
-        }
-    } else { //DE without value in previous dump
-        if (typeof valueNew !== "undefined") { //DE has value in current dump
-            changed = true;
-            logger.info(`DE_UPDATE; DE ${DE} will be updated for patient ${codepatient} (${patient_uid}). Previous value: NO VALUE , New value: ${valueNew}`)
-            var dict = {};
-            dict.action = UPDATE;
-            dict.type = DE_TYPE;
-            dict.resource = DE; //DE UID
-            dict.TEI = previous_all_patient_index[codepatient].uid;
-            dict.event = previousEvent_uid;
-            dict.previousValue = "";
-            dict.currentValue = valueNew;
-            listOfActions.push(dict);
-        } else { //DE without value in current dump
-            //keep the same, do nothing
-        }
+    // TODO review this change
+    if (current_value === true) {
+        current_value = "true";
+    }
+
+    if (previous_value !== current_value) {
+        changed = true;
+        var dict = {};
+        dict.action = UPDATE;
+        dict.type = DE_TYPE;
+        dict.event = event_uid;
+        dict.eventDate = event_date;
+        dict.dataElement = de_uid;
+        dict.previousDataElementValue = previous_value;
+        dict.currentDataElementValue = current_value;
+        dict.TEI = patient_uid;
+        dict.enrollment = enrollment_uid;
+        dict.program = program_uid;
+        dict.programLabel = program_label;
+        dict.programStage = programStage;
+        listOfActions.push(dict);
+        logger.info(`DE_UPDATE; Patient ${codepatient} (${patient_uid}). Program: ${program_label} (${program_uid}). Program Stage ${programStage}. Event (${event_uid}) ${event_date}. DataElement (${de_uid}) will be updated. Previous value ${previous_value}, Current value ${current_value} `);
+    } else {
+        //logger.info(`DE_INFO; DE ${DE} won't be updated for patient ${codepatient} (${patient_uid}); It has the same value as the previous dump`)
     }
 
     return changed;
