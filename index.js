@@ -778,7 +778,7 @@ function checkStageEvents(programLabel, codepatient, stage, previous_enrollment_
                         var previous_dataValues = getDataValues(previousTEI_file, enrollment_uid_previous, previousEvent_uid);
                         var current_dataValues = getDataValues(currentEI_file, enrollment_uid_current, currentEvent_uid);
 
-                        const checkDataValuesExistenceV = checkDataValuesExistence(enrollment_uid_previous, codepatient, patient_uid, event_date, stage, previous_dataValues, current_dataValues, previousEvent_uid, final_program_uid, final_program_label);
+                        const checkDataValuesExistenceV = checkDataValuesExistence(enrollment_uid_previous, codepatient, patient_uid, event_date, stage, previous_dataValues, current_dataValues, event_uid, final_program_uid, final_program_label);
 
                         if (checkDataValuesExistenceV) {
                             changed_common = true
@@ -932,6 +932,17 @@ function getDataValues(TEI_file, enrollment_uid, event_uid) {
     return event.dataValues;
 }
 
+function getValueByDE(dataValues, de_uid){
+    let r_value;
+    dataValues.forEach(dv => {
+        if (dv['dataElement'] == de_uid) {
+            r_value = dv['value']; // TODO se comporta como un continue
+        }
+    });
+
+    return r_value;
+}
+
 /**
  * Given an event check the differences with its datavalues with the new data
  * Logs the changes (remain the same or will be updated in the server)
@@ -944,8 +955,8 @@ function checkDataValuesExistence(enrollment_uid, codepatient, patient_uid, even
     //For each event
     //Check DE existence
     // A DE can only be once in a event
-    if (typeof previous_dataValues !== "undefined") { //Event had dataValues in previous dump
-        if (typeof current_dataValues !== "undefined") { //Event has dataValues in new dump
+    if (typeof previous_dataValues !== "undefined" && previous_dataValues.length !== 0) { //Event had dataValues in previous dump
+        if (typeof current_dataValues !== "undefined" && current_dataValues.length !== 0) { //Event has dataValues in new dump
 
             //DEs UIDs arrays
             var dhisDEs_uids = [];
@@ -963,25 +974,30 @@ function checkDataValuesExistence(enrollment_uid, codepatient, patient_uid, even
             var commonDEs = _.intersection(dhisDEs_uids, newDEs_uids);
 
             //Some DEs for that event are missing in the current dump
-            missingDEs.forEach((DE) => {
+            missingDEs.forEach((de_uid) => {
                 changed_missing = true;
-                logger.info(`DE_DELETE; ${DE} dataElement will be deleted for event ${event_date} (${event_uid}) , ${stage} stage, patient ${codepatient} (${previous_all_patient_index[codepatient].uid}). Not present in new data dump`);
-                //logger.info(`DE_DELETE; Patient ${codepatient} (${patient_uid}). Program: ${final_program_label} (${final_program_uid}). Program Stage ${[stage]}. Event (${event_uid}) ${event_date}. ${DE} dataElement will be deleted. Not present in previous data dump`);
 
+                const de_value = getValueByDE(previous_dataValues, de_uid) // TODO fix
                 var dict = {};
                 dict.action = DELETE;
                 dict.type = DE_TYPE;
-                dict.resource = DE; //DE UID
+                dict.event = event_uid; // event uid
+                dict.eventDate = event_date;
+                dict.dataElement = de_uid; //DE UID
+                dict.dataValue = de_value;
                 dict.TEI = patient_uid;
                 dict.enrollment = enrollment_uid;
+                dict.program = program_uid;
+                dict.programLabel = program_label;
                 dict.programStage = stage;
-                dict.event = event_uid;
                 listOfActions.push(dict);
+                logger.info(`DE_DELETE; Patient ${codepatient} (${patient_uid}). Program: ${program_label} (${program_uid}). Program Stage ${[stage]}. Event (${event_uid}) ${event_date}. DataElement (${de_uid}) with value ${de_value} will be deleted. Not present in current data dump`);
             });
 
             //There are new DEs for that event in the current dump
             newDEs.forEach((DE) => {
                 changed_new = true;
+                // TODO review this part
                 logger.info(`DE_CREATE; ${DE} dataElement for event ${event_uid} (${event_date}), ${stage} stage, will be created for patient ${codepatient} (${previous_all_patient_index[codepatient].uid}). Not present in previous data dump`);
                 var dict = {};
                 dict.action = CREATE;
@@ -995,6 +1011,7 @@ function checkDataValuesExistence(enrollment_uid, codepatient, patient_uid, even
                 listOfActions.push(dict);
             });
 
+            // TODO update this code
             //Some events for that stage are present in both dumps
             commonDEs.forEach((DE) => {
                 if (changed_common) {
@@ -1005,26 +1022,31 @@ function checkDataValuesExistence(enrollment_uid, codepatient, patient_uid, even
                 }
             })
 
-        } else { //Event doesn't have dataValues in new dump
+        } else { //Event has dataValues in previous dump BUT has NOT dataValues in current dump
             previous_dataValues.forEach((DE) => {
                 changed_missing = true;
+                const de_uid = DE.dataElement;
+                const de_value = DE.value
 
                 var dict = {};
                 dict.action = DELETE;
                 dict.type = DE_TYPE;
-                dict.resource = DE.dataElement; //DE UID
+                dict.event = event_uid; // event uid
+                dict.eventDate = event_date;
+                dict.dataElement = de_uid; //DE UID
+                dict.dataValue = de_value;
                 dict.TEI = patient_uid;
                 dict.enrollment = enrollment_uid;
+                dict.program = program_uid;
+                dict.programLabel = program_label;
                 dict.programStage = stage;
-                dict.event = event_uid;
                 listOfActions.push(dict);
-                logger.info(`DE_DELETE; ${DE.dataElement} dataElement with value "${DE.value}" will be deleted for event ${event_uid} (${event_date}) , ${stage} stage, patient ${codepatient} (${previous_all_patient_index[codepatient].uid}). Not present in new data dump`);
                 logger.info(`DE_DELETE; Patient ${codepatient} (${patient_uid}). Program: ${program_label} (${program_uid}). Program Stage ${[stage]}. Event (${event_uid}) ${event_date}. DataElement (${de_uid}) with value ${de_value} will be deleted. Not present in current data dump`);
             });
         }
 
     } else { //Event didn't have dataValues in previous dump
-        if (typeof current_dataValues !== "undefined") { //Event didn't have dataValues before but has now (in new dump)
+        if (typeof current_dataValues !== "undefined" && current_dataValues.length !== 0) { //Event didn't have dataValues before but has now (in new dump)
             var newDEs_uids = [];
             current_dataValues.forEach(DE => {
                 newDEs_uids.push(DE.dataElement)
