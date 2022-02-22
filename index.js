@@ -1103,11 +1103,6 @@ function checkDataValueDifference(event_uid, event_date, de_uid, codepatient, pa
         logger.error(`Review the script code. Debug event (${event_uid}). Previous DE ${JSON.stringify(previous_dv)}. Current DE ${JSON.stringify(current_dv)}]`)
     }
 
-    // TODO review this change
-    if (current_value === true) {
-        current_value = "true";
-    }
-
     if (previous_value !== current_value) {
         changed = true;
         var dict = {};
