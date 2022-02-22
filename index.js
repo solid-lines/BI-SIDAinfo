@@ -977,7 +977,7 @@ function checkDataValuesExistence(enrollment_uid, codepatient, patient_uid, even
             missingDEs.forEach((de_uid) => {
                 changed_missing = true;
 
-                const de_value = getValueByDE(previous_dataValues, de_uid) // TODO fix
+                const de_value = getValueByDE(previous_dataValues, de_uid)
                 var dict = {};
                 dict.action = DELETE;
                 dict.type = DE_TYPE;
@@ -995,20 +995,24 @@ function checkDataValuesExistence(enrollment_uid, codepatient, patient_uid, even
             });
 
             //There are new DEs for that event in the current dump
-            newDEs.forEach((DE) => {
+            newDEs.forEach((de_uid) => {
                 changed_new = true;
-                // TODO review this part
-                logger.info(`DE_CREATE; ${DE} dataElement for event ${event_uid} (${event_date}), ${stage} stage, will be created for patient ${codepatient} (${previous_all_patient_index[codepatient].uid}). Not present in previous data dump`);
+
+                const de_value = getValueByDE(current_dataValues, de_uid)
                 var dict = {};
                 dict.action = CREATE;
                 dict.type = DE_TYPE;
-                dict.resource = DE; //DE UID
+                dict.event = event_uid; // event uid
+                dict.eventDate = event_date;
+                dict.dataElement = de_uid; //DE UID
+                dict.dataValue = de_value;
                 dict.TEI = patient_uid;
                 dict.enrollment = enrollment_uid;
+                dict.program = program_uid;
+                dict.programLabel = program_label;
                 dict.programStage = stage;
-                dict.event = event_uid;
-                dict.dataValue = current_dataValues[newDEs_uids.indexOf(DE)].value;
                 listOfActions.push(dict);
+                logger.info(`DE_CREATE; Patient ${codepatient} (${patient_uid}). Program: ${program_label} (${program_uid}). Program Stage ${[stage]}. Event (${event_uid}) ${event_date}. DataElement (${de_uid}) with value ${de_value} will be created. Not present in previous data dump`);
             });
 
             // TODO update this code
