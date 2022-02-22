@@ -1018,11 +1018,9 @@ function checkDataValuesExistence(enrollment_uid, codepatient, patient_uid, even
             // TODO update this code
             //Some events for that stage are present in both dumps
             commonDEs.forEach((DE) => {
-                if (changed_common) {
-                    checkDataValueDifference(event_uid, DE, codepatient, patient_uid, previous_dataValues[dhisDEs_uids.indexOf(DE)], current_dataValues[newDEs_uids.indexOf(DE)]);
-                } else {
-                    changed_common = checkDataValueDifference(event_uid, DE, codepatient, patient_uid, previous_dataValues[dhisDEs_uids.indexOf(DE)], current_dataValues[newDEs_uids.indexOf(DE)]);
-
+                const changed_commonV = changed_common = checkDataValueDifference(event_uid, DE, codepatient, patient_uid, previous_dataValues[dhisDEs_uids.indexOf(DE)], current_dataValues[newDEs_uids.indexOf(DE)]);
+                if (changed_commonV) {
+                    changed_common = true
                 }
             })
 
