@@ -201,7 +201,7 @@ var teis_toUpdateTEA = [];
 var teis_toUpdateEnroll = [];
 
 commonTEIs_patientCodes.forEach((TEI) => {
-    var changes = checkTEIDifference(TEI); //TODO: in process (cascade)
+    var changes = checkTEIDifference(TEI);
     changed_TEIs = changes.changed_TEI;
     if (changed_TEIs) {
         teis_toBeUpdated.push(TEI);
@@ -782,15 +782,9 @@ function checkStageEvents(programLabel, codepatient, stage, previous_enrollment_
                             changed_common = true
                         }
 
-                        //TODO: what else is there to compare from an event data apart from its dataValues?
-                        // TODO compare status, compare dueDate
-
-
                         /**
                          * EVENT STATUS
                          */
-
-                        /***** Extract enrollment status ******/
 
                         var status_previous = getEventStatus(previous_TEI_file, event_uid);
                         var status_current = getEventStatus(current_TEI_file, event_uid);
@@ -814,6 +808,34 @@ function checkStageEvents(programLabel, codepatient, stage, previous_enrollment_
                             listOfActions.push(dict);
                             logger.info(`EVENT_UPDATE_STATUS; Program: ${final_program_label} (${final_program_uid}). Program Stage ${[stage]}. Event (${event_uid}) on ${event_date} will be updated for patient ${codepatient} (${patient_uid}). Previous status: ${status_previous}, New status: ${status_current}`);
                         }
+
+                        /**
+                         * EVENT DUE DATE
+                         */
+
+                         var dueDate_previous = getEventDueDate(previous_TEI_file, event_uid);
+                         var dueDate_current = getEventDueDate(current_TEI_file, event_uid);
+ 
+                         if (dueDate_previous.toUpperCase() != dueDate_current.toUpperCase()) {
+                             changed = true;
+                             
+                             var dict = {};
+                             dict.action = UPDATE;
+                             dict.type = EVENT_TYPE;
+                             dict.uid = event_uid;
+                             dict.uid = event_uid;
+                             dict.eventDate = event_date; //Event date
+                             dict.TEI = patient_uid;
+                             dict.enrollment = enrollment_uid_previous;
+                             dict.program = final_program_uid;
+                             dict.programLabel = final_program_label;
+                             dict.programStage = stage;
+                             dict.previousDueDate = dueDate_previous;
+                             dict.currentDueDate = dueDate_current;
+                             listOfActions.push(dict);
+                             logger.info(`EVENT_UPDATE_DUEDATE; Program: ${final_program_label} (${final_program_uid}). Program Stage ${[stage]}. Event (${event_uid}) on ${event_date} will be updated for patient ${codepatient} (${patient_uid}). Previous dueDate: ${dueDate_previous}, New dueDate: ${dueDate_current}`);
+                         }
+
                     });
 
                 } else { // Stage doesn't exist in current file enrollment
@@ -960,7 +982,7 @@ function getDataValues(TEI_file, enrollment_uid, event_uid) {
 
 
 function getEventStatus(TEI_data, event_uid) {
-    var status = "ACTIVE"; // TODO move to const // Default value
+    var status = "ACTIVE"; // Default value if no status is present
     TEI_data.enrollments.forEach(enrollment => {
         enrollment.events.forEach(event => {
             if ((event.event == event_uid) && ('status' in event) ){
@@ -970,6 +992,22 @@ function getEventStatus(TEI_data, event_uid) {
     });
 
     return status;
+}
+
+function getEventDueDate(TEI_data, event_uid) {
+    var dueDate; // Default value if no status is present
+    TEI_data.enrollments.forEach(enrollment => {
+        enrollment.events.forEach(event => {
+            if ((event.event == event_uid) && ('dueDate' in event) ){
+                dueDate = event.dueDate
+            }
+        });
+    });
+    if (typeof dueDate !== "undefined" && dueDate.includes("T00:00:00.000")) {
+        dueDate = dueDate.replace("T00:00:00.000","")
+    }
+
+    return dueDate;
 }
 
 function getValueByDE(dataValues, de_uid){
