@@ -453,7 +453,7 @@ function checkTEADifference(TEA, codepatient, dhisTEA, newTEA) {
  * Checks the existence of an Enrollment in the new data dump
  * 
  */
-function checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, program, previous_all_patient_index, current_all_patient_index) {
+function checkEnrollmentExistence(previous_TEI_file, previous_TEI_file, codepatient, program, previous_all_patient_index, current_all_patient_index) {
     var changed_enroll_missing = false;
     var changed_enroll_new = false;
     var changed_enroll_common = false;
@@ -505,7 +505,7 @@ function checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, progra
                 dict.TEI = tei_uid;
                 dict.program = final_program_uid;
                 dict.programLabel = final_program_label;
-                dict.status = getEnrollmentStatus(newTEI_file.enrollments, enrollment_uid);
+                dict.status = getEnrollmentStatus(previous_TEI_file.enrollments, enrollment_uid);
                 listOfActions.push(dict);
                 logger.info(`Enrollment_CREATE; Program: ${final_program_label} (${final_program_uid}). Enrollment: ${enrollment_date} (${enrollment_uid}) will be created from patient ${codepatient} (${tei_uid}). Not present in previous data dump`);
             });
@@ -516,7 +516,7 @@ function checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, progra
                 //logger.info(`Enrollment_REVIEW; TEI ${current_all_patient_index[codepatient].uid} Program: ${program} Enrollment date (${enrollment_date})`)
                 //will be reviewed for patient ${codepatient} (${previous_patient_code_uid[codepatient].uid}) in DHIS2 server;
                 //Present in previous data dump`);
-                const checkEnrollmentDifferenceV = checkEnrollmentDifference(dhisTEI_file, newTEI_file, enrollment_date, codepatient, programLabel, previous_all_patient_index, current_all_patient_index);
+                const checkEnrollmentDifferenceV = checkEnrollmentDifference(previous_TEI_file, previous_TEI_file, enrollment_date, codepatient, programLabel, previous_all_patient_index, current_all_patient_index);
                 if (checkEnrollmentDifferenceV) {
                     changed_enroll_common = true
                 }
@@ -557,7 +557,7 @@ function checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, progra
                 dict.TEI = tei_uid;
                 dict.program = final_program_uid;
                 dict.programLabel = final_program_label;
-                dict.status = getEnrollmentStatus(newTEI_file.enrollments, enrollment_uid);
+                dict.status = getEnrollmentStatus(previous_TEI_file.enrollments, enrollment_uid);
                 listOfActions.push(dict);
                 logger.info(`Enrollment_CREATE; Program: ${final_program_label} (${final_program_uid}). Enrollment: ${enrollment_date} (${enrollment_uid}) will be created from patient ${codepatient} (${tei_uid}). Not present in previous data dump`);
             }
@@ -589,7 +589,7 @@ function getEventData(enrollmentData, enrollmentUID, eventDate) {
  * Check Enrollment status difference
  * Check Events related to this enrollment difference
  */
-function checkEnrollmentDifference(dhisTEI_file, newTEI_file, enrollment_date, codepatient, programLabel, previous_all_patient_index, current_all_patient_index) {
+function checkEnrollmentDifference(previous_TEI_file, current_TEI_file, enrollment_date, codepatient, programLabel, previous_all_patient_index, current_all_patient_index) {
 
     const enrollment_uid = previous_all_patient_index[codepatient][programLabel][enrollment_date]
     const tei_uid = previous_all_patient_index[codepatient].uid
@@ -639,8 +639,8 @@ function checkEnrollmentDifference(dhisTEI_file, newTEI_file, enrollment_date, c
     /**
      * ENROLLMENT STATUS
      */
-    var enrollments_current = newTEI_file.enrollments;
-    var enrollments_previous = dhisTEI_file.enrollments;
+    var enrollments_current = current_TEI_file.enrollments;
+    var enrollments_previous = previous_TEI_file.enrollments;
 
     /***** Extract enrollment status ******/
 
@@ -658,10 +658,10 @@ function checkEnrollmentDifference(dhisTEI_file, newTEI_file, enrollment_date, c
         dict.TEI = tei_uid;
         dict.program = final_program_uid;
         dict.programLabel = final_program_label;
-        dict.previousValue = status_previous;
-        dict.currentValue = status_current;
+        dict.previousStatus = status_previous;
+        dict.currentStatus = status_current;
         listOfActions.push(dict);
-        logger.info(`Enrollment_UPDATE; Program: ${final_program_label} (${final_program_uid}). Enrollment: ${enrollment_date} (${enrollment_uid}) STATUS will be updated from patient ${codepatient} (${tei_uid}). Previous value: ${status_previous}, New value: ${status_current}`)
+        logger.info(`Enrollment_STATUS_UPDATE; Program: ${final_program_label} (${final_program_uid}). Enrollment: ${enrollment_date} (${enrollment_uid}) STATUS will be updated from patient ${codepatient} (${tei_uid}). Previous status: ${status_previous}, New status: ${status_current}`)
     }
 
     return changed;
@@ -705,8 +705,6 @@ function checkStageEvents(programLabel, codepatient, stage, previous_enrollment_
                 if (stage in current_all_enrollment_events_index) {// Stage exist in current file enrollment
 
                     // Revisar altas, bajas y modificaciones
-                    //TODO revisar esta parte
-
                     const patient_uid = previous_all_patient_index[codepatient].uid
 
                     /**
@@ -747,8 +745,8 @@ function checkStageEvents(programLabel, codepatient, stage, previous_enrollment_
                         var dict = {};
                         dict.action = CREATE;
                         dict.type = EVENT_TYPE;
-                        dict.eventDate = event_date; //Event date
                         dict.uid = event_uid;
+                        dict.eventDate = event_date; //Event date
                         dict.TEI = patient_uid;
                         dict.enrollment = enrollment_uid_previous;
                         dict.program = final_program_uid;
@@ -766,17 +764,17 @@ function checkStageEvents(programLabel, codepatient, stage, previous_enrollment_
                         //will be reviewed for patient ${codepatient} (${previous_patient_code_uid[codepatient].uid}) in DHIS2 server;
                         //Present in previous data dump`);
 
-                        var previousTEI_file = read_previous_TEIs(previous_all_patient_index[codepatient].uid);
-                        var currentEI_file = read_current_TEIs(current_all_patient_index[codepatient].uid);
+                        const previous_TEI_file = read_previous_TEIs(previous_all_patient_index[codepatient].uid);
+                        const current_TEI_file = read_current_TEIs(current_all_patient_index[codepatient].uid);
 
-                        var previousEvent_uid = previous_all_enrollment_events_index[stage][event_date];
-                        var currentEvent_uid = current_all_enrollment_events_index[stage][event_date];
+                        const previousEvent_uid = previous_all_enrollment_events_index[stage][event_date];
+                        const currentEvent_uid = current_all_enrollment_events_index[stage][event_date];
 
                         /**
                         * DATA VALUES
                         */
-                        var previous_dataValues = getDataValues(previousTEI_file, enrollment_uid_previous, previousEvent_uid);
-                        var current_dataValues = getDataValues(currentEI_file, enrollment_uid_current, currentEvent_uid);
+                        const previous_dataValues = getDataValues(previous_TEI_file, enrollment_uid_previous, previousEvent_uid);
+                        const current_dataValues = getDataValues(current_TEI_file, enrollment_uid_current, currentEvent_uid);
 
                         const checkDataValuesExistenceV = checkDataValuesExistence(enrollment_uid_previous, codepatient, patient_uid, event_date, stage, previous_dataValues, current_dataValues, event_uid, final_program_uid, final_program_label);
 
@@ -785,9 +783,37 @@ function checkStageEvents(programLabel, codepatient, stage, previous_enrollment_
                         }
 
                         //TODO: what else is there to compare from an event data apart from its dataValues?
-
                         // TODO compare status, compare dueDate
 
+
+                        /**
+                         * EVENT STATUS
+                         */
+
+                        /***** Extract enrollment status ******/
+
+                        var status_previous = getEventStatus(previous_TEI_file, event_uid);
+                        var status_current = getEventStatus(current_TEI_file, event_uid);
+
+                        if (status_current.toUpperCase() != status_previous.toUpperCase()) {
+                            changed = true;
+                            
+                            var dict = {};
+                            dict.action = UPDATE;
+                            dict.type = EVENT_TYPE;
+                            dict.uid = event_uid;
+                            dict.uid = event_uid;
+                            dict.eventDate = event_date; //Event date
+                            dict.TEI = patient_uid;
+                            dict.enrollment = enrollment_uid_previous;
+                            dict.program = final_program_uid;
+                            dict.programLabel = final_program_label;
+                            dict.programStage = stage;
+                            dict.previousStatus = status_previous;
+                            dict.currentStatus = status_current;
+                            listOfActions.push(dict);
+                            logger.info(`EVENT_UPDATE_STATUS; Program: ${final_program_label} (${final_program_uid}). Program Stage ${[stage]}. Event (${event_uid}) on ${event_date} will be updated for patient ${codepatient} (${patient_uid}). Previous status: ${status_previous}, New status: ${status_current}`);
+                        }
                     });
 
                 } else { // Stage doesn't exist in current file enrollment
@@ -932,11 +958,25 @@ function getDataValues(TEI_file, enrollment_uid, event_uid) {
     return event.dataValues;
 }
 
+
+function getEventStatus(TEI_data, event_uid) {
+    var status = "ACTIVE"; // TODO move to const // Default value
+    TEI_data.enrollments.forEach(enrollment => {
+        enrollment.events.forEach(event => {
+            if ((event.event == event_uid) && ('status' in event) ){
+                status = event.status
+            }
+        });
+    });
+
+    return status;
+}
+
 function getValueByDE(dataValues, de_uid){
     let r_value;
     dataValues.forEach(dv => {
         if (dv['dataElement'] == de_uid) {
-            r_value = dv['value']; // TODO se comporta como un continue
+            r_value = dv['value'];
         }
     });
 
@@ -1015,7 +1055,6 @@ function checkDataValuesExistence(enrollment_uid, codepatient, patient_uid, even
                 logger.info(`DE_CREATE; Patient ${codepatient} (${patient_uid}). Program: ${program_label} (${program_uid}). Program Stage ${[stage]}. Event (${event_uid}) ${event_date}. DataElement (${de_uid}) with value ${de_value} will be created. Not present in previous data dump`);
             });
 
-            // TODO update this source code
             //Some events for that stage are present in both dumps
             commonDEs.forEach((DE) => {
                 const changed_commonV = checkDataValueDifference(event_uid, event_date, DE, codepatient, patient_uid, previous_dataValues[dhisDEs_uids.indexOf(DE)], current_dataValues[newDEs_uids.indexOf(DE)], enrollment_uid, program_uid, program_label, stage);
