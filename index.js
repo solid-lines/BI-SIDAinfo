@@ -301,23 +301,23 @@ function checkTEIDifference(codepatient) {
     var newTEI_uid = current_all_patient_index[codepatient].uid;
 
     //DHIS uploaded file
-    var dhisTEI_file = read_previous_TEIs(dhisTEI_uid);
+    var previous_TEI_file = read_previous_TEIs(dhisTEI_uid);
 
     //New dump file
-    var newTEI_file = read_current_TEIs(newTEI_uid);
+    var current_TEI_file = read_current_TEIs(newTEI_uid);
 
-    if (typeof dhisTEI_file !== "undefined" && typeof newTEI_file !== "undefined") {
+    if (typeof previous_TEI_file !== "undefined" && typeof current_TEI_file !== "undefined") {
 
         /**
          * ATTRIBUTES (TEA)
          */
-        changed_TEA = checkTEAexistence(codepatient, dhisTEI_file, newTEI_file, previous_all_patient_index);
+        changed_TEA = checkTEAexistence(codepatient, previous_TEI_file, current_TEI_file, previous_all_patient_index);
 
         /**
          * ENROLLMENTS
          */
         programs.forEach((program) => { // iterate over programs
-            if (checkEnrollmentExistence(dhisTEI_file, newTEI_file, codepatient, program, previous_all_patient_index, current_all_patient_index)){
+            if (checkEnrollmentExistence(previous_TEI_file, current_TEI_file, codepatient, program, previous_all_patient_index, current_all_patient_index)){
                 changed_enroll = true;
             }
         });
@@ -453,7 +453,7 @@ function checkTEADifference(TEA, codepatient, dhisTEA, newTEA) {
  * Checks the existence of an Enrollment in the new data dump
  * 
  */
-function checkEnrollmentExistence(previous_TEI_file, previous_TEI_file, codepatient, program, previous_all_patient_index, current_all_patient_index) {
+function checkEnrollmentExistence(previous_TEI_file, current_TEI_file, codepatient, program, previous_all_patient_index, current_all_patient_index) {
     var changed_enroll_missing = false;
     var changed_enroll_new = false;
     var changed_enroll_common = false;
@@ -505,7 +505,7 @@ function checkEnrollmentExistence(previous_TEI_file, previous_TEI_file, codepati
                 dict.TEI = tei_uid;
                 dict.program = final_program_uid;
                 dict.programLabel = final_program_label;
-                dict.status = getEnrollmentStatus(previous_TEI_file.enrollments, enrollment_uid);
+                dict.status = getEnrollmentStatus(current_TEI_file.enrollments, enrollment_uid);
                 listOfActions.push(dict);
                 logger.info(`Enrollment_CREATE; Program: ${final_program_label} (${final_program_uid}). Enrollment: ${enrollment_date} (${enrollment_uid}) will be created from patient ${codepatient} (${tei_uid}). Not present in previous data dump`);
             });
@@ -516,7 +516,7 @@ function checkEnrollmentExistence(previous_TEI_file, previous_TEI_file, codepati
                 //logger.info(`Enrollment_REVIEW; TEI ${current_all_patient_index[codepatient].uid} Program: ${program} Enrollment date (${enrollment_date})`)
                 //will be reviewed for patient ${codepatient} (${previous_patient_code_uid[codepatient].uid}) in DHIS2 server;
                 //Present in previous data dump`);
-                const checkEnrollmentDifferenceV = checkEnrollmentDifference(previous_TEI_file, previous_TEI_file, enrollment_date, codepatient, programLabel, previous_all_patient_index, current_all_patient_index);
+                const checkEnrollmentDifferenceV = checkEnrollmentDifference(previous_TEI_file, current_TEI_file, enrollment_date, codepatient, programLabel, previous_all_patient_index, current_all_patient_index);
                 if (checkEnrollmentDifferenceV) {
                     changed_enroll_common = true
                 }
@@ -557,7 +557,7 @@ function checkEnrollmentExistence(previous_TEI_file, previous_TEI_file, codepati
                 dict.TEI = tei_uid;
                 dict.program = final_program_uid;
                 dict.programLabel = final_program_label;
-                dict.status = getEnrollmentStatus(previous_TEI_file.enrollments, enrollment_uid);
+                dict.status = getEnrollmentStatus(current_TEI_file.enrollments, enrollment_uid);
                 listOfActions.push(dict);
                 logger.info(`Enrollment_CREATE; Program: ${final_program_label} (${final_program_uid}). Enrollment: ${enrollment_date} (${enrollment_uid}) will be created from patient ${codepatient} (${tei_uid}). Not present in previous data dump`);
             }
