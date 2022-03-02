@@ -43,7 +43,7 @@ var events = getActionByResourceType(actions, EVENT_TYPE);
 var DEs = getActionByResourceType(actions, DE_TYPE);
 
 
-// /************** TEI actions upload *********************/
+/************** TEI actions upload *********************/
 
 /* Create */
 
@@ -63,7 +63,7 @@ TEIs_toDelete.forEach((TEI) => {
     delete_resource(TEI_TYPE, TEI.uid)
 });
 
-// /************** TEA actions upload *********************/
+/************** TEA actions upload *********************/
 
 // TODO: improvement. send one PUT per TEI (no one PUT per each TEA)
 
@@ -118,20 +118,46 @@ const enrollments_to_update = getActionByOperationType(enrollments, UPDATE);
 enrollments_to_update.forEach((enrollment) => {
     const enrollment_uid = enrollment.uid
     const payload = get_enrollment_status_payload(enrollment.TEI, enrollment_uid);
-
     logger.info(`Update enrollment status ${enrollment_uid} (TEI ${enrollment.TEI}), payload: ${JSON.stringify(payload)}`);
     put_resource(ENROLLMENT_TYPE, enrollment_uid, payload);
 });
 
-// /************** Events actions upload *********************/
+/************** Events actions upload *********************/
 
-// /* Delete */
+/* Create */
+const events_to_create = getActionByOperationType(events, CREATE);
+events_to_create.forEach((event) => {
+    const event_uid = event.uid
+    const enrollment_uid = event.enrollment
+    const tei_uid = event.TEI
+        const payload = get_event_payload(tei_uid, enrollment_uid, event_uid);
+    logger.info(`Create event ${event_uid} (TEI ${tei_uid}) (enrollment ${enrollment_uid}), payload: ${JSON.stringify(payload)}`);
+    post_resource(EVENT_TYPE, event_uid, payload);
+});
 
-// /* Create */
+/* Delete */
+const events_to_delete = getActionByOperationType(events, DELETE);
+events_to_delete.forEach((event) => {
+    const event_uid = event.uid
+    const enrollment_uid = event.enrollment
+    const tei_uid = event.TEI
+    logger.info(`Delete event ${event_uid} (TEI ${tei_uid}) (enrollment ${enrollment_uid})`);
+    delete_resource(EVENT_TYPE, event_uid);
+});
 
-// /* Update */
+/* Update */
+//Event_STATUS_UPDATE + Event_DUEDATE_UPDATE
+const events_to_update = getActionByOperationType(events, UPDATE);
+events_to_update.forEach((event) => {
+    const event_uid = event.uid
+    const enrollment_uid = event.enrollment
+    const tei_uid = event.TEI
+    const payload = get_event_payload(tei_uid, enrollment_uid, event_uid); // send all payload, incuding data values
+    logger.info(`Update event ${event_uid} (TEI ${tei_uid}) (enrollment ${enrollment_uid}), payload: ${JSON.stringify(payload)}`);
+    put_resource(EVENT_TYPE, event_uid, payload);
+});
 
-// /************** DataElements actions upload *********************/
+// /************** DataElements/DataValues actions upload *********************/
 
 // /* Delete */
 
@@ -165,7 +191,8 @@ async function post_resource(resource_type, uid, payload) {
     
     const mapping = {
         [TEI_TYPE]: "trackedEntityInstances/",
-        [ENROLLMENT_TYPE]: "enrollments/"
+        [ENROLLMENT_TYPE]: "enrollments/",
+        [EVENT_TYPE]: "events/"
     }
 
 
@@ -202,7 +229,8 @@ async function put_resource(resource_type, uid, payload) {
     
     const mapping = {
         [TEA_TYPE]: "trackedEntityInstances/"+uid+"?program=MVooF5iCp8L", // TODO only needs a valid program uid
-        [ENROLLMENT_TYPE]: "enrollments/"+uid
+        [ENROLLMENT_TYPE]: "enrollments/"+uid,
+        [EVENT_TYPE]: "events/"+uid
     }
 
     logger.info(`PUT ${resource_type} ${uid}. url '${mapping[resource_type]}'`);
@@ -237,7 +265,8 @@ async function delete_resource(resource_type, uid) {
     
     const mapping = {
         [TEI_TYPE]: "trackedEntityInstances/"+uid,
-        [ENROLLMENT_TYPE]: "enrollments/"+uid
+        [ENROLLMENT_TYPE]: "enrollments/"+uid,
+        [EVENT_TYPE]: "events/"+uid
     }
 
     logger.info(`DELETE ${resource_type} ${uid}. url '${mapping[resource_type]}'`);
@@ -284,10 +313,10 @@ function getTEApayload(tei_uid) {
 
 function get_enrollment_payload(tei_uid, enrollment_uid){
     const tei = readTEI(tei_uid);
-    const enrollment = tei['enrollments'].filter(function(enrol){
+    const enrollments = tei['enrollments'].filter(function(enrol){
         return enrol.enrollment == enrollment_uid;
     })
-    return enrollment[0] // return one enrollment
+    return enrollments[0] // return one enrollment
 }
 
 function get_enrollment_status_payload(tei_uid, enrollment_uid){
@@ -296,6 +325,15 @@ function get_enrollment_status_payload(tei_uid, enrollment_uid){
     return enrollment
 }
 
+function get_event_payload(tei_uid, enrollment_uid, event_uid){
+    const enrollment = get_enrollment_payload(tei_uid, enrollment_uid)
+    const events = enrollment['events'].filter(function(ev){
+        return ev.event == event_uid;
+    })
+    events[0]["enrollment"]=enrollment_uid // add link to enrollment
+    return events[0] // return one event
+
+}
 
 function readTEI(TEI_uid) {
     var TEI_file;
