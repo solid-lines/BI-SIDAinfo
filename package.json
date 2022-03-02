@@ -4,6 +4,7 @@
   "description": "This is the node script created for updating the DHIS2 data from the SIDAinfo data dump for PSI Burundi.",
   "main": "index.js",
   "dependencies": {
+    "axios": "^0.26.0",
     "dateformat": "^5.0.2",
     "dotenv": "^10.0.0",
     "lodash": "^4.17.21",
