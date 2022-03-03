@@ -154,7 +154,7 @@ events_to_update.forEach((event) => {
     const tei_uid = event.TEI
     const payload = get_event_payload(tei_uid, enrollment_uid, event_uid); // send all payload, incuding data values
     logger.info(`Update event ${event_uid} (TEI ${tei_uid}) (enrollment ${enrollment_uid}), payload: ${JSON.stringify(payload)}`);
-    //put_resource(EVENT_TYPE, event_uid, payload);
+    put_resource(EVENT_TYPE, event_uid, payload);
 });
 
 // /************** DataElements/DataValues actions upload *********************/
@@ -381,13 +381,13 @@ function get_dv_event_payload(tei_uid, enrollment_uid, event_uid, de_uid){
     return event
 }
 
+
 function get_dv_delete_event_payload(tei_uid, enrollment_uid, event_uid, de_uid){
     const dv = { dataElement: de_uid, value: ""}
     let event = get_dv_event_payload(tei_uid, enrollment_uid, event_uid, de_uid) // return event with empty dataValues
     event['dataValues'].push(dv)
     return event
 }
-
 
 
 function readTEI(TEI_uid) {
