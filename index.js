@@ -76,7 +76,7 @@ const TEI_TYPE = "TEI";
 const ENROLLMENT_TYPE = "ENROLLMENT";
 const TEA_TYPE = "TEA";
 const EVENT_TYPE = "EVENT";
-const DE_TYPE = "DE";
+const DV_TYPE = "DV";
 
 /**************************************/
 
@@ -1058,7 +1058,7 @@ function checkDataValuesExistence(enrollment_uid, codepatient, patient_uid, even
                 const de_value = getValueByDE(previous_dataValues, de_uid)
                 var dict = {};
                 dict.action = DELETE;
-                dict.type = DE_TYPE;
+                dict.type = DV_TYPE;
                 dict.event = event_uid; // event uid
                 dict.eventDate = event_date;
                 dict.dataElement = de_uid; //DE UID
@@ -1069,7 +1069,7 @@ function checkDataValuesExistence(enrollment_uid, codepatient, patient_uid, even
                 dict.programLabel = program_label;
                 dict.programStage = stage;
                 listOfActions.push(dict);
-                logger.info(`DE_DELETE; Patient ${codepatient} (${patient_uid}). Program: ${program_label} (${program_uid}). Program Stage ${[stage]}. Event (${event_uid}) ${event_date}. DataElement (${de_uid}) with value ${de_value} will be deleted. Not present in current data dump`);
+                logger.info(`DV_DELETE; Patient ${codepatient} (${patient_uid}). Program: ${program_label} (${program_uid}). Program Stage ${[stage]}. Event (${event_uid}) ${event_date}. DataElement (${de_uid}) with value ${de_value} will be deleted. Not present in current data dump`);
             });
 
             //There are new DEs for that event in the current dump
@@ -1079,7 +1079,7 @@ function checkDataValuesExistence(enrollment_uid, codepatient, patient_uid, even
                 const de_value = getValueByDE(current_dataValues, de_uid)
                 var dict = {};
                 dict.action = CREATE;
-                dict.type = DE_TYPE;
+                dict.type = DV_TYPE;
                 dict.event = event_uid; // event uid
                 dict.eventDate = event_date;
                 dict.dataElement = de_uid; //DE UID
@@ -1090,7 +1090,7 @@ function checkDataValuesExistence(enrollment_uid, codepatient, patient_uid, even
                 dict.programLabel = program_label;
                 dict.programStage = stage;
                 listOfActions.push(dict);
-                logger.info(`DE_CREATE; Patient ${codepatient} (${patient_uid}). Program: ${program_label} (${program_uid}). Program Stage ${[stage]}. Event (${event_uid}) ${event_date}. DataElement (${de_uid}) with value ${de_value} will be created. Not present in previous data dump`);
+                logger.info(`DV_CREATE; Patient ${codepatient} (${patient_uid}). Program: ${program_label} (${program_uid}). Program Stage ${[stage]}. Event (${event_uid}) ${event_date}. DataElement (${de_uid}) with value ${de_value} will be created. Not present in previous data dump`);
             });
 
             //Some events for that stage are present in both dumps
@@ -1109,7 +1109,7 @@ function checkDataValuesExistence(enrollment_uid, codepatient, patient_uid, even
 
                 var dict = {};
                 dict.action = DELETE;
-                dict.type = DE_TYPE;
+                dict.type = DV_TYPE;
                 dict.event = event_uid; // event uid
                 dict.eventDate = event_date;
                 dict.dataElement = de_uid; //DE UID
@@ -1120,7 +1120,7 @@ function checkDataValuesExistence(enrollment_uid, codepatient, patient_uid, even
                 dict.programLabel = program_label;
                 dict.programStage = stage;
                 listOfActions.push(dict);
-                logger.info(`DE_DELETE; Patient ${codepatient} (${patient_uid}). Program: ${program_label} (${program_uid}). Program Stage ${[stage]}. Event (${event_uid}) ${event_date}. DataElement (${de_uid}) with value ${de_value} will be deleted. Not present in current data dump`);
+                logger.info(`DV_DELETE; Patient ${codepatient} (${patient_uid}). Program: ${program_label} (${program_uid}). Program Stage ${[stage]}. Event (${event_uid}) ${event_date}. DataElement (${de_uid}) with value ${de_value} will be deleted. Not present in current data dump`);
             });
         }
 
@@ -1137,7 +1137,7 @@ function checkDataValuesExistence(enrollment_uid, codepatient, patient_uid, even
 
                 var dict = {};
                 dict.action = CREATE;
-                dict.type = DE_TYPE;
+                dict.type = DV_TYPE;
                 dict.event = event_uid; // event uid
                 dict.eventDate = event_date;
                 dict.dataElement = de_uid; //DE UID
@@ -1148,7 +1148,7 @@ function checkDataValuesExistence(enrollment_uid, codepatient, patient_uid, even
                 dict.programLabel = program_label;
                 dict.programStage = stage;
                 listOfActions.push(dict);
-                logger.info(`DE_CREATE; Patient ${codepatient} (${patient_uid}). Program: ${program_label} (${program_uid}). Program Stage ${[stage]}. Event (${event_uid}) ${event_date}. DataElement (${de_uid}) with value ${de_value} will be created. Not present in previous data dump`);
+                logger.info(`DV_CREATE; Patient ${codepatient} (${patient_uid}). Program: ${program_label} (${program_uid}). Program Stage ${[stage]}. Event (${event_uid}) ${event_date}. DataElement (${de_uid}) with value ${de_value} will be created. Not present in previous data dump`);
             });
 
         } else { //Event doesn't have dataValues in previous nor current dump
@@ -1184,7 +1184,7 @@ function checkDataValueDifference(event_uid, event_date, de_uid, codepatient, pa
         changed = true;
         var dict = {};
         dict.action = UPDATE;
-        dict.type = DE_TYPE;
+        dict.type = DV_TYPE;
         dict.event = event_uid;
         dict.eventDate = event_date;
         dict.dataElement = de_uid;
@@ -1196,9 +1196,9 @@ function checkDataValueDifference(event_uid, event_date, de_uid, codepatient, pa
         dict.programLabel = program_label;
         dict.programStage = programStage;
         listOfActions.push(dict);
-        logger.info(`DE_UPDATE; Patient ${codepatient} (${patient_uid}). Program: ${program_label} (${program_uid}). Program Stage ${programStage}. Event (${event_uid}) ${event_date}. DataElement (${de_uid}) will be updated. Previous value ${previous_value}, Current value ${current_value} `);
+        logger.info(`DV_UPDATE; Patient ${codepatient} (${patient_uid}). Program: ${program_label} (${program_uid}). Program Stage ${programStage}. Event (${event_uid}) ${event_date}. DataElement (${de_uid}) will be updated. Previous value ${previous_value}, Current value ${current_value} `);
     } else {
-        //logger.info(`DE_INFO; DE ${DE} won't be updated for patient ${codepatient} (${patient_uid}); It has the same value as the previous dump`)
+        //logger.info(`DV_INFO; DE ${DE} won't be updated for patient ${codepatient} (${patient_uid}); It has the same value as the previous dump`)
     }
 
     return changed;

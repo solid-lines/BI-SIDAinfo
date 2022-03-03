@@ -20,7 +20,7 @@ const TEI_TYPE = "TEI";
 const TEA_TYPE = "TEA";
 const ENROLLMENT_TYPE = "ENROLLMENT";
 const EVENT_TYPE = "EVENT";
-const DE_TYPE = "DE";
+const DV_TYPE = "DV";
 
 //check if folder exists. If not, create it
 if (!fs.existsSync(ACTIONS_FOLDER)) {
