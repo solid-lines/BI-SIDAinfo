@@ -40,7 +40,7 @@ var enrollments = getActionByResourceType(actions, ENROLLMENT_TYPE);
 
 var events = getActionByResourceType(actions, EVENT_TYPE);
 
-var DEs = getActionByResourceType(actions, DE_TYPE);
+var DVs = getActionByResourceType(actions, DV_TYPE);
 
 
 /************** TEI actions upload *********************/
@@ -154,17 +154,50 @@ events_to_update.forEach((event) => {
     const tei_uid = event.TEI
     const payload = get_event_payload(tei_uid, enrollment_uid, event_uid); // send all payload, incuding data values
     logger.info(`Update event ${event_uid} (TEI ${tei_uid}) (enrollment ${enrollment_uid}), payload: ${JSON.stringify(payload)}`);
-    put_resource(EVENT_TYPE, event_uid, payload);
+    //put_resource(EVENT_TYPE, event_uid, payload);
 });
 
 // /************** DataElements/DataValues actions upload *********************/
 
-// /* Delete */
+// TODO. Y si enviar todos los campos del actual? Que pasa con los que estan deleted? probar con PUT y con POST
 
-// /* Create */
+/* Create */
+const dv_to_create = getActionByOperationType(DVs, CREATE);
+dv_to_create.forEach((dv) => {
+    const dv_de = dv.dataElement
+    const event_uid = dv.event
+    const enrollment_uid = dv.enrollment
+    const tei_uid = dv.TEI
+    const payload = get_dv_event_payload(tei_uid, enrollment_uid, event_uid, dv_de);
+    logger.info(`Create datavalue ${dv_de} event ${event_uid} (TEI ${tei_uid}) (enrollment ${enrollment_uid}), payload: ${JSON.stringify(payload)}`);
+    put_resource(DV_TYPE, event_uid+"/"+dv_de, payload);
+});
 
-// /* Update */
+/* Delete */
+//send the datavalue empty ("")
+const dv_to_delete = getActionByOperationType(DVs, DELETE);
+dv_to_delete.forEach((dv) => {
+    const dv_de = dv.dataElement
+    const event_uid = dv.event
+    const enrollment_uid = dv.enrollment
+    const tei_uid = dv.TEI
+    const payload = get_dv_delete_event_payload(tei_uid, enrollment_uid, event_uid, dv_de);
+    logger.info(`Delete datavalue ${dv_de} event ${event_uid} (TEI ${tei_uid}) (enrollment ${enrollment_uid}), payload: ${JSON.stringify(payload)}`);
+    put_resource(DV_TYPE, event_uid+"/"+dv_de, payload);
+});
 
+
+/* Update */
+const dv_to_update = getActionByOperationType(DVs, UPDATE);
+dv_to_update.forEach((dv) => {
+    const dv_de = dv.dataElement
+    const event_uid = dv.event
+    const enrollment_uid = dv.enrollment
+    const tei_uid = dv.TEI
+    const payload = get_dv_event_payload(tei_uid, enrollment_uid, event_uid, dv_de);
+    logger.info(`Update datavalue ${dv_de} event ${event_uid} (TEI ${tei_uid}) (enrollment ${enrollment_uid}), payload: ${JSON.stringify(payload)}`);
+    put_resource(DV_TYPE, event_uid+"/"+dv_de, payload);
+});
 
 
 function getActionByResourceType(actions, resource_type) {
@@ -230,7 +263,8 @@ async function put_resource(resource_type, uid, payload) {
     const mapping = {
         [TEA_TYPE]: "trackedEntityInstances/"+uid+"?program=MVooF5iCp8L", // TODO only needs a valid program uid
         [ENROLLMENT_TYPE]: "enrollments/"+uid,
-        [EVENT_TYPE]: "events/"+uid
+        [EVENT_TYPE]: "events/"+uid,
+        [DV_TYPE]: "events/"+uid
     }
 
     logger.info(`PUT ${resource_type} ${uid}. url '${mapping[resource_type]}'`);
@@ -332,8 +366,29 @@ function get_event_payload(tei_uid, enrollment_uid, event_uid){
     })
     events[0]["enrollment"]=enrollment_uid // add link to enrollment
     return events[0] // return one event
-
 }
+
+function get_dv_event_payload(tei_uid, enrollment_uid, event_uid, de_uid){
+    let event = get_event_payload(tei_uid, enrollment_uid, event_uid)
+    delete event['enrollment'] // remove enrollment
+    delete event['dueDate'] // remove dueDate
+    delete event['eventDate'] // remove eventDate
+    const dvs = event['dataValues'].filter(function(dv){
+        return dv.dataElement == de_uid;
+    })
+    delete event['dataValues'] // remove dataValues
+    event['dataValues'] = dvs
+    return event
+}
+
+function get_dv_delete_event_payload(tei_uid, enrollment_uid, event_uid, de_uid){
+    const dv = { dataElement: de_uid, value: ""}
+    let event = get_dv_event_payload(tei_uid, enrollment_uid, event_uid, de_uid) // return event with empty dataValues
+    event['dataValues'].push(dv)
+    return event
+}
+
+
 
 function readTEI(TEI_uid) {
     var TEI_file;
