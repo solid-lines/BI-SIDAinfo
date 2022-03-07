@@ -177,22 +177,24 @@ logger.info(`TEIs list from CURRENT data dump: ${currentTEIs_PatientCodes}`);*/
 newTEIs_patientCodes.forEach((TEI) => {
     changed_TEIs = true;
     teis_toBeCreated.push(TEI);
+    const patient_uid = current_all_patient_index[TEI].uid;
     
     var dict = getAction_TEI(CREATE, TEI);
-    dict.uid = current_all_patient_index[TEI].uid;
+    dict.uid = patient_uid;
     listOfActions.push(dict);
-    logger.info(`TEI_CREATE; Patient ${TEI} will be created. Not present in previous data dump`);
+    logger.info(`TEI_CREATE; Patient ${TEI} (${patient_uid}) will be created. Not present in previous data dump`);
 })
 
 // DELETE TEIs
 missingTEIs_patientCodes.forEach((TEI) => {
     changed_TEIs = true;
     teis_toBeDeleted.push(TEI);
+    const patient_uid = previous_all_patient_index[TEI].uid;
     
     var dict = getAction_TEI(DELETE, TEI);
-    dict.uid = previous_all_patient_index[TEI].uid;
+    dict.uid = patient_uid;
     listOfActions.push(dict);
-    logger.info(`TEI_DELETE; Patient ${TEI} (${previous_all_patient_index[TEI].uid}) will be deleted from DHIS2 server; Not present in new data dump`);
+    logger.info(`TEI_DELETE; Patient ${TEI} (${patient_uid}) will be deleted from DHIS2 server; Not present in new data dump`);
 });
 
 
