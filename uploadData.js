@@ -251,9 +251,11 @@ async function post_resource(resource_type, uid, payload) {
 
     axios.post(mapping[resource_type], payload, config)
       .then(function (response) {
+        logger.info(`POST ${resource_type} ${uid}. url '${mapping[resource_type]}'`);
         logger.info(JSON.stringify(response.data))
       })
       .catch(function (error) {
+        logger.error(`POST ${resource_type} ${uid}. url '${mapping[resource_type]}'`);
         logger.error(error.response.data)
       });
 
@@ -289,9 +291,11 @@ async function put_resource(resource_type, uid, payload) {
 
     axios.put(mapping[resource_type], payload, config)
       .then(function (response) {
+        logger.info(`PUT ${resource_type} ${uid}. url '${mapping[resource_type]}'`);
         logger.info(JSON.stringify(response.data))
       })
       .catch(function (error) {
+        logger.error(`PUT ${resource_type} ${uid}. url '${mapping[resource_type]}'`);
         logger.error(error.response.data)
       });
 }
@@ -326,9 +330,11 @@ async function delete_resource(resource_type, uid) {
 
     axios.delete(mapping[resource_type], config)
       .then(function (response) {
+        logger.info(`DELETE ${resource_type} ${uid}. url '${mapping[resource_type]}'`);
         logger.info(JSON.stringify(response.data))
       })
       .catch(function (error) {
+        logger.error(`DELETE ${resource_type} ${uid}. url '${mapping[resource_type]}'`);
         logger.error(error.response.data)
       });
 }
