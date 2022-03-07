@@ -57,7 +57,7 @@ async function getTEIs(programUID, orgUnit) {
             let optionsgetmsg = {
                 host: endpointConfig.dhisServer, // here only the domain name (no http/https !)
                 port: 443,
-                path: '/api/trackedEntityInstances.json?program=' + encodeURIComponent(programUID) + '&ou=' + orgUnit + '&fields=*,enrollments&paging=false', // the rest of the url with parameters if needed
+                path: '/api/trackedEntityInstances.json?program=' + encodeURIComponent(programUID) + '&ou=' + orgUnit + '&fields=*,enrollments&skipPaging=true', // the rest of the url with parameters if needed
                 method: 'GET', // do GET
                 headers: {
                     'Content-Type': 'application/json',
@@ -66,6 +66,7 @@ async function getTEIs(programUID, orgUnit) {
                 },
                 auth: endpointConfig.dhisUser + ':' + endpointConfig.dhisPass
             };
+            logger.info(optionsgetmsg)
 
             // do the GET request
             let reqGet = https.request(optionsgetmsg, function (res) {
