@@ -3,6 +3,7 @@ var fs = require('fs');
 const { logger, logger_fr } = require('./logger.js');
 const endpointConfig = require('./config.json');
 
+//TODO add await in requests
 
 /*********** Read actions.json ********/
 const SOURCE_OU_CODE = "003BDI017S020203";//TODO: parametrizar
@@ -230,9 +231,9 @@ async function post_resource(resource_type, uid, payload) {
 
 
     logger.info(`POST ${resource_type} ${uid}. url '${mapping[resource_type]}'`);
-
+    const baseURL = `https://${endpointConfig.dhisServer}/api/`
     const config = {
-        baseURL: endpointConfig.dhis2Server,
+        baseURL: baseURL,
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
@@ -240,8 +241,8 @@ async function post_resource(resource_type, uid, payload) {
             'Pragma': 'no-cache'
         },
         auth: {
-            username: endpointConfig.dhis2User,
-            password: endpointConfig.dhis2Pass
+            username: endpointConfig.dhisUser,
+            password: endpointConfig.dhisPass
         },
         validateStatus: function (status) {
             return status == 200; // TEI. not only create also update
@@ -268,9 +269,9 @@ async function put_resource(resource_type, uid, payload) {
     }
 
     logger.info(`PUT ${resource_type} ${uid}. url '${mapping[resource_type]}'`);
-
+    const baseURL = `https://${endpointConfig.dhisServer}/api/`
     const config = {
-        baseURL: endpointConfig.dhis2Server,
+        baseURL: baseURL,
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
@@ -278,8 +279,8 @@ async function put_resource(resource_type, uid, payload) {
             'Pragma': 'no-cache'
         },
         auth: {
-            username: endpointConfig.dhis2User,
-            password: endpointConfig.dhis2Pass
+            username: endpointConfig.dhisUser,
+            password: endpointConfig.dhisPass
         },
         validateStatus: function (status) {
             return status == 200;
@@ -305,8 +306,9 @@ async function delete_resource(resource_type, uid) {
 
     logger.info(`DELETE ${resource_type} ${uid}. url '${mapping[resource_type]}'`);
 
+    const baseURL = `https://${endpointConfig.dhisServer}/api/`
     const config = {
-        baseURL: endpointConfig.dhis2Server,
+        baseURL: baseURL,
         headers: {
             'Accept': 'application/json',
             'Content-Type': 'application/json',
@@ -314,8 +316,8 @@ async function delete_resource(resource_type, uid) {
             'Pragma': 'no-cache'
         },
         auth: {
-            username: endpointConfig.dhis2User,
-            password: endpointConfig.dhis2Pass
+            username: endpointConfig.dhisUser,
+            password: endpointConfig.dhisPass
         },
         validateStatus: function (status) {
             return status == 200;
