@@ -66,7 +66,7 @@ async function getTEIs(programUID, orgUnit) {
                 },
                 auth: endpointConfig.dhisUser + ':' + endpointConfig.dhisPass
             };
-            logger.info(optionsgetmsg)
+            logger.info(JSON.stringify(optionsgetmsg))
 
             // do the GET request
             let reqGet = https.request(optionsgetmsg, function (res) {
