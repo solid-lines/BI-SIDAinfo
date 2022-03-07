@@ -10,9 +10,9 @@ This is the node script created for updating the DHIS2 data from the SIDAinfo da
 
 ## Preparation of the source files
 1. Run SIDAInfo-DHIS2 script to generate the file OUcode_YYYY_MM_DD-patient_code_uid-FINAL.json
-2. Save the file in the root directory & rename it to patient_code_uid-FINAL.json
-3. Save generated teis folders in SIDAInfo-Updates/teis
-4. Run ```node retrieveDHISdata.js```to download the data from the DHIS2 server (formatted files will be stored in DHIS2_data folder). This script generate files enfant.json, mere.json, tarv.json, teis.json and, finally, patient_code_uid.json in folder PREVIOUS_DHIS2_data/OUcode_YYYY_MM_DD. The file patient_code_uid.json is used in the diff script.
+2. Copy the file OUcode_YYYY_MM_DD-patient_code_uid-FINAL.json in the root directory & rename it to current_all_patient_index.json
+3. Copy generated teis folders in SIDAInfo-Updates/teis
+4. Run ```node retrieveDHISdata.js```to download the data from the DHIS2 server (formatted files will be stored in DHIS2_data folder). This script generate files enfant.json, mere.json, tarv.json, teis.json and, finally, previous_all_patient_index.json in folder PREVIOUS_DHIS2_data/OUcode_YYYY_MM_DD. The file previous_all_patient_index.json & teis.json are used in the diff script.
 
 
 ## Folders in the script
