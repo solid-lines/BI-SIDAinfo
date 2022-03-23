@@ -570,22 +570,6 @@ function checkEnrollmentExistence(previous_TEI_file, current_TEI_file, codepatie
     return (changed_enroll_new || changed_enroll_missing || changed_enroll_common);
 }
 
-function getEventData(enrollmentData, enrollmentUID, eventDate) {
-
-    var enroll = enrollmentData.filter((enroll) => {
-        if (enroll.enrollment == enrollmentUID) {
-            return enroll;
-        }
-    });
-    var event = enroll[0].events.filter(function (entry) {
-        if (entry.eventDate == eventDate) {
-            return entry;
-        }
-    });
-
-    return event;
-}
-
 /**
  * For a particular program and particular enrollmentDate
  * Check Enrollment status difference
