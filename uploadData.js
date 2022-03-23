@@ -379,7 +379,7 @@ function get_event_payload(tei_uid, enrollment_uid, event_uid){
 function get_dv_event_payload(tei_uid, enrollment_uid, event_uid, de_uid){
     let event = get_event_payload(tei_uid, enrollment_uid, event_uid)
     delete event['enrollment'] // remove enrollment
-    delete event['dueDate'] // remove dueDate
+    // delete event['dueDate'] // remove dueDate // KEEP DUEDATE DUE TO A BUG IN DHIS2 https://jira.dhis2.org/browse/DHIS2-12934
     delete event['eventDate'] // remove eventDate
     const dvs = event['dataValues'].filter(function(dv){
         return dv.dataElement == de_uid;
