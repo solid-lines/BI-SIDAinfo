@@ -46,16 +46,6 @@ var DVs = getActionByResourceType(actions, DV_TYPE);
 
 /************** TEI actions upload *********************/
 
-/* Create */
-
-const TEIs_toCreate = getActionByOperationType(TEIs, CREATE);
-
-TEIs_toCreate.forEach((TEI) => {
-    const payload = getTEIpayload(TEI.uid);
-    logger.info(`Create TEI ${TEI.uid}, payload: ${JSON.stringify(payload)}`);
-    post_resource(TEI_TYPE, TEI.uid, payload);
-});
-
 /* Delete */
 // In 2.36, delete a TEI means: delete TEI, delete enrollment, delete events (but in 2.33, events were not deleted).
 const TEIs_toDelete = getActionByOperationType(TEIs, DELETE);
@@ -64,24 +54,32 @@ TEIs_toDelete.forEach((TEI) => {
     delete_resource(TEI_TYPE, TEI.uid)
 });
 
+/* Create */
+const TEIs_toCreate = getActionByOperationType(TEIs, CREATE);
+TEIs_toCreate.forEach((TEI) => {
+    const payload = getTEIpayload(TEI.uid);
+    logger.info(`Create TEI ${TEI.uid}, payload: ${JSON.stringify(payload)}`);
+    post_resource(TEI_TYPE, TEI.uid, payload);
+});
+
+
 /************** TEA actions upload *********************/
 
 // TODO: improvement. send one PUT per TEI (no one PUT per each TEA)
-
-/* Create */
-const TEAs_toCreate = getActionByOperationType(TEAs, CREATE);
-TEAs_toCreate.forEach((TEA) => {
-    const payload = getTEApayload(TEA.TEI);
-    logger.info(`Create TEA ${TEA.TEA} (TEI ${TEA.TEI}), payload: ${JSON.stringify(payload)}`);
-    put_resource(TEA_TYPE, TEA.TEI, payload);
-});
-
 
 /* Delete */
 const TEAs_toDelete = getActionByOperationType(TEAs, DELETE);
 TEAs_toDelete.forEach((TEA) => {
     const payload = getTEApayload(TEA.TEI);
     logger.info(`Delete TEA ${TEA.TEA} (TEI ${TEA.TEI}), payload: ${JSON.stringify(payload)}`);
+    put_resource(TEA_TYPE, TEA.TEI, payload);
+});
+
+/* Create */
+const TEAs_toCreate = getActionByOperationType(TEAs, CREATE);
+TEAs_toCreate.forEach((TEA) => {
+    const payload = getTEApayload(TEA.TEI);
+    logger.info(`Create TEA ${TEA.TEA} (TEI ${TEA.TEI}), payload: ${JSON.stringify(payload)}`);
     put_resource(TEA_TYPE, TEA.TEI, payload);
 });
 
@@ -96,6 +94,14 @@ TEAs_toUpdate.forEach((TEA) => {
 
 /************** Enrollment actions upload *********************/
 
+/* Delete */
+const enrollments_to_delete = getActionByOperationType(enrollments, DELETE);
+enrollments_to_delete.forEach((enrollment) => {
+    const enrollment_uid = enrollment.uid
+    logger.info(`Delete enrollment ${enrollment_uid} (TEI ${enrollment.TEI})`);
+    delete_resource(ENROLLMENT_TYPE, enrollment_uid);
+});
+
 /* Create */
 const enrollments_to_create = getActionByOperationType(enrollments, CREATE);
 enrollments_to_create.forEach((enrollment) => {
@@ -103,14 +109,6 @@ enrollments_to_create.forEach((enrollment) => {
     const payload = get_enrollment_payload(enrollment.TEI, enrollment_uid);
     logger.info(`Create enrollment ${enrollment_uid} (TEI ${enrollment.TEI}), payload: ${JSON.stringify(payload)}`);
     post_resource(ENROLLMENT_TYPE, enrollment_uid, payload);
-});
-
-/* Delete */
-const enrollments_to_delete = getActionByOperationType(enrollments, DELETE);
-enrollments_to_delete.forEach((enrollment) => {
-    const enrollment_uid = enrollment.uid
-    logger.info(`Delete enrollment ${enrollment_uid} (TEI ${enrollment.TEI})`);
-    delete_resource(ENROLLMENT_TYPE, enrollment_uid);
 });
 
 /* Update */
@@ -125,6 +123,16 @@ enrollments_to_update.forEach((enrollment) => {
 
 /************** Events actions upload *********************/
 
+/* Delete */
+const events_to_delete = getActionByOperationType(events, DELETE);
+events_to_delete.forEach((event) => {
+    const event_uid = event.uid
+    const enrollment_uid = event.enrollment
+    const tei_uid = event.TEI
+    logger.info(`Delete event ${event_uid} (TEI ${tei_uid}) (enrollment ${enrollment_uid})`);
+    delete_resource(EVENT_TYPE, event_uid);
+});
+
 /* Create */
 const events_to_create = getActionByOperationType(events, CREATE);
 events_to_create.forEach((event) => {
@@ -134,16 +142,6 @@ events_to_create.forEach((event) => {
         const payload = get_event_payload(tei_uid, enrollment_uid, event_uid);
     logger.info(`Create event ${event_uid} (TEI ${tei_uid}) (enrollment ${enrollment_uid}), payload: ${JSON.stringify(payload)}`);
     post_resource(EVENT_TYPE, event_uid, payload);
-});
-
-/* Delete */
-const events_to_delete = getActionByOperationType(events, DELETE);
-events_to_delete.forEach((event) => {
-    const event_uid = event.uid
-    const enrollment_uid = event.enrollment
-    const tei_uid = event.TEI
-    logger.info(`Delete event ${event_uid} (TEI ${tei_uid}) (enrollment ${enrollment_uid})`);
-    delete_resource(EVENT_TYPE, event_uid);
 });
 
 /* Update */
@@ -162,18 +160,6 @@ events_to_update.forEach((event) => {
 
 // TODO. Y si enviar todos los campos del actual? Que pasa con los que estan deleted? probar con PUT y con POST
 
-/* Create */
-const dv_to_create = getActionByOperationType(DVs, CREATE);
-dv_to_create.forEach((dv) => {
-    const dv_de = dv.dataElement
-    const event_uid = dv.event
-    const enrollment_uid = dv.enrollment
-    const tei_uid = dv.TEI
-    const payload = get_dv_event_payload(tei_uid, enrollment_uid, event_uid, dv_de);
-    logger.info(`Create datavalue ${dv_de} event ${event_uid} (TEI ${tei_uid}) (enrollment ${enrollment_uid}), payload: ${JSON.stringify(payload)}`);
-    put_resource(DV_TYPE, event_uid+"/"+dv_de, payload);
-});
-
 /* Delete */
 //send the datavalue empty ("")
 const dv_to_delete = getActionByOperationType(DVs, DELETE);
@@ -184,6 +170,18 @@ dv_to_delete.forEach((dv) => {
     const tei_uid = dv.TEI
     const payload = get_dv_delete_event_payload(tei_uid, enrollment_uid, event_uid, dv_de);
     logger.info(`Delete datavalue ${dv_de} event ${event_uid} (TEI ${tei_uid}) (enrollment ${enrollment_uid}), payload: ${JSON.stringify(payload)}`);
+    put_resource(DV_TYPE, event_uid+"/"+dv_de, payload);
+});
+
+/* Create */
+const dv_to_create = getActionByOperationType(DVs, CREATE);
+dv_to_create.forEach((dv) => {
+    const dv_de = dv.dataElement
+    const event_uid = dv.event
+    const enrollment_uid = dv.enrollment
+    const tei_uid = dv.TEI
+    const payload = get_dv_event_payload(tei_uid, enrollment_uid, event_uid, dv_de);
+    logger.info(`Create datavalue ${dv_de} event ${event_uid} (TEI ${tei_uid}) (enrollment ${enrollment_uid}), payload: ${JSON.stringify(payload)}`);
     put_resource(DV_TYPE, event_uid+"/"+dv_de, payload);
 });
 
