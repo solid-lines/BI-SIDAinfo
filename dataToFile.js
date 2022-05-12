@@ -114,6 +114,13 @@ function formatData(source_id) {
 
         //Enrollments keys
         TEI.enrollments.forEach((enroll) => {
+
+            // due to https://jira.dhis2.org/browse/DHIS2-12285
+            if (enroll.deleted == true){
+                logger.warn(`Enrollment deleted: ${JSON.stringify(enroll)}`)
+                return;
+            }
+
             //Enrollment info
             var enrollmentLabel = getEnrollmentLabel(enroll);
             const programName = getProgramName(enroll.program)
@@ -137,8 +144,11 @@ function formatData(source_id) {
                 //Check stage
                 var stage = event.programStage;
                 if (typeof patient_code_uid[patient][enrollmentUID_label][stagesDict[stage]] === "undefined") {
-                    patient_code_uid[patient][enrollmentUID_label][stagesDict[stage]] = {}
-                    patient_code_uid[patient][enrollmentUID_label][stagesDict[stage]] = getEvents_format(enroll.events, stage);
+
+                    const evs = getEvents_format(enroll.events, stage)
+                    if (Object.keys(evs).length != 0){
+                        patient_code_uid[patient][enrollmentUID_label][stagesDict[stage]] = getEvents_format(enroll.events, stage);
+                    }
                 }
             });
         })
@@ -156,17 +166,18 @@ function formatData(source_id) {
 /******** FUNCTIONS  *******/
 
 function getPatientCode(TEI) {
-
     var attribute = TEI.attributes.filter(function (entry) {
         return entry.attribute === PATIENT_CODE_TEA;
     });
     return attribute[0].value;
 }
 
+
 function getEnrollmentLabel(enrollment) {
     var program = getProgramName(enrollment.program);
     return program + "_enrollment";
 }
+
 
 function getProgramName(programUID) {
     if (programUID === TARV_UID) {
@@ -183,6 +194,7 @@ function getEnrollmentUIDLabel(enroll) {
     var program = getProgramName(enroll.program);
     return program + "-" + enroll.enrollment;
 }
+
 
 function getEvents_format(events_data, stage) {
     var events = {};
@@ -201,7 +213,14 @@ function getEvents_format(events_data, stage) {
             date = event.eventDate;
         }
         obj[getDHIS2dateFormat(date)] = event.event;
-        Object.assign(events, obj)
+
+        // due to https://jira.dhis2.org/browse/DHIS2-12285
+        if (event.deleted == false){
+            Object.assign(events, obj)
+        } else {
+            logger.warn(`Event deleted: ${JSON.stringify(event)}`)
+        }
+        
     });
     return events;
 }
