@@ -11,4 +11,12 @@ function saveJSONFile(filename, json_data) {
     }
 }
 
-module.exports = {saveJSONFile};
+function wait(ms) {
+    var start = Date.now(),
+        now = start;
+    while (now - start < ms) {
+      now = Date.now();
+    }
+}
+
+module.exports = {saveJSONFile, wait};

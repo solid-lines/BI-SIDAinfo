@@ -4,7 +4,8 @@ const endpointConfig = require('./config.json');
 const { reject } = require("async");
 var fs = require('fs');
 var dataToFile = require('./dataToFile.js');
-const utils = require('./utils.js')
+const utils = require('./utils.js');
+const { exit } = require("process");
 
 //PROGRAMS
 const PROGRAM_TARV = "e3swbbSnbQ2";
@@ -20,11 +21,11 @@ const OU_MAPPING = {
     "003BDI013S010301": "IFiJar1g6y9", // Hôpital de Kibumbu
     "003BDI014S010120": "ZAZapFNLXru", // Centre Akabanga Ngozi
     "003BDI017S010401": "YIJAETW8k0a", // Centre Akabanga Bujumbura
-    "003BDI017S020203": "DLsHsaJhtnk", // Hôpital Militaire de Kamenge
+    "17020203": "DLsHsaJhtnk", // Hôpital Militaire de Kamenge
 };
 
 //TODO: provide orgUnit as an argument for retrieveDHISdata.js
-const SOURCE_ID = "003BDI017S020203"; //TODO: parametrizar
+const SOURCE_ID = "17020203"; //TODO: parametrizar
 const orgUnit = OU_MAPPING[SOURCE_ID];
 const parent_DHIS2data_folder = "PREVIOUS_DHIS2_data"
 const DHIS2data_folder = parent_DHIS2data_folder + "/" + SOURCE_ID
@@ -35,6 +36,11 @@ if (!fs.existsSync(DHIS2data_folder)) {
 } else {
     fs.rmSync(DHIS2data_folder, { recursive: true, force: true }); // remove directory and its content
     fs.mkdirSync(DHIS2data_folder);
+}
+
+if(typeof orgUnit === "undefined"){
+    logger.error(`There is no mapping to the org unit ${SOURCE_ID}`)
+    exit(-1)
 }
 
 main();
@@ -136,6 +142,8 @@ async function saveTEIs(orgUnit) {
     if (typeof tarv_teis === "undefined") {
         logger.error("No tarv TEIs retrieved");
     }
+
+    // TODO remove soft-deleted events: https://jira.dhis2.org/browse/DHIS2-12285
 
     try {
         logger.info("Saving enfant.json file")

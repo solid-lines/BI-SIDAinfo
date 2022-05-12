@@ -34,4 +34,30 @@ const logger_fr = winston.createLogger({
   ],
 });
 
-module.exports = {logger, logger_fr};
+const logger_upload = winston.createLogger({
+  level: 'debug',
+  format: winston.format.combine(
+ 
+    // winston.format.timestamp({
+    //   format: 'YYYY-MM-DD HH:mm:ss'
+    // }),
+    winston.format.json()
+  ),
+  transports: [
+    // - Write all logs with level `debug` and below to `SIDAInfo.log`
+    new winston.transports.File({ format: winston.format.simple(), filename: process.env.log_upload, level: 'debug', json: false }),
+    new winston.transports.Console({format: winston.format.simple(), level: 'info'})
+  ],
+});
+
+
+const logger_upload_fr = winston.createLogger({
+  level: 'warn',
+  format: winston.format.simple(),
+  transports: [
+    new winston.transports.File({ format: winston.format.simple(), filename: process.env.log_upload_fr, level: 'warn'})
+  ],
+});
+
+
+module.exports = {logger, logger_fr, logger_upload, logger_upload_fr};

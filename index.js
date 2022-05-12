@@ -222,7 +222,7 @@ logger.info(`TEIs to be created: ${teis_toBeCreated.length} (${teis_toBeCreated}
 logger.info(`TEIs to be deleted: ${teis_toBeDeleted.length} (${teis_toBeDeleted})`);
 logger.info(`TEIs to be updated: ${teis_toBeUpdated.length} (${teis_toBeUpdated})`);
 logger.info(`TEIs to be updated because of TEA difference: ${teis_toUpdateTEA.length} (${teis_toUpdateTEA})`);
-logger.info(`TEIs to be updated because of enrollment difference: ${teis_toUpdateEnroll.length} (${teis_toUpdateEnroll})`);
+logger.info(`TEIs to be updated because of enrollment difference (including change in events): ${teis_toUpdateEnroll.length} (${teis_toUpdateEnroll})`);
 logger.info(`Total TEIs (common + new - missing): ${commonTEIs_patientCodes.length + newTEIs_patientCodes.length - missingTEIs_patientCodes.length}`);
 /**
  * WRITE actions to file
@@ -587,7 +587,7 @@ function checkEnrollmentDifference(previous_TEI_file, current_TEI_file, enrollme
 
     var changed = false;
 
-    //Check enrollment events existence for each programStage
+    //Check enrollment existence for each programStage
     var programStages = [];
     var previous_enrollment_key = "";
     var current_enrollment_key = "";
@@ -951,6 +951,11 @@ function getDataValues(TEI_file, enrollment_uid, event_uid) {
 
     /***** Extract events info ******/
     //Events array
+    if (enrollment_uid == "qI6sxCauRF2") {
+        console.log(enrollment_uid)
+        console.log(enrollments_uids.indexOf(enrollment_uid))
+        console.log(enrollments_data)    
+    }
     var events = enrollments_data[enrollments_uids.indexOf(enrollment_uid)].events;
 
     //Events UIDs arrays
