@@ -5,10 +5,9 @@ const endpointConfig = require('./config.json');
 const utils = require('./utils.js');
 
 //TODO add await in requests
+function upload_data(SOURCE_OU_CODE) {
 
 /*********** Read actions.json ********/
-const SOURCE_OU_CODE = "17020203";//TODO: parametrizar
-const SOURCE_DATE = "2022_05_10";//TODO: parametrizar
 const ACTIONS_FOLDER = "actions/" + SOURCE_OU_CODE;
 const ACTIONS_FILE = "actions/" + SOURCE_OU_CODE + "/actions.json";
 
@@ -605,7 +604,7 @@ function get_dv_delete_event_payload(tei_uid, enrollment_uid, event_uid, de_uid)
 
 function readTEI(TEI_uid) {
     var TEI_file;
-    const TEI_fileName = "./teis/" + SOURCE_OU_CODE + "_" + SOURCE_DATE + "/" + TEI_uid + ".json";
+    const TEI_fileName = `./GENERATED_data/teis/${SOURCE_OU_CODE}/${TEI_uid}.json`;
     if (!fs.existsSync(TEI_fileName)) {
         logger_upload.error(`FileError; TEI file (${TEI_fileName}) doesn't exist`)
     } else {
@@ -613,4 +612,9 @@ function readTEI(TEI_uid) {
     }
 
     return TEI_file;
+}
+}
+
+module.exports = {
+    upload_data
 }

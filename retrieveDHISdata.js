@@ -7,28 +7,20 @@ var dataToFile = require('./dataToFile.js');
 const utils = require('./utils.js');
 const { exit } = require("process");
 
+function retrieve_data(SOURCE_OU_CODE) {
+
 //PROGRAMS
 const PROGRAM_TARV = "e3swbbSnbQ2";
 const PROGRAM_PTME_MERE = "MVooF5iCp8L";
 const PROGRAM_PTME_ENFANT = "PiXg9cX1i0y";
 
-//ORGUNITS
-const OU_MAPPING = {
-    "003BDI003S010912": "FG6tYYTDf5d", // Centre Akabanga Rumonge
-    "003BDI006S010120": "g9r6PbRYVAi", // Centre Akabanga Gitega
-    "003BDI010S020502": "nniW4f9J1tB", // Centre Akabanga Nyanza-Lac
-    "003BDI012S010120": "yW1SToCNaYm", // Centre Akabanga Muyinga
-    "003BDI013S010301": "IFiJar1g6y9", // Hôpital de Kibumbu
-    "003BDI014S010120": "ZAZapFNLXru", // Centre Akabanga Ngozi
-    "003BDI017S010401": "YIJAETW8k0a", // Centre Akabanga Bujumbura
-    "17020203": "DLsHsaJhtnk", // Hôpital Militaire de Kamenge
-};
+const ou_mapping_filename='./ou_mapping.json'
+const rawdata = fs.readFileSync(ou_mapping_filename);
+const OU_MAPPING = JSON.parse(rawdata);
 
-//TODO: provide orgUnit as an argument for retrieveDHISdata.js
-const SOURCE_ID = "17020203"; //TODO: parametrizar
-const orgUnit = OU_MAPPING[SOURCE_ID];
+const orgUnit = OU_MAPPING[SOURCE_OU_CODE];
 const parent_DHIS2data_folder = "PREVIOUS_DHIS2_data"
-const DHIS2data_folder = parent_DHIS2data_folder + "/" + SOURCE_ID
+const DHIS2data_folder = parent_DHIS2data_folder + "/" + SOURCE_OU_CODE
 
 //check if folder exists. If not, create it. If yes, remove directory & create it again
 if (!fs.existsSync(DHIS2data_folder)) {
@@ -39,7 +31,7 @@ if (!fs.existsSync(DHIS2data_folder)) {
 }
 
 if(typeof orgUnit === "undefined"){
-    logger.error(`There is no mapping to the org unit ${SOURCE_ID}`)
+    logger.error(`There is no mapping to the org unit ${SOURCE_OU_CODE}`)
     exit(-1)
 }
 
@@ -47,10 +39,11 @@ main();
 
 //Main
 async function main() {
+    logger.info(`Retrieving SIDAinfo data from OU ${SOURCE_OU_CODE} (${orgUnit}) and server ${endpointConfig.dhisServer}`)
     await saveTEIs(orgUnit).catch((err) => {
         logger.error(err)
     });;
-    dataToFile.formatData(SOURCE_ID);
+    dataToFile.formatData(SOURCE_OU_CODE);
 }
 
 
@@ -72,7 +65,6 @@ async function getTEIs(programUID, orgUnit) {
                 },
                 auth: endpointConfig.dhisUser + ':' + endpointConfig.dhisPass
             };
-            logger.info(JSON.stringify(optionsgetmsg))
 
             // do the GET request
             let reqGet = https.request(optionsgetmsg, function (res) {
@@ -114,17 +106,17 @@ async function getTEIs(programUID, orgUnit) {
 async function saveTEIs(orgUnit) {
     //Get TEIs from 3 programs for a given orgUnit
     logger.info("Retrieving enfant_teis")
-    const enfant_teis = await getTEIs(PROGRAM_PTME_ENFANT, orgUnit).catch((err) => {
+    let enfant_teis = await getTEIs(PROGRAM_PTME_ENFANT, orgUnit).catch((err) => {
         logger.error(err)
     });
 
     logger.info("Retrieving mere_teis")
-    const mere_teis = await getTEIs(PROGRAM_PTME_MERE, orgUnit).catch((err) => {
+    let mere_teis = await getTEIs(PROGRAM_PTME_MERE, orgUnit).catch((err) => {
         logger.error(err)
     });
 
     logger.info("Retrieving tarv_teis")
-    const tarv_teis = await getTEIs(PROGRAM_TARV, orgUnit).catch((err) => {
+    let tarv_teis = await getTEIs(PROGRAM_TARV, orgUnit).catch((err) => {
         logger.error(err)
     });
 
@@ -134,13 +126,16 @@ async function saveTEIs(orgUnit) {
     const TARV_DHIS2_FILE = DHIS2data_folder + "/tarv.json";
 
     if (typeof enfant_teis === "undefined"){
-        logger.error("No enfant TEIs retrieved");
+        logger.warn("No enfant TEIs retrieved");
+        enfant_teis = []
     }
     if (typeof mere_teis === "undefined") {
-        logger.error("No mere TEIs retrieved");
+        logger.warn("No mere TEIs retrieved");
+        mere_teis = []
     }
     if (typeof tarv_teis === "undefined") {
-        logger.error("No tarv TEIs retrieved");
+        logger.warn("No tarv TEIs retrieved");
+        tarv_teis = []
     }
 
     // TODO remove soft-deleted events: https://jira.dhis2.org/browse/DHIS2-12285
@@ -156,4 +151,9 @@ async function saveTEIs(orgUnit) {
         // An error occurred
         logger.error(err);
     }
+}
+}
+
+module.exports = {
+    retrieve_data
 }

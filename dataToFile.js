@@ -89,6 +89,7 @@ function formatData(source_id) {
     //DHIS2 retrieved data
     var dhis_data = [];
     var patient_code_uid = {};
+
     //***** READ FILES ******/
     var enfant_data = JSON.parse(fs.readFileSync(ENFANT_FILE));
     var mere_data = JSON.parse(fs.readFileSync(MERE_FILE));
@@ -117,7 +118,7 @@ function formatData(source_id) {
 
             // due to https://jira.dhis2.org/browse/DHIS2-12285
             if (enroll.deleted == true){
-                logger.warn(`Enrollment deleted: ${JSON.stringify(enroll)}`)
+                logger.debug(`Enrollment deleted: ${JSON.stringify(enroll)}`)
                 return;
             }
 
@@ -212,13 +213,20 @@ function getEvents_format(events_data, stage) {
         } else {
             date = event.eventDate;
         }
-        obj[getDHIS2dateFormat(date)] = event.event;
+
+        if(typeof date === "undefined"){
+            logger.error("Unexpected format: event without date")
+            logger.error(JSON.stringify(event))
+        } else {
+            obj[getDHIS2dateFormat(date)] = event.event;
+        }
+        
 
         // due to https://jira.dhis2.org/browse/DHIS2-12285
         if (event.deleted == false){
             Object.assign(events, obj)
         } else {
-            logger.warn(`Event deleted: ${JSON.stringify(event)}`)
+            logger.debug(`Event deleted: ${JSON.stringify(event)}`)
         }
         
     });
