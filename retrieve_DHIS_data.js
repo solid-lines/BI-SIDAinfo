@@ -3,7 +3,7 @@ const { logger } = require('./logger.js');
 const endpointConfig = require('./config.json');
 const { reject } = require("async");
 var fs = require('fs');
-var dhis2_to_script_file = require('./dhis2_to_script_file.js');
+var dhis2_to_script_file = require('./dhis2_to_script_files.js');
 const utils = require('./utils.js');
 const { exit } = require("process");
 
