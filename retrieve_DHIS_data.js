@@ -1,6 +1,5 @@
 const https = require("https");
 const { logger } = require('./logger.js');
-const { reject } = require("async");
 var fs = require('fs');
 var dhis2_to_script_file = require('./dhis2_to_script_files.js');
 const utils = require('./utils.js');
