@@ -80,139 +80,145 @@ const DV_TYPE = "DV";
 const PREVIOUS_FOLDER = "PREVIOUS_DHIS2_data"
 const CURRENT_FOLDER = "GENERATED_data"
 
-function generate_diff(SOURCE_OU_CODE){
+function generate_diff(SOURCE_OU_CODE) {
     try{
-        logger_diff.info(`Running diff for ${SOURCE_OU_CODE}`)
-        /**
-         * Read input files
-         */
-        const PATIENT_DUMP_PREVIOUS_FILE = "./" + PREVIOUS_FOLDER + "/" + SOURCE_OU_CODE + "/previous_all_patient_index.json";
-        logger_diff.info(PATIENT_DUMP_PREVIOUS_FILE)
-        if (!fs.existsSync(PATIENT_DUMP_PREVIOUS_FILE)) {
-            logger_diff.error(`ArgError; Patient_uid_file (${PATIENT_DUMP_PREVIOUS_FILE}) from previous data dump doesn't exist`)
-        } else {
-            var previous_all_patient_index = JSON.parse(fs.readFileSync(PATIENT_DUMP_PREVIOUS_FILE))
-        }
-
-        //const PATIENT_UID_FILE_CURRENT = SOURCE_DATE_CURRENT + "-" + SOURCE_OU_CODE + "-patient_code_uid.json";
-        const PATIENT_DUMP_CURRENT_FILE = "./" + CURRENT_FOLDER + "/current_all_patient_index.json";
-
-
-        if (!fs.existsSync(PATIENT_DUMP_CURRENT_FILE)) {
-            logger_diff.error(`ArgError; Patient_uid_file (${PATIENT_DUMP_CURRENT_FILE}) from current data dump doesn't exist`)
-        } else {
-            var current_all_patient_index = JSON.parse(fs.readFileSync(PATIENT_DUMP_CURRENT_FILE))
-        }
-
-        //Files
-        const TEIS_FILE = "./" + PREVIOUS_FOLDER + "/" + SOURCE_OU_CODE + "/teis.json";
-        var dhis_teis;
-        if (!fs.existsSync(TEIS_FILE)) {
-            logger_diff.error(`ArgError; TEIs file (${TEIS_FILE}) from dhis data doesn't exist`)
-        } else {
-            dhis_teis = JSON.parse(fs.readFileSync(TEIS_FILE))
-        }
-
-        /**************************************************************************/
-
-        var listOfActions = [];
-
-        /**
-         * TEIS
-         */
-
-        var changed_TEIs = false;
-
-        //List of TEIs codepatient
-        var teis_toBeUpdated = [];
-        var teis_toBeCreated = [];
-        var teis_toBeDeleted = [];
-
-        var previousTEIs_PatientCodes = Object.keys(previous_all_patient_index);
-        var currentTEIs_PatientCodes = Object.keys(current_all_patient_index);
-
-        var newTEIs_patientCodes = _.difference(currentTEIs_PatientCodes, previousTEIs_PatientCodes);
-        var missingTEIs_patientCodes = _.difference(previousTEIs_PatientCodes, currentTEIs_PatientCodes);
-        var commonTEIs_patientCodes = _.intersection(previousTEIs_PatientCodes, currentTEIs_PatientCodes);
-        /*logger_diff.info(`TEIs list from PREVIOUS data dump: ${previousTEIs_PatientCodes}`);
-        logger_diff.info(`TEIs list from CURRENT data dump: ${currentTEIs_PatientCodes}`);*/
-
-        // CREATE TEIs
-        newTEIs_patientCodes.forEach((TEI) => {
-            changed_TEIs = true;
-            teis_toBeCreated.push(TEI);
-            const patient_uid = current_all_patient_index[TEI].uid;
-            
-            var dict = getAction_TEI(CREATE, TEI);
-            dict.uid = patient_uid;
-            listOfActions.push(dict);
-            logger_diff.info(`TEI_CREATE; Patient ${TEI} (${patient_uid}) will be created. Not present in previous data dump`);
-        })
-
-        // DELETE TEIs
-        missingTEIs_patientCodes.forEach((TEI) => {
-            changed_TEIs = true;
-            teis_toBeDeleted.push(TEI);
-            const patient_uid = previous_all_patient_index[TEI].uid;
-            
-            var dict = getAction_TEI(DELETE, TEI);
-            dict.uid = patient_uid;
-            listOfActions.push(dict);
-            logger_diff.info(`TEI_DELETE; Patient ${TEI} (${patient_uid}) will be deleted from DHIS2 server; Not present in new data dump`);
-        });
-
-        var teis_toUpdateTEA = [];
-        var teis_toUpdateEnroll = [];
-
-        commonTEIs_patientCodes.forEach((TEI) => {
-            var changes = checkTEIDifference(TEI);
-            changed_TEIs = changes.changed_TEI;
-            if (changed_TEIs) {
-                teis_toBeUpdated.push(TEI);
-                if (changes.changed_TEA) {
-                    teis_toUpdateTEA.push(previous_all_patient_index[TEI].uid);
-                }
-                if (changes.changed_enroll) {
-                    teis_toUpdateEnroll.push(TEI);
-                }
-
-            }
-        })
-
-        //Statistics
-        logger_diff.info(`TEIs to be created: ${teis_toBeCreated.length} (${teis_toBeCreated})`);
-        logger_diff.info(`TEIs to be deleted: ${teis_toBeDeleted.length} (${teis_toBeDeleted})`);
-        logger_diff.info(`TEIs to be updated: ${teis_toBeUpdated.length} (${teis_toBeUpdated})`);
-        logger_diff.info(`TEIs to be updated because of TEA difference: ${teis_toUpdateTEA.length} (${teis_toUpdateTEA})`);
-        logger_diff.info(`TEIs to be updated because of enrollment difference (including change in events): ${teis_toUpdateEnroll.length} (${teis_toUpdateEnroll})`);
-        logger_diff.info(`Total TEIs (common + new - missing): ${commonTEIs_patientCodes.length + newTEIs_patientCodes.length - missingTEIs_patientCodes.length}`);
-        /**
-         * WRITE actions to file
-         */
-        const ACTIONS_FOLDER = "actions"
-        const ACTIONS_LIST_FILE = `./${ACTIONS_FOLDER}/${SOURCE_OU_CODE}/actions.json`
-        const ACTIONS_FOLDER_OU_CODE = `./${ACTIONS_FOLDER}/${SOURCE_OU_CODE}`
-
-        //check if folder exists. If not, create it
-        if (!fs.existsSync(ACTIONS_FOLDER)) {
-            fs.mkdirSync(ACTIONS_FOLDER);
-        }
-
-        //check if folder exists. If not, create it
-        if (!fs.existsSync(ACTIONS_FOLDER_OU_CODE)) {
-            fs.mkdirSync(ACTIONS_FOLDER_OU_CODE);
-        }
-
-        try {
-            utils.saveJSONFile(ACTIONS_LIST_FILE, listOfActions);
-        } catch (err) {
-            // An error occurred
-            logger_diff.error(err);
-        }
+        generate_diff_complete(SOURCE_OU_CODE)
     } catch (error) {
         logger_diff.error(error.stack)
         process.exitCode = 1;
     }
+}
+
+
+function generate_diff_complete(SOURCE_OU_CODE){
+    logger_diff.info(`Running diff for ${SOURCE_OU_CODE}`)
+    /**
+     * Read input files
+     */
+    const PATIENT_DUMP_PREVIOUS_FILE = "./" + PREVIOUS_FOLDER + "/" + SOURCE_OU_CODE + "/previous_all_patient_index.json";
+    logger_diff.info(PATIENT_DUMP_PREVIOUS_FILE)
+    if (!fs.existsSync(PATIENT_DUMP_PREVIOUS_FILE)) {
+        logger_diff.error(`ArgError; Patient_uid_file (${PATIENT_DUMP_PREVIOUS_FILE}) from previous data dump doesn't exist`)
+    } else {
+        var previous_all_patient_index = JSON.parse(fs.readFileSync(PATIENT_DUMP_PREVIOUS_FILE))
+    }
+
+    //const PATIENT_UID_FILE_CURRENT = SOURCE_DATE_CURRENT + "-" + SOURCE_OU_CODE + "-patient_code_uid.json";
+    const PATIENT_DUMP_CURRENT_FILE = "./" + CURRENT_FOLDER + "/current_all_patient_index.json";
+
+
+    if (!fs.existsSync(PATIENT_DUMP_CURRENT_FILE)) {
+        logger_diff.error(`ArgError; Patient_uid_file (${PATIENT_DUMP_CURRENT_FILE}) from current data dump doesn't exist`)
+    } else {
+        var current_all_patient_index = JSON.parse(fs.readFileSync(PATIENT_DUMP_CURRENT_FILE))
+    }
+
+    //Files
+    const TEIS_FILE = "./" + PREVIOUS_FOLDER + "/" + SOURCE_OU_CODE + "/teis.json";
+    var dhis_teis;
+    if (!fs.existsSync(TEIS_FILE)) {
+        logger_diff.error(`ArgError; TEIs file (${TEIS_FILE}) from dhis data doesn't exist`)
+    } else {
+        dhis_teis = JSON.parse(fs.readFileSync(TEIS_FILE))
+    }
+
+    /**************************************************************************/
+
+    var listOfActions = [];
+
+    /**
+     * TEIS
+     */
+
+    var changed_TEIs = false;
+
+    //List of TEIs codepatient
+    var teis_toBeUpdated = [];
+    var teis_toBeCreated = [];
+    var teis_toBeDeleted = [];
+
+    var previousTEIs_PatientCodes = Object.keys(previous_all_patient_index);
+    var currentTEIs_PatientCodes = Object.keys(current_all_patient_index);
+
+    var newTEIs_patientCodes = _.difference(currentTEIs_PatientCodes, previousTEIs_PatientCodes);
+    var missingTEIs_patientCodes = _.difference(previousTEIs_PatientCodes, currentTEIs_PatientCodes);
+    var commonTEIs_patientCodes = _.intersection(previousTEIs_PatientCodes, currentTEIs_PatientCodes);
+    /*logger_diff.info(`TEIs list from PREVIOUS data dump: ${previousTEIs_PatientCodes}`);
+    logger_diff.info(`TEIs list from CURRENT data dump: ${currentTEIs_PatientCodes}`);*/
+
+    // CREATE TEIs
+    newTEIs_patientCodes.forEach((TEI) => {
+        changed_TEIs = true;
+        teis_toBeCreated.push(TEI);
+        const patient_uid = current_all_patient_index[TEI].uid;
+        
+        var dict = getAction_TEI(CREATE, TEI);
+        dict.uid = patient_uid;
+        listOfActions.push(dict);
+        logger_diff.info(`TEI_CREATE; Patient ${TEI} (${patient_uid}) will be created. Not present in previous data dump`);
+    })
+
+    // DELETE TEIs
+    missingTEIs_patientCodes.forEach((TEI) => {
+        changed_TEIs = true;
+        teis_toBeDeleted.push(TEI);
+        const patient_uid = previous_all_patient_index[TEI].uid;
+        
+        var dict = getAction_TEI(DELETE, TEI);
+        dict.uid = patient_uid;
+        listOfActions.push(dict);
+        logger_diff.info(`TEI_DELETE; Patient ${TEI} (${patient_uid}) will be deleted from DHIS2 server; Not present in new data dump`);
+    });
+
+    var teis_toUpdateTEA = [];
+    var teis_toUpdateEnroll = [];
+
+    commonTEIs_patientCodes.forEach((TEI) => {
+        var changes = checkTEIDifference(TEI);
+        changed_TEIs = changes.changed_TEI;
+        if (changed_TEIs) {
+            teis_toBeUpdated.push(TEI);
+            if (changes.changed_TEA) {
+                teis_toUpdateTEA.push(previous_all_patient_index[TEI].uid);
+            }
+            if (changes.changed_enroll) {
+                teis_toUpdateEnroll.push(TEI);
+            }
+
+        }
+    })
+
+    //Statistics
+    logger_diff.info(`TEIs to be created: ${teis_toBeCreated.length} (${teis_toBeCreated})`);
+    logger_diff.info(`TEIs to be deleted: ${teis_toBeDeleted.length} (${teis_toBeDeleted})`);
+    logger_diff.info(`TEIs to be updated: ${teis_toBeUpdated.length} (${teis_toBeUpdated})`);
+    logger_diff.info(`TEIs to be updated because of TEA difference: ${teis_toUpdateTEA.length} (${teis_toUpdateTEA})`);
+    logger_diff.info(`TEIs to be updated because of enrollment difference (including change in events): ${teis_toUpdateEnroll.length} (${teis_toUpdateEnroll})`);
+    logger_diff.info(`Total TEIs (common + new - missing): ${commonTEIs_patientCodes.length + newTEIs_patientCodes.length - missingTEIs_patientCodes.length}`);
+    /**
+     * WRITE actions to file
+     */
+    const ACTIONS_FOLDER = "actions"
+    const ACTIONS_LIST_FILE = `./${ACTIONS_FOLDER}/${SOURCE_OU_CODE}/actions.json`
+    const ACTIONS_FOLDER_OU_CODE = `./${ACTIONS_FOLDER}/${SOURCE_OU_CODE}`
+
+    //check if folder exists. If not, create it
+    if (!fs.existsSync(ACTIONS_FOLDER)) {
+        fs.mkdirSync(ACTIONS_FOLDER);
+    }
+
+    //check if folder exists. If not, create it
+    if (!fs.existsSync(ACTIONS_FOLDER_OU_CODE)) {
+        fs.mkdirSync(ACTIONS_FOLDER_OU_CODE);
+    }
+
+    try {
+        utils.saveJSONFile(ACTIONS_LIST_FILE, listOfActions);
+    } catch (err) {
+        // An error occurred
+        logger_diff.error(err);
+    }
+
 
     // AND NOW, all the definition of the functions.
 

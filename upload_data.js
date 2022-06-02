@@ -3,8 +3,18 @@ var fs = require('fs');
 const { logger_upload } = require('./logger.js');
 const utils = require('./utils.js');
 
-//TODO add await in requests
+
 function upload_data(SOURCE_OU_CODE) {
+    try{
+        upload_data_complete(SOURCE_OU_CODE)
+    } catch (error) {
+        logger_upload.error(error.stack)
+        process.exitCode = 1;
+    }
+}
+
+//TODO add await in requests
+function upload_data_complete(SOURCE_OU_CODE) {
     logger_upload.info(`Running upload for ${SOURCE_OU_CODE}`)
 
     const endpoint_filename='./config.json'

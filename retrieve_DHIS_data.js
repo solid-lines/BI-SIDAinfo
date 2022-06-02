@@ -4,9 +4,18 @@ const { reject } = require("async");
 var fs = require('fs');
 var dhis2_to_script_file = require('./dhis2_to_script_files.js');
 const utils = require('./utils.js');
-const { exit } = require("process");
 
 function retrieve_data(SOURCE_OU_CODE) {
+    try{
+        retrieve_data_complete(SOURCE_OU_CODE)
+    } catch (error) {
+        logger.error(error.stack)
+        process.exitCode = 1;
+    }
+}
+
+
+function retrieve_data_complete(SOURCE_OU_CODE) {
     logger.info(`Running retrieve for ${SOURCE_OU_CODE}`)
 
     //PROGRAMS
@@ -39,7 +48,7 @@ function retrieve_data(SOURCE_OU_CODE) {
 
     if(typeof orgUnit === "undefined"){
         logger.error(`There is no mapping to the org unit ${SOURCE_OU_CODE}`)
-        exit(-1)
+        process.exitCode = 1;
     }
 
     main();
@@ -81,11 +90,16 @@ function retrieve_data(SOURCE_OU_CODE) {
                     }).on('end', function () {
                         let body = Buffer.concat(bodyChunks);
                         let myJSONParse = JSON.parse(body);
-
-                        if (myJSONParse.length != 0) {
+                        if (res.statusCode != 200) {
+                            logger.error(`response statusCode=${res.statusCode}`)
+                            logger.error(body)
+                            TEIs = "";
+                            resolve(TEIs)                            
+                        } else if (myJSONParse.length != 0) {
                             TEIs = myJSONParse.trackedEntityInstances;
                             resolve(TEIs)
                         } else {
+                            logger.error(body)
                             TEIs = "";
                             resolve(TEIs)
                         }
@@ -97,14 +111,13 @@ function retrieve_data(SOURCE_OU_CODE) {
                 reqGet.on('error', function (e) {
                     logger.error(e);
                     TEIs = "";
-                    //resolve({ enrolledTEIs: TEIs })
-                    reject(e)
+                    resolve(TEIs)
                 });
 
             } catch (error) {
+                logger.error(error);
                 TEIs = "";
-                //resolve({ enrolledTEIs: TEIs })
-                reject(e)
+                resolve(TEIs)
             }
         });
     }
