@@ -1,7 +1,6 @@
 const yargs = require('yargs');
-const { logger, logger_fr } = require('./logger.js');
-const diff = require("./diff.js");
 const retrieve = require("./retrieveDHISdata.js");
+const diff = require("./diff.js");
 const upload = require("./uploadData.js");
 
 /**************************************/
@@ -16,7 +15,7 @@ const argv = yargs
             alias: ['o', 'ou'],
             type: 'text'        }
     })
-    .command('diff', 'Generate diff changes log from a given Organization Unit (Health Facility) and two Export Dates (previous data dump and current data dump)', {
+    .command('diff', 'Generate diff changes file from a given Organization Unit (Health Facility) and two Export Dates (previous data dump and current data dump)', {
         org_unit: {
             description: 'the Organization Unit code (e.g. 17020203)',
             alias: ['o', 'ou'],
@@ -40,19 +39,15 @@ const argv = yargs
 /**
  * Parsing arguments
  */
-let SOURCE_OU_CODE;
 if (argv._.includes('diff')) {
-    SOURCE_OU_CODE = argv.org_unit;
+    const SOURCE_OU_CODE = argv.org_unit;
     diff.generate_diff(SOURCE_OU_CODE)
 } else if (argv._.includes('retrieve')) {
-    SOURCE_OU_CODE = argv.org_unit;
+    const SOURCE_OU_CODE = argv.org_unit;
     retrieve.retrieve_data(SOURCE_OU_CODE)
 } else if (argv._.includes('upload')) {
-    SOURCE_OU_CODE = argv.org_unit;
+    const SOURCE_OU_CODE = argv.org_unit;
     upload.upload_data(SOURCE_OU_CODE)
 } else {
     process.exit(1)
 }
-
-/**************************************/
-

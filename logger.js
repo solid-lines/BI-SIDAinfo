@@ -26,14 +26,6 @@ const logger = winston.createLogger({
 });
 
 
-const logger_fr = winston.createLogger({
-  level: 'warn',
-  format: winston.format.simple(),
-  transports: [
-    new winston.transports.File({ format: winston.format.simple(), filename: process.env.logErrorFR, level: 'warn'})
-  ],
-});
-
 const logger_upload = winston.createLogger({
   level: 'debug',
   format: winston.format.combine(
@@ -50,14 +42,6 @@ const logger_upload = winston.createLogger({
   ],
 });
 
-
-const logger_upload_fr = winston.createLogger({
-  level: 'warn',
-  format: winston.format.simple(),
-  transports: [
-    new winston.transports.File({ format: winston.format.simple(), filename: process.env.log_upload_fr, level: 'warn'})
-  ],
-});
 
 const logger_diff = winston.createLogger({
   level: 'debug',
@@ -76,4 +60,4 @@ const logger_diff = winston.createLogger({
 });
 
 
-module.exports = {logger, logger_fr, logger_diff, logger_upload, logger_upload_fr};
+module.exports = {logger, logger_diff, logger_upload};

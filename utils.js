@@ -1,5 +1,5 @@
 var fs = require('fs');
-const { logger, logger_fr } = require('./logger.js');
+const { logger } = require('./logger.js');
 
 /*** Utils ***/
 function saveJSONFile(filename, json_data) {

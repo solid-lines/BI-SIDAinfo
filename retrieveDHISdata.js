@@ -1,5 +1,5 @@
 const https = require("https");
-const { logger, logger_fr } = require('./logger.js');
+const { logger } = require('./logger.js');
 const endpointConfig = require('./config.json');
 const { reject } = require("async");
 var fs = require('fs');

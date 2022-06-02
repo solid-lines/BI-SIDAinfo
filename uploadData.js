@@ -1,6 +1,6 @@
 const axios = require('axios');
 var fs = require('fs');
-const { logger_upload, logger_upload_fr } = require('./logger.js');
+const { logger_upload } = require('./logger.js');
 const endpointConfig = require('./config.json');
 const utils = require('./utils.js');
 
