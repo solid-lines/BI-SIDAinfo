@@ -1,11 +1,15 @@
 const axios = require('axios');
 var fs = require('fs');
 const { logger_upload } = require('./logger.js');
-const endpointConfig = require('./config.json');
 const utils = require('./utils.js');
 
 //TODO add await in requests
 function upload_data(SOURCE_OU_CODE) {
+    logger_upload.info(`Running upload for ${SOURCE_OU_CODE}`)
+
+    const endpoint_filename='./config.json'
+    const endpoint_rawdata = fs.readFileSync(endpoint_filename);
+    const endpointConfig = JSON.parse(endpoint_rawdata);    
 
     /*********** Read actions.json ********/
     const ACTIONS_FOLDER = "actions/" + SOURCE_OU_CODE;

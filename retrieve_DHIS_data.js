@@ -1,6 +1,5 @@
 const https = require("https");
 const { logger } = require('./logger.js');
-const endpointConfig = require('./config.json');
 const { reject } = require("async");
 var fs = require('fs');
 var dhis2_to_script_file = require('./dhis2_to_script_files.js');
@@ -8,11 +7,16 @@ const utils = require('./utils.js');
 const { exit } = require("process");
 
 function retrieve_data(SOURCE_OU_CODE) {
+    logger.info(`Running retrieve for ${SOURCE_OU_CODE}`)
 
     //PROGRAMS
     const PROGRAM_TARV = "e3swbbSnbQ2";
     const PROGRAM_PTME_MERE = "MVooF5iCp8L";
     const PROGRAM_PTME_ENFANT = "PiXg9cX1i0y";
+
+    const endpoint_filename='./config.json'
+    const endpoint_rawdata = fs.readFileSync(endpoint_filename);
+    const endpointConfig = JSON.parse(endpoint_rawdata);
 
     const ou_mapping_filename='./ou_mapping.json'
     const rawdata = fs.readFileSync(ou_mapping_filename);
@@ -23,7 +27,10 @@ function retrieve_data(SOURCE_OU_CODE) {
     const DHIS2data_folder = parent_DHIS2data_folder + "/" + SOURCE_OU_CODE
 
     //check if folder exists. If not, create it. If yes, remove directory & create it again
-    if (!fs.existsSync(DHIS2data_folder)) {
+    if (!fs.existsSync(parent_DHIS2data_folder)) {
+        fs.mkdirSync(parent_DHIS2data_folder);
+        fs.mkdirSync(DHIS2data_folder);
+    } else if (!fs.existsSync(DHIS2data_folder)) {
         fs.mkdirSync(DHIS2data_folder);
     } else {
         fs.rmSync(DHIS2data_folder, { recursive: true, force: true }); // remove directory and its content
@@ -141,11 +148,11 @@ function retrieve_data(SOURCE_OU_CODE) {
         // TODO remove soft-deleted events: https://jira.dhis2.org/browse/DHIS2-12285
 
         try {
-            logger.info("Saving enfant.json file")
+            logger.info(`Saving ${ENFANT_DHIS2_FILE} file`)
             utils.saveJSONFile(ENFANT_DHIS2_FILE, enfant_teis);
-            logger.info("Saving mere.json file")
+            logger.info(`Saving ${MERE_DHIS2_FILE} file`)
             utils.saveJSONFile(MERE_DHIS2_FILE, mere_teis);
-            logger.info("Saving tarv.json file")
+            logger.info(`Saving ${TARV_DHIS2_FILE} file`)
             utils.saveJSONFile(TARV_DHIS2_FILE, tarv_teis);
         } catch (err) {
             // An error occurred

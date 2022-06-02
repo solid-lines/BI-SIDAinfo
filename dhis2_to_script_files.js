@@ -157,9 +157,9 @@ function generate_patient_index_and_teis(source_id) {
 
 
     //Main
-    logger.info("Saving teis.json file")
+    logger.info(`Saving ${TEIS_FILE} file`)
     utils.saveJSONFile(TEIS_FILE, dhis_data);
-    logger.info("Saving patient_code_uid.json file")
+    logger.info(`Saving ${PATIENT_CODE_UID} file`)
     utils.saveJSONFile(PATIENT_CODE_UID, patient_code_uid);
 
 }

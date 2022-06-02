@@ -189,12 +189,18 @@ function generate_diff(SOURCE_OU_CODE){
         /**
          * WRITE actions to file
          */
-        const ACTIONS_LIST_FILE = "./actions/" + SOURCE_OU_CODE + "/actions.json";
-        const ACTIONS_FOLDER = "actions/" + SOURCE_OU_CODE;
+        const ACTIONS_FOLDER = "actions"
+        const ACTIONS_LIST_FILE = `./${ACTIONS_FOLDER}/${SOURCE_OU_CODE}/actions.json`
+        const ACTIONS_FOLDER_OU_CODE = `./${ACTIONS_FOLDER}/${SOURCE_OU_CODE}`
 
         //check if folder exists. If not, create it
         if (!fs.existsSync(ACTIONS_FOLDER)) {
             fs.mkdirSync(ACTIONS_FOLDER);
+        }
+
+        //check if folder exists. If not, create it
+        if (!fs.existsSync(ACTIONS_FOLDER_OU_CODE)) {
+            fs.mkdirSync(ACTIONS_FOLDER_OU_CODE);
         }
 
         try {
