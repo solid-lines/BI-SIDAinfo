@@ -1,7 +1,5 @@
 {
-    "type": "endpoint",
-    "name": "development",
-    "dhisServer": "server.name",
+    "dhisServer": "dev.psi-mis.org",
     "dhisUser": "user",
     "dhisPass": "pwd"
 }
