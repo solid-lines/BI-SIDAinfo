@@ -5,3 +5,4 @@ node_modules
 current_all_patient_index.json
 config.json
 actions.json
+ou_mapping.json
