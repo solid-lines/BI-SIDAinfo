@@ -3,7 +3,7 @@ const { logger } = require('./logger.js');
 const endpointConfig = require('./config.json');
 const { reject } = require("async");
 var fs = require('fs');
-var dataToFile = require('./dataToFile.js');
+var dhis2_to_script_file = require('./dhis2_to_script_file.js');
 const utils = require('./utils.js');
 const { exit } = require("process");
 
@@ -43,7 +43,7 @@ function retrieve_data(SOURCE_OU_CODE) {
         await saveTEIs(orgUnit).catch((err) => {
             logger.error(err)
         });;
-        dataToFile.formatData(SOURCE_OU_CODE);
+        dhis2_to_script_file.generate_patient_index_and_teis(SOURCE_OU_CODE);
     }
 
 

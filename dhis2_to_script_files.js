@@ -70,7 +70,7 @@ stagesDict[PROGRAMSTAGE_PTME_ENFANT_PCR_SUIVI] = PROGRAMSTAGE_PTME_ENFANT_PCR_SU
 stagesDict[PROGRAMSTAGE_PTME_ENFANT_SORTIE] = PROGRAMSTAGE_PTME_ENFANT_SORTIE_LABEL
 
 
-function formatData(source_id) {
+function generate_patient_index_and_teis(source_id) {
 
     logger.info("Processing retrieved data")
 
@@ -238,4 +238,4 @@ function getDHIS2dateFormat(date) {
     return date.substr(0, 10);
 }
 
-module.exports = { formatData };
+module.exports = { generate_patient_index_and_teis };
