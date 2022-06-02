@@ -17,9 +17,9 @@ const logger = winston.createLogger({
     winston.format.json()
   ),
   transports: [
-    // - Write all logs with level `error` and below to `error.log`
+    // - Write all logs with level `error` and below to `retrieve-error.log`
     new winston.transports.File({ format: winston.format.simple(), filename: process.env.logError, level: 'warn', json: false }),
-    // - Write all logs with level `debug` and below to `SIDAInfo.log`
+    // - Write all logs with level `debug` and below to `retrieve.log`
     new winston.transports.File({ format: winston.format.simple(), filename: process.env.log, level: 'debug', json: false }),
     new winston.transports.Console({format: winston.format.simple(), level: 'info'})
   ],
