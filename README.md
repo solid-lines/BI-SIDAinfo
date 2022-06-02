@@ -27,10 +27,10 @@ This is the node script created for updating the DHIS2 data from the SIDAinfo da
 - Need help? run ```node generate help```
 
 ## Output files
-- ```actions.json```: objects structure to be read by ```uploadData.js```
+- ```actions.json```: objects structure to be read by ```upload_data.js```
 
 ## Run the script for uploading the updates
-- Run the script ```node .\uploadData.js```
+- Run the script ```node .\upload_data.js```
 
 ## Notes
 - OrganisationUnit is not reviewed (it's assumed that is the same since it comes from the same source file given as an argument)
