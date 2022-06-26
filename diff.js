@@ -936,12 +936,6 @@ function generate_diff_complete(SOURCE_OU_CODE){
         });
 
         /***** Extract events info ******/
-        //Events array
-        if (enrollment_uid == "qI6sxCauRF2") {
-            console.log(enrollment_uid)
-            console.log(enrollments_uids.indexOf(enrollment_uid))
-            console.log(enrollments_data)    
-        }
         var events = enrollments_data[enrollments_uids.indexOf(enrollment_uid)].events;
 
         //Events UIDs arrays
