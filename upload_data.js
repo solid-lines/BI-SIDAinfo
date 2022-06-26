@@ -2,9 +2,11 @@ const axios = require('axios');
 var fs = require('fs');
 const { logger_upload } = require('./logger.js');
 const utils = require('./utils.js');
+var pjson = require('./package.json');
 
 
 function upload_data(SOURCE_OU_CODE) {
+    logger_upload.info(`Running update (upload) version ${pjson.version}`)
     try{
         upload_data_complete(SOURCE_OU_CODE)
     } catch (error) {

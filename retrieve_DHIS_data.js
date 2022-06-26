@@ -3,8 +3,10 @@ const { logger } = require('./logger.js');
 var fs = require('fs');
 var dhis2_to_script_file = require('./dhis2_to_script_files.js');
 const utils = require('./utils.js');
+var pjson = require('./package.json');
 
 function retrieve_data(SOURCE_OU_CODE) {
+    logger.info(`Running update (retrieve) version ${pjson.version}`)
     try{
         retrieve_data_complete(SOURCE_OU_CODE)
     } catch (error) {

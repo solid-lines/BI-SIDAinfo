@@ -2,6 +2,7 @@ var fs = require('fs');
 const { logger_diff } = require('./logger.js');
 var _ = require('lodash');
 const utils = require('./utils.js');
+var pjson = require('./package.json');
 
 //UIDs
 const TEA_CODE_PATIENT = "dsWUbqvV9GW";
@@ -81,6 +82,7 @@ const PREVIOUS_FOLDER = "PREVIOUS_DHIS2_data"
 const CURRENT_FOLDER = "GENERATED_data"
 
 function generate_diff(SOURCE_OU_CODE) {
+    logger_diff.info(`Running update (diff) version ${pjson.version}`)
     try{
         generate_diff_complete(SOURCE_OU_CODE)
     } catch (error) {
@@ -174,6 +176,8 @@ function generate_diff_complete(SOURCE_OU_CODE){
     var teis_toUpdateEnroll = [];
 
     commonTEIs_patientCodes.forEach((TEI) => {
+        const patient_uid = previous_all_patient_index[TEI].uid;
+        logger_diff.debug(`TEI Review; Patient ${TEI} (${patient_uid})`);
         var changes = checkTEIDifference(TEI);
         changed_TEIs = changes.changed_TEI;
         if (changed_TEIs) {
