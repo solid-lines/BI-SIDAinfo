@@ -32,6 +32,9 @@ This is the node script created for updating the DHIS2 data from the SIDAinfo da
 ## Run the script for uploading the updates
 - Run the script ```node .\upload_data.js```
 
+## Genarate the executable files
+- Run ```pkg .```
+
 ## Notes
 - OrganisationUnit is not reviewed (it's assumed that is the same since it comes from the same source file given as an argument)
 - The OUcode is the internal SIDAinfo code, NOT the dhis2 uid or code.
