@@ -74,7 +74,6 @@ function generate_patient_index_and_teis(source_id) {
 
     logger.info("Processing retrieved data")
 
-    //const SOURCE_ID = "003BDI017S020203"; //TODO: parametrizar
     const SOURCE_ID = source_id;
     const parent_DHIS2data_folder = "PREVIOUS_DHIS2_data"
     const DHIS2data_folder = parent_DHIS2data_folder + "/" + SOURCE_ID

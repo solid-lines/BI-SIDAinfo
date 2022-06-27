@@ -3,12 +3,13 @@ var fs = require('fs');
 const { logger_upload } = require('./logger.js');
 const utils = require('./utils.js');
 var pjson = require('./package.json');
+const { exit } = require('process');
 
 
-function upload_data(SOURCE_OU_CODE) {
+function upload_data(SOURCE_OU_CODE, SOURCE_DATE) {
     logger_upload.info(`Running update (upload) version ${pjson.version}`)
     try{
-        upload_data_complete(SOURCE_OU_CODE)
+        upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE)
     } catch (error) {
         logger_upload.error(error.stack)
         process.exitCode = 1;
@@ -16,16 +17,16 @@ function upload_data(SOURCE_OU_CODE) {
 }
 
 //TODO add await in requests
-function upload_data_complete(SOURCE_OU_CODE) {
-    logger_upload.info(`Running upload for ${SOURCE_OU_CODE}`)
+function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
+    logger_upload.info(`Running upload for site:${SOURCE_OU_CODE} and export date:${SOURCE_DATE}`)
 
     const endpoint_filename='./config.json'
     const endpoint_rawdata = fs.readFileSync(endpoint_filename);
     const endpointConfig = JSON.parse(endpoint_rawdata);    
 
     /*********** Read actions.json ********/
-    const ACTIONS_FOLDER = "actions/" + SOURCE_OU_CODE;
-    const ACTIONS_FILE = "actions/" + SOURCE_OU_CODE + "/actions.json";
+    const SOURCE_ID = SOURCE_OU_CODE + '_' + SOURCE_DATE
+    const ACTIONS_FILE = "actions/" + SOURCE_ID + "/actions.json";
 
     //Actions
     const CREATE = "CREATE";
@@ -40,8 +41,10 @@ function upload_data_complete(SOURCE_OU_CODE) {
     const DV_TYPE = "DV";
 
     //check if folder exists. If not, create it
-    if (!fs.existsSync(ACTIONS_FOLDER)) {
-        fs.mkdirSync(ACTIONS_FOLDER);
+    if (!fs.existsSync(ACTIONS_FILE)) {
+        logger_upload.error("Missed action file="+ACTIONS_FILE)
+        process.exit(1)
+        // exit, no changes
     }
 
     var actions = JSON.parse(fs.readFileSync(ACTIONS_FILE)); //Array
@@ -620,7 +623,7 @@ function upload_data_complete(SOURCE_OU_CODE) {
 
     function readTEI(TEI_uid) {
         var TEI_file;
-        const TEI_fileName = `./GENERATED_data/teis/${SOURCE_OU_CODE}/${TEI_uid}.json`;
+        const TEI_fileName = `./GENERATED_data/${SOURCE_ID}/teis/${TEI_uid}.json`;
         if (!fs.existsSync(TEI_fileName)) {
             logger_upload.error(`FileError; TEI file (${TEI_fileName}) doesn't exist`)
         } else {

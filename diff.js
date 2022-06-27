@@ -81,10 +81,10 @@ const DV_TYPE = "DV";
 const PREVIOUS_FOLDER = "PREVIOUS_DHIS2_data"
 const CURRENT_FOLDER = "GENERATED_data"
 
-function generate_diff(SOURCE_OU_CODE) {
+function generate_diff(SOURCE_OU_CODE, SOURCE_DATE) {
     logger_diff.info(`Running update (diff) version ${pjson.version}`)
     try{
-        generate_diff_complete(SOURCE_OU_CODE)
+        generate_diff_complete(SOURCE_OU_CODE, SOURCE_DATE)
     } catch (error) {
         logger_diff.error(error.stack)
         process.exitCode = 1;
@@ -92,12 +92,14 @@ function generate_diff(SOURCE_OU_CODE) {
 }
 
 
-function generate_diff_complete(SOURCE_OU_CODE){
-    logger_diff.info(`Running diff for ${SOURCE_OU_CODE}`)
+function generate_diff_complete(SOURCE_OU_CODE, SOURCE_DATE){
+    logger_diff.info(`Running diff for site:${SOURCE_OU_CODE} and export date: ${SOURCE_DATE}`)
     /**
      * Read input files
      */
-    const PATIENT_DUMP_PREVIOUS_FILE = "./" + PREVIOUS_FOLDER + "/" + SOURCE_OU_CODE + "/previous_all_patient_index.json";
+    const SOURCE_ID = SOURCE_OU_CODE + '_' + SOURCE_DATE
+
+    const PATIENT_DUMP_PREVIOUS_FILE = "./" + PREVIOUS_FOLDER + "/" + SOURCE_ID + "/previous_all_patient_index.json";
     logger_diff.info(PATIENT_DUMP_PREVIOUS_FILE)
     if (!fs.existsSync(PATIENT_DUMP_PREVIOUS_FILE)) {
         logger_diff.error(`ArgError; Patient_uid_file (${PATIENT_DUMP_PREVIOUS_FILE}) from previous data dump doesn't exist`)
@@ -105,8 +107,7 @@ function generate_diff_complete(SOURCE_OU_CODE){
         var previous_all_patient_index = JSON.parse(fs.readFileSync(PATIENT_DUMP_PREVIOUS_FILE))
     }
 
-    //const PATIENT_UID_FILE_CURRENT = SOURCE_DATE_CURRENT + "-" + SOURCE_OU_CODE + "-patient_code_uid.json";
-    const PATIENT_DUMP_CURRENT_FILE = "./" + CURRENT_FOLDER + "/current_all_patient_index.json";
+    const PATIENT_DUMP_CURRENT_FILE = "./" + CURRENT_FOLDER + "/" + SOURCE_ID + "/generated_all_patient_index.json";
 
 
     if (!fs.existsSync(PATIENT_DUMP_CURRENT_FILE)) {
@@ -116,7 +117,7 @@ function generate_diff_complete(SOURCE_OU_CODE){
     }
 
     //Files
-    const TEIS_FILE = "./" + PREVIOUS_FOLDER + "/" + SOURCE_OU_CODE + "/teis.json";
+    const TEIS_FILE = "./" + PREVIOUS_FOLDER + "/" + SOURCE_ID + "/teis.json";
     var dhis_teis;
     if (!fs.existsSync(TEIS_FILE)) {
         logger_diff.error(`ArgError; TEIs file (${TEIS_FILE}) from dhis data doesn't exist`)
@@ -203,17 +204,12 @@ function generate_diff_complete(SOURCE_OU_CODE){
      * WRITE actions to file
      */
     const ACTIONS_FOLDER = "actions"
-    const ACTIONS_LIST_FILE = `./${ACTIONS_FOLDER}/${SOURCE_OU_CODE}/actions.json`
-    const ACTIONS_FOLDER_OU_CODE = `./${ACTIONS_FOLDER}/${SOURCE_OU_CODE}`
-
-    //check if folder exists. If not, create it
-    if (!fs.existsSync(ACTIONS_FOLDER)) {
-        fs.mkdirSync(ACTIONS_FOLDER);
-    }
+    const ACTIONS_FOLDER_OU_CODE = `./${ACTIONS_FOLDER}/${SOURCE_ID}`
+    const ACTIONS_LIST_FILE = `${ACTIONS_FOLDER_OU_CODE}/actions.json`
 
     //check if folder exists. If not, create it
     if (!fs.existsSync(ACTIONS_FOLDER_OU_CODE)) {
-        fs.mkdirSync(ACTIONS_FOLDER_OU_CODE);
+        fs.mkdirSync(ACTIONS_FOLDER_OU_CODE, {recursive: true});
     }
 
     try {
@@ -237,7 +233,7 @@ function generate_diff_complete(SOURCE_OU_CODE){
     function read_current_TEIs(TEI_uid) {
 
         var TEI_file;
-        const TEI_fileName = `./${CURRENT_FOLDER}/teis/${SOURCE_OU_CODE}/${TEI_uid}.json`;
+        const TEI_fileName = `./${CURRENT_FOLDER}/${SOURCE_ID}/teis/${TEI_uid}.json`;
         if (!fs.existsSync(TEI_fileName)) {
             logger_diff.error(`FileError; TEI file (${TEI_fileName}) (from data dump) doesn't exist`)
         } else {

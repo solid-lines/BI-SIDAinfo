@@ -5,10 +5,10 @@ var dhis2_to_script_file = require('./dhis2_to_script_files.js');
 const utils = require('./utils.js');
 var pjson = require('./package.json');
 
-function retrieve_data(SOURCE_OU_CODE) {
+function retrieve_data(SOURCE_OU_CODE, SOURCE_DATE) {
     logger.info(`Running update (retrieve) version ${pjson.version}`)
     try{
-        retrieve_data_complete(SOURCE_OU_CODE)
+        retrieve_data_complete(SOURCE_OU_CODE, SOURCE_DATE)
     } catch (error) {
         logger.error(error.stack)
         process.exitCode = 1;
@@ -16,8 +16,8 @@ function retrieve_data(SOURCE_OU_CODE) {
 }
 
 
-function retrieve_data_complete(SOURCE_OU_CODE) {
-    logger.info(`Running retrieve for ${SOURCE_OU_CODE}`)
+function retrieve_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
+    logger.info(`Running retrieve for site:${SOURCE_OU_CODE} and export date:${SOURCE_DATE}`)
 
     //PROGRAMS
     const PROGRAM_TARV = "e3swbbSnbQ2";
@@ -34,7 +34,8 @@ function retrieve_data_complete(SOURCE_OU_CODE) {
 
     const orgUnit = OU_MAPPING[SOURCE_OU_CODE];
     const parent_DHIS2data_folder = "PREVIOUS_DHIS2_data"
-    const DHIS2data_folder = parent_DHIS2data_folder + "/" + SOURCE_OU_CODE
+    const SOURCE_ID = SOURCE_OU_CODE + '_' + SOURCE_DATE
+    const DHIS2data_folder = parent_DHIS2data_folder + "/" + SOURCE_ID
 
     //check if folder exists. If not, create it. If yes, remove directory & create it again
     if (!fs.existsSync(parent_DHIS2data_folder)) {
@@ -60,7 +61,7 @@ function retrieve_data_complete(SOURCE_OU_CODE) {
         await saveTEIs(orgUnit).catch((err) => {
             logger.error(err)
         });;
-        dhis2_to_script_file.generate_patient_index_and_teis(SOURCE_OU_CODE);
+        dhis2_to_script_file.generate_patient_index_and_teis(SOURCE_ID);
     }
 
 
