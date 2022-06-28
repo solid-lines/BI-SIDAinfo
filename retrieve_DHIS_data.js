@@ -51,12 +51,17 @@ function retrieve_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
 
     //check if folder exists. If not, create it. If yes, remove directory & create it again
     if (!fs.existsSync(parent_DHIS2data_folder)) {
+        logger_retrieve.info(`Creating folder ${parent_DHIS2data_folder}`)
         fs.mkdirSync(parent_DHIS2data_folder);
+        logger_retrieve.info(`Creating folder ${DHIS2data_folder}`)
         fs.mkdirSync(DHIS2data_folder);
     } else if (!fs.existsSync(DHIS2data_folder)) {
+        logger_retrieve.info(`Creating folder ${DHIS2data_folder}`)
         fs.mkdirSync(DHIS2data_folder);
     } else {
+        logger_retrieve.info(`Removing folder ${DHIS2data_folder} (including files)`)
         fs.rmSync(DHIS2data_folder, { recursive: true, force: true }); // remove directory and its content
+        logger_retrieve.info(`Creating folder ${DHIS2data_folder}`)
         fs.mkdirSync(DHIS2data_folder);
     }
 
@@ -64,6 +69,7 @@ function retrieve_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
     const SOURCES_FOLDERNAME = "NEW_SIDAINFO_data"
     const SOURCES_PATH = `${SOURCES_FOLDERNAME}/${SOURCE_ID}`
     if (!fs.existsSync(SOURCES_PATH)) {
+        logger_retrieve.info(`Creating folder (for copying later the SIDAinfo dump files) ${SOURCES_PATH}`)
         fs.mkdirSync(SOURCES_PATH, { recursive: true, force: true });
     }
 

@@ -1,7 +1,7 @@
 {
-  "name": "sidainfo-dhis2-update",
-  "version": "1.0.3",
-  "description": "This is the node script created for updating the DHIS2 data from the SIDAinfo data dump for PSI Burundi.",
+  "name": "sidainfo-dhis2",
+  "version": "1.1.0",
+  "description": "This is the node script created for managing the DHIS2 data from the SIDAinfo data dump for PSI Burundi.",
   "main": "index.js",
   "bin": {
     "index": "./index.js"

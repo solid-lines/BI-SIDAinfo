@@ -1,5 +1,5 @@
 var fs = require('fs');
-const { logger } = require('./logger.js');
+const { logger_retrieve } = require('./logger.js');
 const utils = require('./utils.js')
 
 const PATIENT_CODE_TEA = "dsWUbqvV9GW";
@@ -72,7 +72,7 @@ stagesDict[PROGRAMSTAGE_PTME_ENFANT_SORTIE] = PROGRAMSTAGE_PTME_ENFANT_SORTIE_LA
 
 function generate_patient_index_and_teis(source_id) {
 
-    logger.info("Processing retrieved data")
+    logger_retrieve.info("Processing retrieved data")
 
     const SOURCE_ID = source_id;
     const parent_DHIS2data_folder = "PREVIOUS_DHIS2_data"
@@ -117,7 +117,7 @@ function generate_patient_index_and_teis(source_id) {
 
             // due to https://jira.dhis2.org/browse/DHIS2-12285
             if (enroll.deleted == true){
-                logger.debug(`Enrollment deleted: ${JSON.stringify(enroll)}`)
+                logger_retrieve.debug(`Enrollment deleted: ${JSON.stringify(enroll)}`)
                 return;
             }
 
@@ -156,9 +156,9 @@ function generate_patient_index_and_teis(source_id) {
 
 
     //Main
-    logger.info(`Saving ${TEIS_FILE} file`)
+    logger_retrieve.info(`Saving ${TEIS_FILE} file`)
     utils.saveJSONFile(TEIS_FILE, dhis_data);
-    logger.info(`Saving ${PATIENT_CODE_UID} file`)
+    logger_retrieve.info(`Saving ${PATIENT_CODE_UID} file`)
     utils.saveJSONFile(PATIENT_CODE_UID, patient_code_uid);
 
 }
@@ -214,8 +214,8 @@ function getEvents_format(events_data, stage) {
         }
 
         if(typeof date === "undefined"){
-            logger.error("Unexpected format: event without date")
-            logger.error(JSON.stringify(event))
+            logger_retrieve.error("Unexpected format: event without date")
+            logger_retrieve.error(JSON.stringify(event))
         } else {
             obj[getDHIS2dateFormat(date)] = event.event;
         }
@@ -225,7 +225,7 @@ function getEvents_format(events_data, stage) {
         if (event.deleted == false){
             Object.assign(events, obj)
         } else {
-            logger.debug(`Event deleted: ${JSON.stringify(event)}`)
+            logger_retrieve.debug(`Event deleted: ${JSON.stringify(event)}`)
         }
         
     });
