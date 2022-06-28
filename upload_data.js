@@ -26,7 +26,7 @@ function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
 
     /*********** Read actions.json ********/
     const SOURCE_ID = SOURCE_OU_CODE + '_' + SOURCE_DATE
-    const ACTIONS_FILE = "actions/" + SOURCE_ID + "/actions.json";
+    const ACTIONS_FILE = "GENERATED_data/" + SOURCE_ID + "/actions.json";
 
     //Actions
     const CREATE = "CREATE";
@@ -40,12 +40,13 @@ function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
     const EVENT_TYPE = "EVENT";
     const DV_TYPE = "DV";
 
-    //check if folder exists. If not, create it
+    //check if files exists
     if (!fs.existsSync(ACTIONS_FILE)) {
         logger_upload.error("ArgError;Missed action file="+ACTIONS_FILE)
-        process.exit(1)
-        // exit, no changes
+        process.exit(1) // exit, no changes
     }
+
+    logger_upload.info(`Reading file ${ACTIONS_FILE}`)
 
     var actions = JSON.parse(fs.readFileSync(ACTIONS_FILE)); //Array
 
