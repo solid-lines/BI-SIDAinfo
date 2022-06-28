@@ -60,6 +60,13 @@ function retrieve_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         fs.mkdirSync(DHIS2data_folder);
     }
 
+    // create folder for new data from SIDAinfo dump
+    const SOURCES_FOLDERNAME = "NEW_SIDAINFO_data"
+    const SOURCES_PATH = `${SOURCES_FOLDERNAME}/${SOURCE_ID}`
+    if (!fs.existsSync(SOURCES_PATH)) {
+        fs.mkdirSync(SOURCES_PATH, { recursive: true, force: true });
+    }
+
     main();
 
     //Main
