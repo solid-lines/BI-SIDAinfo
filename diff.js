@@ -208,9 +208,9 @@ function generate_diff_complete(SOURCE_OU_CODE, SOURCE_DATE){
     /**
      * WRITE actions to file
      */
-    const ACTIONS_FOLDER = "actions"
-    const ACTIONS_FOLDER_OU_CODE = `./${ACTIONS_FOLDER}/${SOURCE_ID}`
-    const ACTIONS_LIST_FILE = `${ACTIONS_FOLDER_OU_CODE}/actions.json`
+    const PARENT_FOLDER = "GENERATED_data"
+    const ACTIONS_FOLDER_OU_CODE = PARENT_FOLDER + "/" + SOURCE_ID
+    const ACTIONS_LIST_FILE = ACTIONS_FOLDER_OU_CODE + "/actions.json";
 
     //check if folder exists. If not, create it
     if (!fs.existsSync(ACTIONS_FOLDER_OU_CODE)) {
