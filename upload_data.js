@@ -42,7 +42,7 @@ function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
 
     //check if folder exists. If not, create it
     if (!fs.existsSync(ACTIONS_FILE)) {
-        logger_upload.error("Missed action file="+ACTIONS_FILE)
+        logger_upload.error("ArgError;Missed action file="+ACTIONS_FILE)
         process.exit(1)
         // exit, no changes
     }
