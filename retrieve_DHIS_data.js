@@ -1,24 +1,24 @@
 const https = require("https");
 const Moment = require('moment');
-const { logger } = require('./logger.js');
+const { logger_retrieve } = require('./logger.js');
 var fs = require('fs');
 var dhis2_to_script_file = require('./dhis2_to_script_files.js');
 const utils = require('./utils.js');
 var pjson = require('./package.json');
 
 function retrieve_data(SOURCE_OU_CODE, SOURCE_DATE) {
-    logger.info(`Running update (retrieve) version ${pjson.version}`)
+    logger_retrieve.info(`Running update (retrieve) version ${pjson.version}`)
     try{
         retrieve_data_complete(SOURCE_OU_CODE, SOURCE_DATE)
     } catch (error) {
-        logger.error(error.stack)
+        logger_retrieve.error(error.stack)
         process.exit(1)
     }
 }
 
 
 function retrieve_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
-    logger.info(`Running retrieve for site:${SOURCE_OU_CODE} and export date:${SOURCE_DATE}`)
+    logger_retrieve.info(`Running retrieve for site:${SOURCE_OU_CODE} and export date:${SOURCE_DATE}`)
 
     //PROGRAMS
     const PROGRAM_TARV = "e3swbbSnbQ2";
@@ -35,13 +35,13 @@ function retrieve_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
 
     const EXPORT_DUMP_DATE = Moment(SOURCE_DATE.replace("-", ""), "YYYYMMDD")
     if (EXPORT_DUMP_DATE.isValid() == false){
-        logger.error(`Invalid export_dump_date ${SOURCE_DATE}`)
+        logger_retrieve.error(`Invalid export_dump_date ${SOURCE_DATE}`)
         process.exit(1)
     }
 
     const orgUnit = OU_MAPPING[SOURCE_OU_CODE];
     if(typeof orgUnit === "undefined"){
-        logger.error(`There is no mapping to the org unit ${SOURCE_OU_CODE}`)
+        logger_retrieve.error(`There is no mapping to the org unit ${SOURCE_OU_CODE}`)
         process.exit(1)
     }
 
@@ -71,9 +71,9 @@ function retrieve_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
 
     //Main
     async function main() {
-        logger.info(`Retrieving SIDAinfo data from OU ${SOURCE_OU_CODE} (${orgUnit}) and server ${endpointConfig.dhisServer}`)
+        logger_retrieve.info(`Retrieving SIDAinfo data from OU ${SOURCE_OU_CODE} (${orgUnit}) and server ${endpointConfig.dhisServer}`)
         await saveTEIs(orgUnit).catch((err) => {
-            logger.error(err)
+            logger_retrieve.error(err)
         });;
         dhis2_to_script_file.generate_patient_index_and_teis(SOURCE_ID);
     }
@@ -107,15 +107,15 @@ function retrieve_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
                         let body = Buffer.concat(bodyChunks);
                         let myJSONParse = JSON.parse(body);
                         if (res.statusCode != 200) {
-                            logger.error(`response statusCode=${res.statusCode}`)
-                            logger.error(body)
+                            logger_retrieve.error(`response statusCode=${res.statusCode}`)
+                            logger_retrieve.error(body)
                             TEIs = "";
                             resolve(TEIs)                            
                         } else if (myJSONParse.length != 0) {
                             TEIs = myJSONParse.trackedEntityInstances;
                             resolve(TEIs)
                         } else {
-                            logger.error(body)
+                            logger_retrieve.error(body)
                             TEIs = "";
                             resolve(TEIs)
                         }
@@ -125,13 +125,13 @@ function retrieve_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
                 reqGet.end();
 
                 reqGet.on('error', function (e) {
-                    logger.error(e);
+                    logger_retrieve.error(e);
                     TEIs = "";
                     resolve(TEIs)
                 });
 
             } catch (error) {
-                logger.error(error);
+                logger_retrieve.error(error);
                 TEIs = "";
                 resolve(TEIs)
             }
@@ -141,19 +141,19 @@ function retrieve_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
 
     async function saveTEIs(orgUnit) {
         //Get TEIs from 3 programs for a given orgUnit
-        logger.info("Retrieving enfant_teis")
+        logger_retrieve.info("Retrieving enfant_teis")
         let enfant_teis = await getTEIs(PROGRAM_PTME_ENFANT, orgUnit).catch((err) => {
-            logger.error(err)
+            logger_retrieve.error(err)
         });
 
-        logger.info("Retrieving mere_teis")
+        logger_retrieve.info("Retrieving mere_teis")
         let mere_teis = await getTEIs(PROGRAM_PTME_MERE, orgUnit).catch((err) => {
-            logger.error(err)
+            logger_retrieve.error(err)
         });
 
-        logger.info("Retrieving tarv_teis")
+        logger_retrieve.info("Retrieving tarv_teis")
         let tarv_teis = await getTEIs(PROGRAM_TARV, orgUnit).catch((err) => {
-            logger.error(err)
+            logger_retrieve.error(err)
         });
 
         /**** Save to JSON file ****/
@@ -162,30 +162,30 @@ function retrieve_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         const TARV_DHIS2_FILE = DHIS2data_folder + "/tarv.json";
 
         if (typeof enfant_teis === "undefined"){
-            logger.warn("No enfant TEIs retrieved");
+            logger_retrieve.warn("No enfant TEIs retrieved");
             enfant_teis = []
         }
         if (typeof mere_teis === "undefined") {
-            logger.warn("No mere TEIs retrieved");
+            logger_retrieve.warn("No mere TEIs retrieved");
             mere_teis = []
         }
         if (typeof tarv_teis === "undefined") {
-            logger.warn("No tarv TEIs retrieved");
+            logger_retrieve.warn("No tarv TEIs retrieved");
             tarv_teis = []
         }
 
         // TODO remove soft-deleted events: https://jira.dhis2.org/browse/DHIS2-12285
 
         try {
-            logger.info(`Saving ${ENFANT_DHIS2_FILE} file`)
+            logger_retrieve.info(`Saving ${ENFANT_DHIS2_FILE} file`)
             utils.saveJSONFile(ENFANT_DHIS2_FILE, enfant_teis);
-            logger.info(`Saving ${MERE_DHIS2_FILE} file`)
+            logger_retrieve.info(`Saving ${MERE_DHIS2_FILE} file`)
             utils.saveJSONFile(MERE_DHIS2_FILE, mere_teis);
-            logger.info(`Saving ${TARV_DHIS2_FILE} file`)
+            logger_retrieve.info(`Saving ${TARV_DHIS2_FILE} file`)
             utils.saveJSONFile(TARV_DHIS2_FILE, tarv_teis);
         } catch (err) {
             // An error occurred
-            logger.error(err);
+            logger_retrieve.error(err);
         }
     }
 }

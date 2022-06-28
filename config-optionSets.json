@@ -1,0 +1,111 @@
+{
+    "sexe": {
+        "uid": "wnOeO6OrCeG",
+        "name": "sexe",
+        "options": {
+            "Féminin": "F",
+            "Masculin": "M"
+        }
+    },
+    "Mode d’entrée": {
+        "uid": "JpuahRIomLh",
+        "name": "Mode d’entrée",
+        "options": {
+            "Dépistage volontaire": "1",
+            "PTME mère": "2",
+            "Hospitalisation": "3",
+            "Infections opportunistes(IO)": "4",
+            "Prophylaxie post-exposition": "7",
+            "Transféré entrant": "8",
+            "Suivi décentralisé": "9",
+            "PTME enfant": "10"
+        }
+    },
+    "Issue Grossesse": {
+        "uid": "fkCOeqPphBF",
+        "name": "Issue Grossesse",
+        "options": {
+            "Non connu / non renseigné": "0",
+            "Accouchement normal": "1",
+            "Bébé décédé": "2",
+            "Avortement": "3",
+            "Décès mère": "4",
+            "Accouchement prématuré": "5",
+            "Transfert": "6",
+            "Perdu de vue": "7"
+        }
+    },
+    "TBTypeExamen": {
+        "uid": "NHv6CHfhi0l",
+        "name": "TBTypeExamen",
+        "options": {
+            "Non connu / non renseigné": "0",
+            "Examen crachat": "1",
+            "GEN-XPERT": "2",
+            "Autre": "3"
+        }
+    },
+    "TBResultat": {
+        "uid": "hHNt19rmsLR",
+        "name": "TBResultat",
+        "options": {
+            "Non connu / non renseigné": "0",
+            "Negatif": "1",
+            "Positif": "2"
+        }
+    },
+    "causesortie": {
+        "name": "causesortie",
+        "options": {
+            "Transféré sortant": "1",
+            "Décès": "2",
+            "Perdu de vue au moins trois moist": "3",
+            "Fin de traitement prophyl. post-expositionnel": "4",
+            "Abandon": "5",
+            "Autres": "6"
+        }
+    },
+    "StatusBeforePregnancy": {
+        "name": "StatusBeforePregnancy",
+        "options": {
+            "Statut déja connu": "Statut déja connu",
+            "Statut non connu": "Statut non connu"
+        }
+    },
+    "ARVBeforePregnancy": {
+        "name": "ARVBeforePregnancy",
+        "options": {
+            "ARV déjà commencé": "ARV déjà commencé",
+            "ARV pas encore commencé": "ARV pas encore commencé"
+        }
+    },
+    "enfant_ptme_causesortie": {
+        "name": "enfant_ptme_causesortie",
+        "options": {
+            "Non connu / non renseigné": "0",
+            "Décès": "1",
+            "Perdu de vue au moins trois mois": "2",
+            "Sérologie negative 18 mois": "3",
+            "Transfert": "4",
+            "Retraite voluntaire": "5",
+            "Seropositive": "6",
+            "Sérologie positive à 18 mois": "7"
+        }
+    },
+    "enfant_ptme_pcr_result": {
+        "name": "enfant_ptme_pcr_result",
+        "options": {
+            "Positif": "1",
+            "Négatif": "2",
+            "Indétérminé": "3"
+        }
+    },
+    "SortieStatus": {
+        "name": "SortieStatus",
+        "options": {
+            "Actif": "Actif",
+            "Perdu de vue": "Perdu de vue",
+            "TARV pas encore commencé": "TARV pas encore commencé"
+        }
+    }
+}
