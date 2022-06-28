@@ -108,8 +108,7 @@ function generate_diff_complete(SOURCE_OU_CODE, SOURCE_DATE){
     }
 
     const PATIENT_DUMP_CURRENT_FILE = "./" + CURRENT_FOLDER + "/" + SOURCE_ID + "/generated_all_patient_index.json";
-
-
+    logger_diff.info(PATIENT_DUMP_CURRENT_FILE)
     if (!fs.existsSync(PATIENT_DUMP_CURRENT_FILE)) {
         logger_diff.error(`ArgError; Patient_uid_file (${PATIENT_DUMP_CURRENT_FILE}) from current data dump doesn't exist`)
     } else {
@@ -146,8 +145,11 @@ function generate_diff_complete(SOURCE_OU_CODE, SOURCE_DATE){
     var newTEIs_patientCodes = _.difference(currentTEIs_PatientCodes, previousTEIs_PatientCodes);
     var missingTEIs_patientCodes = _.difference(previousTEIs_PatientCodes, currentTEIs_PatientCodes);
     var commonTEIs_patientCodes = _.intersection(previousTEIs_PatientCodes, currentTEIs_PatientCodes);
-    /*logger_diff.info(`TEIs list from PREVIOUS data dump: ${previousTEIs_PatientCodes}`);
-    logger_diff.info(`TEIs list from CURRENT data dump: ${currentTEIs_PatientCodes}`);*/
+    logger_diff.debug(`TEIs list from PREVIOUS data dump: ${previousTEIs_PatientCodes}`);
+    logger_diff.debug(`TEIs list from CURRENT data dump: ${currentTEIs_PatientCodes}`);
+    logger_diff.debug(`newTEIs_patientCodes: ${newTEIs_patientCodes}`);
+    logger_diff.debug(`missingTEIs_patientCodes: ${missingTEIs_patientCodes}`);
+    logger_diff.debug(`commonTEIs_patientCodes: ${commonTEIs_patientCodes}`);
 
     // CREATE TEIs
     newTEIs_patientCodes.forEach((TEI) => {
