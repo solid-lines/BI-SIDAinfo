@@ -87,7 +87,7 @@ function generate_diff(SOURCE_OU_CODE, SOURCE_DATE) {
         generate_diff_complete(SOURCE_OU_CODE, SOURCE_DATE)
     } catch (error) {
         logger_diff.error(error.stack)
-        process.exitCode = 1;
+        process.exit(1)
     }
 }
 

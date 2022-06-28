@@ -11,7 +11,7 @@ function retrieve_data(SOURCE_OU_CODE, SOURCE_DATE) {
         retrieve_data_complete(SOURCE_OU_CODE, SOURCE_DATE)
     } catch (error) {
         logger.error(error.stack)
-        process.exitCode = 1;
+        process.exit(1)
     }
 }
 
@@ -50,7 +50,7 @@ function retrieve_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
 
     if(typeof orgUnit === "undefined"){
         logger.error(`There is no mapping to the org unit ${SOURCE_OU_CODE}`)
-        process.exitCode = 1;
+        process.exit(1)
     }
 
     main();

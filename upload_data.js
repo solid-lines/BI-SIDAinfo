@@ -12,7 +12,7 @@ function upload_data(SOURCE_OU_CODE, SOURCE_DATE) {
         upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE)
     } catch (error) {
         logger_upload.error(error.stack)
-        process.exitCode = 1;
+        process.exit(1)
     }
 }
 
