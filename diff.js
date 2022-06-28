@@ -102,7 +102,8 @@ function generate_diff_complete(SOURCE_OU_CODE, SOURCE_DATE){
     const PATIENT_DUMP_PREVIOUS_FILE = "./" + PREVIOUS_FOLDER + "/" + SOURCE_ID + "/previous_all_patient_index.json";
     logger_diff.info(PATIENT_DUMP_PREVIOUS_FILE)
     if (!fs.existsSync(PATIENT_DUMP_PREVIOUS_FILE)) {
-        logger_diff.error(`ArgError; Patient_uid_file (${PATIENT_DUMP_PREVIOUS_FILE}) from previous data dump doesn't exist`)
+        logger_diff.error(`ArgError;Patient index file from prvious data dump (${PATIENT_DUMP_PREVIOUS_FILE}) doesn't exist`)
+        process.exit(1)
     } else {
         var previous_all_patient_index = JSON.parse(fs.readFileSync(PATIENT_DUMP_PREVIOUS_FILE))
     }
@@ -110,7 +111,8 @@ function generate_diff_complete(SOURCE_OU_CODE, SOURCE_DATE){
     const PATIENT_DUMP_CURRENT_FILE = "./" + CURRENT_FOLDER + "/" + SOURCE_ID + "/generated_all_patient_index.json";
     logger_diff.info(PATIENT_DUMP_CURRENT_FILE)
     if (!fs.existsSync(PATIENT_DUMP_CURRENT_FILE)) {
-        logger_diff.error(`ArgError; Patient_uid_file (${PATIENT_DUMP_CURRENT_FILE}) from current data dump doesn't exist`)
+        logger_diff.error(`ArgError;Patient index file from current data dump (${PATIENT_DUMP_CURRENT_FILE}) doesn't exist`)
+        process.exit(1)
     } else {
         var current_all_patient_index = JSON.parse(fs.readFileSync(PATIENT_DUMP_CURRENT_FILE))
     }
@@ -119,7 +121,8 @@ function generate_diff_complete(SOURCE_OU_CODE, SOURCE_DATE){
     const TEIS_FILE = "./" + PREVIOUS_FOLDER + "/" + SOURCE_ID + "/teis.json";
     var dhis_teis;
     if (!fs.existsSync(TEIS_FILE)) {
-        logger_diff.error(`ArgError; TEIs file (${TEIS_FILE}) from dhis data doesn't exist`)
+        logger_diff.error(`ArgError;TEIs file (${TEIS_FILE}) from dhis data doesn't exist`)
+        process.exit(1)
     } else {
         dhis_teis = JSON.parse(fs.readFileSync(TEIS_FILE))
     }
