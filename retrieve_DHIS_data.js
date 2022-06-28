@@ -1,4 +1,5 @@
 const https = require("https");
+const Moment = require('moment');
 const { logger } = require('./logger.js');
 var fs = require('fs');
 var dhis2_to_script_file = require('./dhis2_to_script_files.js');
@@ -32,7 +33,18 @@ function retrieve_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
     const rawdata = fs.readFileSync(ou_mapping_filename);
     const OU_MAPPING = JSON.parse(rawdata);
 
+    const EXPORT_DUMP_DATE = Moment(SOURCE_DATE.replace("-", ""), "YYYYMMDD")
+    if (EXPORT_DUMP_DATE.isValid() == false){
+        logger.error(`Invalid export_dump_date ${SOURCE_DATE}`)
+        process.exit(1)
+    }
+
     const orgUnit = OU_MAPPING[SOURCE_OU_CODE];
+    if(typeof orgUnit === "undefined"){
+        logger.error(`There is no mapping to the org unit ${SOURCE_OU_CODE}`)
+        process.exit(1)
+    }
+
     const parent_DHIS2data_folder = "PREVIOUS_DHIS2_data"
     const SOURCE_ID = SOURCE_OU_CODE + '_' + SOURCE_DATE
     const DHIS2data_folder = parent_DHIS2data_folder + "/" + SOURCE_ID
@@ -46,11 +58,6 @@ function retrieve_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
     } else {
         fs.rmSync(DHIS2data_folder, { recursive: true, force: true }); // remove directory and its content
         fs.mkdirSync(DHIS2data_folder);
-    }
-
-    if(typeof orgUnit === "undefined"){
-        logger.error(`There is no mapping to the org unit ${SOURCE_OU_CODE}`)
-        process.exit(1)
     }
 
     main();
