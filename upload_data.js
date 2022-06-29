@@ -82,17 +82,23 @@ function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
 
     /* Create */
     const TEIs_toCreate = getActionByOperationType(TEIs, CREATE);
-    i=0
+    let list_teis_to_create = []
     TEIs_toCreate.forEach((TEI) => {
-        utils.wait(500)
-        i=i+1
-        if ((i%50) == 0){
-            utils.wait(10000)
-        }
         const payload = getTEIpayload(TEI.uid);
-        logger_upload.info(`Create TEI ${TEI.uid}, payload: ${JSON.stringify(payload)}`);
-        post_resource(TEI_TYPE, TEI.uid, payload);
+        logger_upload.debug(`Create TEI ${TEI.uid}, payload: ${JSON.stringify(payload)}`);
+        //post_resource(TEI_TYPE, TEI.uid, payload);
+        list_teis_to_create.push(payload)
+        if ((list_teis_to_create.length % 20) == 0){
+            post_list_resources(TEI_TYPE, list_teis_to_create);
+            //clean list
+            list_teis_to_create = []
+            utils.wait(5000)
+        }
     });
+    // send last list of resources
+    if (list_teis_to_create.length>0){
+        post_list_resources(TEI_TYPE, list_teis_to_create);
+    }
 
 
     /************** TEA actions upload *********************/
@@ -387,7 +393,7 @@ function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
     async function post_list_resources(resource_type, list_resources) {
         
         const mapping = {
-    //        [TEI_TYPE]: "trackedEntityInstances",
+            [TEI_TYPE]: "trackedEntityInstances",
     //        [ENROLLMENT_TYPE]: "enrollments",
             [EVENT_TYPE]: "events"
         }
@@ -395,7 +401,7 @@ function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         let payload = new Object();
         payload[mapping[resource_type]] = list_resources;
 
-        logger_upload.info(payload)
+        logger_upload.debug(JSON.stringify(payload))
 
         logger_upload.info(`POST List of ${resource_type}. url '${mapping[resource_type]}/'`);
         const baseURL = `https://${endpointConfig.dhisServer}/api/`
@@ -416,19 +422,16 @@ function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
             },
         }
 
-        axios.post(mapping[resource_type], payload, config)
-        .then(function (response) {
-            logger_upload.info(`POST ${resource_type}. url '${mapping[resource_type]}/'`);
+        try {
+            const response = await axios.post(mapping[resource_type], payload, config)
             logger_upload.info(JSON.stringify(response.data))
-        })
-        .catch(function (error) {
-            logger_upload.error(`POST ${resource_type}. url '${mapping[resource_type]}/'`);
+        } catch (error) {
+            logger_upload.error(`POST List ${resource_type}. url '${mapping[resource_type]}/'`);
             logger_upload.error(error)
             if (("response" in error) && ("data" in error.response)) {
                 logger_upload.error(error.response.data)
             }
-        });
-
+        };
     }
 
     async function delete_list_resources(resource_type, list_resources) {
@@ -442,7 +445,7 @@ function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         let payload = new Object();
         payload[mapping[resource_type]] = list_resources;
 
-        logger_upload.info(payload)
+        logger_upload.info(JSON.stringify(payload))
 
         logger_upload.info(`POST ?strategy=DELETE List of ${resource_type}. url '${mapping[resource_type]}/'`);
         const baseURL = `https://${endpointConfig.dhisServer}/api/`
