@@ -157,7 +157,7 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
     const DE_TARV_Premier_system = "fvSF03NkyO1" // BI SIDAInfo - Première visite ARV dans le système
     
     const DHIS2_DATEFORMAT = "YYYY-MM-DD"
-    const SIDAINFO_DATEFORMAT = "DD-MM-YYYY"
+    const SIDAINFO_DATEFORMAT = "YYYY-MM-DD"
     
     const MIN_YEAR_EVENTS = "1950"
     const MIN_YEAR_BIRTH = "1900"
