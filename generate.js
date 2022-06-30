@@ -1813,7 +1813,7 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
     
         if (validateDate(birthdate, MIN_YEAR_BIRTH) == false) {
             patient.addLog(`08;Date de naissance avec une DATE inattendu : ${birthdate}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE}`)
-            logger_generation.error(`08;${codepatient};Patient ${codepatient} has a Birth da te with an unexpected DATE ${birthdate}. Check the row number ${row_number + 1} in the ${CURRENT_TABLE} table`)
+            logger_generation.error(`08;${codepatient};Patient ${codepatient} has a Birth date with an unexpected DATE ${birthdate}. Check the row number ${row_number + 1} in the ${CURRENT_TABLE} table`)
             logger_generation_fr.error(`08;${codepatient};Le patient ${codepatient} a une date de naissance avec une DATE inattendu : ${birthdate}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE}`)
         }
     
