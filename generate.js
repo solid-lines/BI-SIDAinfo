@@ -2101,8 +2101,10 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
     
         const site = row [0]
         row.shift(); // Remove the first column that contains the health facility SIDA info code
-    
-        // [0] ExportDate - [1] ID - [2] CodePatientSuiviPTME - [3] DateVisiteSuiviPTME - [4] AmenorrheePTME - [5] DateAccoucheSuiviPTME - [6] LieuAccoucheSuivi - [7] ModeAccoucheSuivi - [8] StructureAccouchement - [9] EtatMere
+
+        row.unshift(row[0]) // WORKAROUND. Adding the ExportDate at the beginning will keep the order
+
+        // [0] ExportDate - [1] ID (removed but duplicated manually the ExportDate in order to keep the order) - [2] CodePatientSuiviPTME - [3] DateVisiteSuiviPTME - [4] AmenorrheePTME - [5] DateAccoucheSuiviPTME - [6] LieuAccoucheSuivi - [7] ModeAccoucheSuivi - [8] StructureAccouchement - [9] EtatMere
         // [10] AllaitementMaternelPTME - [11] EtatEnfantSuiviPTME - [12] DateDecesSuivi - [13] PartenaireDateNaissance - [14] PartenaireConseil - [15] PartenaireDepiste - [16] PartenaireRecupere - [17] PartenaireResultat - [18] PartenaireRefere - [19] Cotri
         // [20] DateRegle - [21] Gestite - [22] DateProbable - [23] AgeGrossesseAccouche - [24] IssueGrossesse - [25] EnfantInfecte - [26] Taille - [27] DateGrossesse
         const codepatient = site + SEPARATOR_PATIENT + row[2]; //CodePatientSuiviPTME
