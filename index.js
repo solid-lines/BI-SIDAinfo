@@ -53,6 +53,8 @@ const argv = yargs
     .demandOption(['site', 'export_dump_date'], 'Please provide both site code and export date arguments to work with this tool')
     .help()
     .alias('help', 'h')
+    .version()
+    .alias('version', 'v')
     .argv;
 
 /**************************************/
