@@ -105,10 +105,16 @@ function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
 
     // TODO: improvement. send one PUT per TEI (no one PUT per each TEA)
 
+    TEIs_already_sent = []
     /* Delete */
     const TEAs_toDelete = getActionByOperationType(TEAs, DELETE);
     i=0
     TEAs_toDelete.forEach((TEA) => {
+        if (TEIs_already_sent.includes(TEA.TEI)){
+            return;
+        } else {
+            TEIs_already_sent.push(TEA.TEI)
+        }
         utils.wait(500)
         i=i+1
         if ((i%50) == 0){
@@ -123,6 +129,12 @@ function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
     const TEAs_toCreate = getActionByOperationType(TEAs, CREATE);
     i=0
     TEAs_toCreate.forEach((TEA) => {
+        if (TEIs_already_sent.includes(TEA.TEI)){
+            return;
+        } else {
+            TEIs_already_sent.push(TEA.TEI)
+        }
+
         utils.wait(500)
         i=i+1
         if ((i%50) == 0){
@@ -137,6 +149,11 @@ function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
     const TEAs_toUpdate = getActionByOperationType(TEAs, UPDATE);
     i=0
     TEAs_toUpdate.forEach((TEA) => {
+        if (TEIs_already_sent.includes(TEA.TEI)){
+            return;
+        } else {
+            TEIs_already_sent.push(TEA.TEI)
+        }
         utils.wait(500)
         i=i+1
         if ((i%50) == 0){
