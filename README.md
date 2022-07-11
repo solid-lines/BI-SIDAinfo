@@ -15,6 +15,6 @@ This is the node script created for managing the interoperability between SIDAin
 Please read the documentation/SIDAInfo-DHIS2 Interoperability - Administrator's Manual (ENGLISH).docx
 
 ## Notes
-- OrganisationUnit is not reviewed (it's assumed that is the same since it comes from the same source file given as an argument)
+- In the generation, sometimes there are empty values in the .txt files. In order to search them, run ```grep -irn ': \"\"' .``` in the log files
 - The OUcode is the internal SIDAinfo site code, NOT the dhis2 uid or code.
 - Particular version dependency: ```npm install csv@5.3.2```
