@@ -1,8 +1,8 @@
 const yargs = require('yargs');
-const retrieve = require("./retrieve_DHIS_data.js");
+const retrieve = require("./retrieve.js");
 const generate = require("./generate.js");
 const diff = require("./diff.js");
-const upload = require("./upload_data.js");
+const upload = require("./upload.js");
 
 /**************************************/
 
