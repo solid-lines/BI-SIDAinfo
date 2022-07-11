@@ -22,7 +22,7 @@ This is the node script created for updating the DHIS2 data from the SIDAinfo da
 5. Run the script (see below)
 
 ## Run the script for generating the update actions
-- Run the script using the arguments: ```node .\index.js diff --org_unit=XXXXXXXX --export_dump_date=YYYY_MM_DD```
+- Run the script using the arguments: ```node .\index.js diff --site=XXXXXXXX --export_dump_date=YYYY_MM_DD```
 - Arguments: ORGUNIT, EXPORT_DATE_CURRENT
 - Need help? run ```node generate help```
 
@@ -38,3 +38,4 @@ This is the node script created for updating the DHIS2 data from the SIDAinfo da
 ## Notes
 - OrganisationUnit is not reviewed (it's assumed that is the same since it comes from the same source file given as an argument)
 - The OUcode is the internal SIDAinfo code, NOT the dhis2 uid or code.
+- npm install csv@5.3.2
