@@ -82,6 +82,7 @@ function retrieve_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
             logger_retrieve.error(err)
         });;
         dhis2_to_script_file.generate_patient_index_and_teis(SOURCE_ID);
+        logger_retrieve.info(`*** PROCESS FINISHED SUCCESSFULLY ***`);
     }
 
 

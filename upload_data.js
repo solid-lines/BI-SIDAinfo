@@ -14,6 +14,7 @@ function upload_data(SOURCE_OU_CODE, SOURCE_DATE) {
         logger_upload.error(error.stack)
         process.exit(1)
     }
+    // TODO logger_generation.info(`*** PROCESS FINISHED SUCCESSFULLY ***`);
 }
 
 //TODO add await in requests

@@ -34,8 +34,8 @@ function generate_data(SOURCE_OU_CODE, SOURCE_DATE) {
         logger_generation.error(error.stack)
         logger_generation_fr.error(error.stack)
         process.exit(1)
-
     }
+    logger_generation.info(`*** PROCESS FINISHED SUCCESSFULLY ***`);
 }
 
 function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){

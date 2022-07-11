@@ -89,6 +89,7 @@ function generate_diff(SOURCE_OU_CODE, SOURCE_DATE) {
         logger_diff.error(error.stack)
         process.exit(1)
     }
+    logger_diff.info(`*** PROCESS FINISHED SUCCESSFULLY ***`);
 }
 
 
