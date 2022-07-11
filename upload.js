@@ -7,7 +7,7 @@ const { exit } = require('process');
 
 
 function upload_data(SOURCE_OU_CODE, SOURCE_DATE) {
-    logger_upload.info(`Running update (upload) version ${pjson.version}`)
+    logger_upload.info(`Running upload. Version ${pjson.version}`)
     try{
         upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE)
     } catch (error) {

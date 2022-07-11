@@ -82,7 +82,7 @@ const PREVIOUS_FOLDER = "PREVIOUS_DHIS2_data"
 const CURRENT_FOLDER = "GENERATED_data"
 
 function generate_diff(SOURCE_OU_CODE, SOURCE_DATE) {
-    logger_diff.info(`Running update (diff) version ${pjson.version}`)
+    logger_diff.info(`Running diff. Version ${pjson.version}`)
     try{
         generate_diff_complete(SOURCE_OU_CODE, SOURCE_DATE)
     } catch (error) {

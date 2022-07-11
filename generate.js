@@ -27,7 +27,7 @@ function change_encoding(filename){
 
 
 function generate_data(SOURCE_OU_CODE, SOURCE_DATE) {
-    logger_generation.info(`Running generation version ${pjson.version}`)
+    logger_generation.info(`Running generate. Version ${pjson.version}`)
     try{
         generate_complete(SOURCE_OU_CODE, SOURCE_DATE)
     } catch (error) {

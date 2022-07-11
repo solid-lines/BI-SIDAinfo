@@ -7,7 +7,7 @@ const utils = require('./utils.js');
 var pjson = require('./package.json');
 
 function retrieve_data(SOURCE_OU_CODE, SOURCE_DATE) {
-    logger_retrieve.info(`Running update (retrieve) version ${pjson.version}`)
+    logger_retrieve.info(`Running retrieve. Version ${pjson.version}`)
     try{
         retrieve_data_complete(SOURCE_OU_CODE, SOURCE_DATE)
     } catch (error) {
