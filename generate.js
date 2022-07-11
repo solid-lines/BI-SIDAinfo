@@ -311,8 +311,9 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
         // Validation 38: There is one or more record in Table_ARV, but no ARVdatedebut date in FileActive (or the ARVdatedebut is missing completely).
         validateARV_debut(){
             if ((this.ARV_treatments.length > 0) && (typeof this.ARVdatedebut === 'undefined')) {
-                logger_generation.warn(`38;${this.code};Patient ${this.code} has a Table ARV first event: ${this.ARV_treatments[0].eventDate.format(DHIS2_DATEFORMAT)} but FileActive ARV debut is empty.`);
-                logger_generation_fr.warn(`38;${this.code};Le patient ${this.code} a un premier évènement dans Table_ARV (${table_ARV_firstEvent.format(DHIS2_DATEFORMAT)}) mais le champs debut ARV dans FileActive est vide.`);
+                const table_ARV_firstEventDate = this.ARV_treatments[0].eventDate
+                logger_generation.warn(`38;${this.code};Patient ${this.code} has a Table ARV first event: ${table_ARV_firstEventDate.format(DHIS2_DATEFORMAT)} but FileActive ARV debut is empty.`);
+                logger_generation_fr.warn(`38;${this.code};Le patient ${this.code} a un premier évènement dans Table_ARV (${table_ARV_firstEventDate.format(DHIS2_DATEFORMAT)}) mais le champs debut ARV dans FileActive est vide.`);
             }
         }
     
