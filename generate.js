@@ -3,7 +3,7 @@ const parse = require('csv-parse/lib/sync')
 const optionSets = require('./config-optionSets.json');
 const Moment = require('moment');
 const { generateCode } = require('dhis2-uid'); //https://github.com/dhis2/dhis2-uid
-const { logger_generation, logger_generation_fr } = require('./logger.js');
+const logger = require('./logger.js');
 const chardet = require('chardet');
 var pjson = require('./package.json');
 
@@ -27,6 +27,10 @@ function change_encoding(filename){
 
 
 function generate_data(SOURCE_OU_CODE, SOURCE_DATE) {
+    const SOURCE_ID = SOURCE_OU_CODE + '_' + SOURCE_DATE
+    global.logger_generation = logger.get_logger_generation(SOURCE_ID)
+    global.logger_generation_fr = logger.get_logger_generation_fr(SOURCE_ID)
+
     logger_generation.info(`Running generate. Version ${pjson.version}`)
     try{
         generate_complete(SOURCE_OU_CODE, SOURCE_DATE)

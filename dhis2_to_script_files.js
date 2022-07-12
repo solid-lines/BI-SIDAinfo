@@ -1,5 +1,4 @@
 var fs = require('fs');
-const { logger_retrieve } = require('./logger.js');
 const utils = require('./utils.js')
 
 const PATIENT_CODE_TEA = "dsWUbqvV9GW";

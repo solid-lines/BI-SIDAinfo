@@ -7,84 +7,125 @@ dotenv.config({ path: ENV_FILE });
 
 const winston = require('winston');
 
-const logger_retrieve = winston.createLogger({
-  level: 'debug',
-  format: winston.format.combine(
- 
-    // winston.format.timestamp({
-    //   format: 'YYYY-MM-DD HH:mm:ss'
-    // }),
-    winston.format.json()
-  ),
-  transports: [
-    // - Write all logs with level `error` and below to `retrieve-error.log`
-    new winston.transports.File({ format: winston.format.simple(), filename: process.env.log_retrieve_error, level: 'warn', json: false }),
-    // - Write all logs with level `debug` and below to `retrieve.log`
-    new winston.transports.File({ format: winston.format.simple(), filename: process.env.log_retrieve, level: 'debug', json: false }),
-    new winston.transports.Console({format: winston.format.simple(), level: 'info'})
-  ],
-});
+function get_logger_retrieve(SOURCE_ID) {
 
-const logger_generation = winston.createLogger({
-  level: 'debug',
-  format: winston.format.combine(
- 
-    // winston.format.timestamp({
-    //   format: 'YYYY-MM-DD HH:mm:ss'
-    // }),
-    winston.format.json()
-  ),
-  transports: [
-    // - Write all logs with level `error` and below to `error.log`
-    new winston.transports.File({ format: winston.format.simple(), filename: process.env.log_generation_error, level: 'warn', json: false }),
-    // - Write all logs with level `debug` and below to `SIDAInfo.log`
-    new winston.transports.File({ format: winston.format.simple(), filename: process.env.log_generation, level: 'debug', json: false }),
-    new winston.transports.Console({format: winston.format.simple(), level: 'info'})
-  ],
-});
+  const log_filename = `${process.env.log_folder}/${SOURCE_ID}/${process.env.log_retrieve}`
+  const log_error_filename = `${process.env.log_folder}/${SOURCE_ID}/${process.env.log_retrieve_error}`
+
+  const logger_retrieve = winston.createLogger({
+    level: 'debug',
+    format: winston.format.combine(
+   
+      // winston.format.timestamp({
+      //   format: 'YYYY-MM-DD HH:mm:ss'
+      // }),
+      winston.format.json()
+    ),
+    transports: [
+      // - Write all logs with level `warn` and below
+      new winston.transports.File({ format: winston.format.simple(), filename: log_error_filename, level: 'warn', json: false }),
+      // - Write all logs with level `debug` and below
+      new winston.transports.File({ format: winston.format.simple(), filename: log_filename, level: 'debug', json: false }),
+      // - Print on console all logs with level `info` and below
+      new winston.transports.Console({format: winston.format.simple(), level: 'info'})
+    ],
+  });
+
+  return logger_retrieve
+}
 
 
-const logger_generation_fr = winston.createLogger({
-  level: 'warn',
-  format: winston.format.simple(),
-  transports: [
-    new winston.transports.File({ format: winston.format.simple(), filename: process.env.log_generation_error_fr, level: 'warn'})
-  ],
-});
+function get_logger_generation(SOURCE_ID) {
+
+  const log_filename = `${process.env.log_folder}/${SOURCE_ID}/${process.env.log_generation}`
+  const log_error_filename = `${process.env.log_folder}/${SOURCE_ID}/${process.env.log_generation_error}`
 
 
-const logger_upload = winston.createLogger({
-  level: 'debug',
-  format: winston.format.combine(
- 
-    // winston.format.timestamp({
-    //   format: 'YYYY-MM-DD HH:mm:ss'
-    // }),
-    winston.format.json()
-  ),
-  transports: [
-    // - Write all logs with level `debug` and below to `SIDAInfo.log`
-    new winston.transports.File({ format: winston.format.simple(), filename: process.env.log_upload, level: 'debug', json: false }),
-    new winston.transports.Console({format: winston.format.simple(), level: 'info'})
-  ],
-});
+  const logger_generation = winston.createLogger({
+    level: 'debug',
+    format: winston.format.combine(
+  
+      // winston.format.timestamp({
+      //   format: 'YYYY-MM-DD HH:mm:ss'
+      // }),
+      winston.format.json()
+    ),
+    transports: [
+      // - Write all logs with level `warn` and below
+      new winston.transports.File({ format: winston.format.simple(), filename: log_error_filename, level: 'warn', json: false }),
+      // - Write all logs with level `debug` and below
+      new winston.transports.File({ format: winston.format.simple(), filename: log_filename, level: 'debug', json: false }),
+      // - Print on console all logs with level `info` and below
+      new winston.transports.Console({format: winston.format.simple(), level: 'info'})
+    ],
+  });
+
+  return logger_generation
+}
 
 
-const logger_diff = winston.createLogger({
-  level: 'debug',
-  format: winston.format.combine(
- 
-    // winston.format.timestamp({
-    //   format: 'YYYY-MM-DD HH:mm:ss'
-    // }),
-    winston.format.json()
-  ),
-  transports: [
-    // - Write all logs with level `debug` and below to `SIDAInfo.log`
-    new winston.transports.File({ format: winston.format.simple(), filename: process.env.log_diff, level: 'debug', json: false }),
-    new winston.transports.Console({format: winston.format.simple(), level: 'info'})
-  ],
-});
+function get_logger_generation_fr(SOURCE_ID) {
+
+  const log_filename = `${process.env.log_folder}/${SOURCE_ID}/${process.env.log_generation_error_fr}`
+
+  const logger_generation_fr = winston.createLogger({
+    level: 'warn',
+    format: winston.format.simple(),
+    transports: [
+      // - Write all logs with level `warn` and below
+      new winston.transports.File({ format: winston.format.simple(), filename: log_filename, level: 'warn'})
+    ],
+  });
+  return logger_generation_fr
+}
 
 
-module.exports = {logger_generation, logger_generation_fr, logger_retrieve, logger_diff, logger_upload};
+function get_logger_diff(SOURCE_ID) {
+
+  const log_filename = `${process.env.log_folder}/${SOURCE_ID}/${process.env.log_diff}`
+  const logger_diff = winston.createLogger({
+    level: 'debug',
+    format: winston.format.combine(
+   
+      // winston.format.timestamp({
+      //   format: 'YYYY-MM-DD HH:mm:ss'
+      // }),
+      winston.format.json()
+    ),
+    transports: [
+      // - Write all logs with level `debug` and below to `SIDAInfo.log`
+      new winston.transports.File({ format: winston.format.simple(), filename: log_filename, level: 'debug', json: false }),
+      // - Print on console all logs with level `info` and below
+      new winston.transports.Console({format: winston.format.simple(), level: 'info'})
+    ],
+  });
+  return logger_diff  
+}
+
+
+function get_logger_upload(SOURCE_ID) {
+
+  const log_filename = `${process.env.log_folder}/${SOURCE_ID}/${process.env.log_upload}`
+
+  const logger_upload = winston.createLogger({
+    level: 'debug',
+    format: winston.format.combine(
+  
+      // winston.format.timestamp({
+      //   format: 'YYYY-MM-DD HH:mm:ss'
+      // }),
+      winston.format.json()
+    ),
+    transports: [
+      // - Write all logs with level `debug` and below to `SIDAInfo.log`
+      new winston.transports.File({ format: winston.format.simple(), filename: log_filename, level: 'debug', json: false }),
+      // - Print on console all logs with level `info` and below
+      new winston.transports.Console({format: winston.format.simple(), level: 'info'})
+    ],
+  });
+
+  return logger_upload;
+}
+
+
+module.exports = {get_logger_retrieve, get_logger_generation, get_logger_generation_fr, get_logger_diff, get_logger_upload};

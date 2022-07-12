@@ -1,12 +1,14 @@
 const https = require("https");
 const Moment = require('moment');
-const { logger_retrieve } = require('./logger.js');
+const logger = require('./logger.js');
 var fs = require('fs');
 var dhis2_to_script_file = require('./dhis2_to_script_files.js');
 const utils = require('./utils.js');
 var pjson = require('./package.json');
 
 function retrieve_data(SOURCE_OU_CODE, SOURCE_DATE) {
+    const SOURCE_ID = SOURCE_OU_CODE + '_' + SOURCE_DATE
+    global.logger_retrieve = logger.get_logger_retrieve(SOURCE_ID)
     logger_retrieve.info(`Running retrieve. Version ${pjson.version}`)
     try{
         retrieve_data_complete(SOURCE_OU_CODE, SOURCE_DATE)

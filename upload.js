@@ -1,12 +1,13 @@
 const axios = require('axios');
 var fs = require('fs');
-const { logger_upload } = require('./logger.js');
+const logger = require('./logger.js');
 const utils = require('./utils.js');
 var pjson = require('./package.json');
-const { exit } = require('process');
 
 
 function upload_data(SOURCE_OU_CODE, SOURCE_DATE) {
+    const SOURCE_ID = SOURCE_OU_CODE + '_' + SOURCE_DATE
+    global.logger_upload = logger.get_logger_upload(SOURCE_ID)
     logger_upload.info(`Running upload. Version ${pjson.version}`)
     try{
         upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE)

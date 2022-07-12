@@ -1,5 +1,5 @@
 var fs = require('fs');
-const { logger_diff } = require('./logger.js');
+const logger = require('./logger.js');
 var _ = require('lodash');
 const utils = require('./utils.js');
 var pjson = require('./package.json');
@@ -82,6 +82,9 @@ const PREVIOUS_FOLDER = "PREVIOUS_DHIS2_data"
 const CURRENT_FOLDER = "GENERATED_data"
 
 function generate_diff(SOURCE_OU_CODE, SOURCE_DATE) {
+    const SOURCE_ID = SOURCE_OU_CODE + '_' + SOURCE_DATE
+    global.logger_diff = logger.get_logger_diff(SOURCE_ID)
+
     logger_diff.info(`Running diff. Version ${pjson.version}`)
     try{
         generate_diff_complete(SOURCE_OU_CODE, SOURCE_DATE)
