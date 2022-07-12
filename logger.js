@@ -7,6 +7,24 @@ dotenv.config({ path: ENV_FILE });
 
 const winston = require('winston');
 
+const logger_retrieve = winston.createLogger({
+  level: 'debug',
+  format: winston.format.combine(
+ 
+    // winston.format.timestamp({
+    //   format: 'YYYY-MM-DD HH:mm:ss'
+    // }),
+    winston.format.json()
+  ),
+  transports: [
+    // - Write all logs with level `error` and below to `retrieve-error.log`
+    new winston.transports.File({ format: winston.format.simple(), filename: process.env.log_retrieve_error, level: 'warn', json: false }),
+    // - Write all logs with level `debug` and below to `retrieve.log`
+    new winston.transports.File({ format: winston.format.simple(), filename: process.env.log_retrieve, level: 'debug', json: false }),
+    new winston.transports.Console({format: winston.format.simple(), level: 'info'})
+  ],
+});
+
 const logger_generation = winston.createLogger({
   level: 'debug',
   format: winston.format.combine(
@@ -31,24 +49,6 @@ const logger_generation_fr = winston.createLogger({
   format: winston.format.simple(),
   transports: [
     new winston.transports.File({ format: winston.format.simple(), filename: process.env.log_generation_error_fr, level: 'warn'})
-  ],
-});
-
-const logger_retrieve = winston.createLogger({
-  level: 'debug',
-  format: winston.format.combine(
- 
-    // winston.format.timestamp({
-    //   format: 'YYYY-MM-DD HH:mm:ss'
-    // }),
-    winston.format.json()
-  ),
-  transports: [
-    // - Write all logs with level `error` and below to `retrieve-error.log`
-    new winston.transports.File({ format: winston.format.simple(), filename: process.env.log_retrieve_error, level: 'warn', json: false }),
-    // - Write all logs with level `debug` and below to `retrieve.log`
-    new winston.transports.File({ format: winston.format.simple(), filename: process.env.log_retrieve, level: 'debug', json: false }),
-    new winston.transports.Console({format: winston.format.simple(), level: 'info'})
   ],
 });
 
