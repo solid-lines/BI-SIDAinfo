@@ -5,6 +5,7 @@ var fs = require('fs');
 var dhis2_to_script_file = require('./dhis2_to_script_files.js');
 const utils = require('./utils.js');
 var pjson = require('./package.json');
+var process_status_OK = true
 
 function retrieve_data(SOURCE_OU_CODE, SOURCE_DATE) {
     const SOURCE_ID = SOURCE_OU_CODE + '_' + SOURCE_DATE
@@ -84,7 +85,12 @@ function retrieve_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
             logger_retrieve.error(err)
         });;
         dhis2_to_script_file.generate_patient_index_and_teis(SOURCE_ID);
-        logger_retrieve.info(`*** PROCESS FINISHED SUCCESSFULLY ***`);
+        if (process_status_OK) {
+            logger_retrieve.info(`*** PROCESS FINISHED SUCCESSFULLY ***`);
+        } else {
+            logger_retrieve.error(`*** ERRORS DURING THE PROCESS ***`);            
+        }
+        
     }
 
 
@@ -116,6 +122,7 @@ function retrieve_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
                         let body = Buffer.concat(bodyChunks);
                         let myJSONParse = JSON.parse(body);
                         if (res.statusCode != 200) {
+                            process_status_OK = false
                             logger_retrieve.error(`response statusCode=${res.statusCode}`)
                             logger_retrieve.error(body)
                             TEIs = "";
@@ -124,6 +131,7 @@ function retrieve_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
                             TEIs = myJSONParse.trackedEntityInstances;
                             resolve(TEIs)
                         } else {
+                            process_status_OK = false
                             logger_retrieve.error(body)
                             TEIs = "";
                             resolve(TEIs)
@@ -134,12 +142,14 @@ function retrieve_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
                 reqGet.end();
 
                 reqGet.on('error', function (e) {
+                    process_status_OK = false
                     logger_retrieve.error(e);
                     TEIs = "";
                     resolve(TEIs)
                 });
 
             } catch (error) {
+                process_status_OK = false
                 logger_retrieve.error(error);
                 TEIs = "";
                 resolve(TEIs)
