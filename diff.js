@@ -104,7 +104,7 @@ function generate_diff_complete(SOURCE_OU_CODE, SOURCE_DATE){
     const SOURCE_ID = SOURCE_OU_CODE + '_' + SOURCE_DATE
 
     const PATIENT_DUMP_PREVIOUS_FILE = "./" + PREVIOUS_FOLDER + "/" + SOURCE_ID + "/previous_all_patient_index.json";
-    logger_diff.info(PATIENT_DUMP_PREVIOUS_FILE)
+    logger_diff.debug(PATIENT_DUMP_PREVIOUS_FILE)
     if (!fs.existsSync(PATIENT_DUMP_PREVIOUS_FILE)) {
         logger_diff.error(`ArgError;Patient index file from prvious data dump (${PATIENT_DUMP_PREVIOUS_FILE}) doesn't exist`)
         process.exit(1)
@@ -113,7 +113,7 @@ function generate_diff_complete(SOURCE_OU_CODE, SOURCE_DATE){
     }
 
     const PATIENT_DUMP_CURRENT_FILE = "./" + CURRENT_FOLDER + "/" + SOURCE_ID + "/generated_all_patient_index.json";
-    logger_diff.info(PATIENT_DUMP_CURRENT_FILE)
+    logger_diff.debug(PATIENT_DUMP_CURRENT_FILE)
     if (!fs.existsSync(PATIENT_DUMP_CURRENT_FILE)) {
         logger_diff.error(`ArgError;Patient index file from current data dump (${PATIENT_DUMP_CURRENT_FILE}) doesn't exist`)
         process.exit(1)
@@ -167,7 +167,7 @@ function generate_diff_complete(SOURCE_OU_CODE, SOURCE_DATE){
         var dict = getAction_TEI(CREATE, TEI);
         dict.uid = patient_uid;
         listOfActions.push(dict);
-        logger_diff.info(`TEI_CREATE; Patient ${TEI} (${patient_uid}) will be created. Not present in previous data dump`);
+        logger_diff.debug(`TEI_CREATE; Patient ${TEI} (${patient_uid}) will be created. Not present in previous data dump`);
     })
 
     // DELETE TEIs
@@ -179,7 +179,7 @@ function generate_diff_complete(SOURCE_OU_CODE, SOURCE_DATE){
         var dict = getAction_TEI(DELETE, TEI);
         dict.uid = patient_uid;
         listOfActions.push(dict);
-        logger_diff.info(`TEI_DELETE; Patient ${TEI} (${patient_uid}) will be deleted from DHIS2 server; Not present in new data dump`);
+        logger_diff.debug(`TEI_DELETE; Patient ${TEI} (${patient_uid}) will be deleted from DHIS2 server; Not present in new data dump`);
     });
 
     var teis_toUpdateTEA = [];
@@ -376,7 +376,7 @@ function generate_diff_complete(SOURCE_OU_CODE, SOURCE_DATE){
             
             var dict = getAction_TEA(DELETE, previous_all_patient_index[codepatient].uid, TEA, dhisTEAs_data[dhisTEAs_uids.indexOf(TEA)].value);
             listOfActions.push(dict);
-            logger_diff.info(`TEA_DELETE; TEA ${TEA} will be deleted from patient ${codepatient} (${previous_all_patient_index[codepatient].uid}). Not present in new data dump`);
+            logger_diff.debug(`TEA_DELETE; TEA ${TEA} will be deleted from patient ${codepatient} (${previous_all_patient_index[codepatient].uid}). Not present in new data dump`);
         });
 
         newTEAs.forEach((TEA) => {
@@ -384,7 +384,7 @@ function generate_diff_complete(SOURCE_OU_CODE, SOURCE_DATE){
             
             var dict = getAction_TEA(CREATE, previous_all_patient_index[codepatient].uid, TEA, newTEAs_data[newTEAs_uids.indexOf(TEA)].value);
             listOfActions.push(dict);
-            logger_diff.info(`TEA_CREATE; TEA ${TEA} will be created for patient ${codepatient} (${previous_all_patient_index[codepatient].uid}). Not present in previous data dump`);
+            logger_diff.debug(`TEA_CREATE; TEA ${TEA} will be created for patient ${codepatient} (${previous_all_patient_index[codepatient].uid}). Not present in previous data dump`);
         });
 
         commonTEAs.forEach((TEA) => {
@@ -434,7 +434,7 @@ function generate_diff_complete(SOURCE_OU_CODE, SOURCE_DATE){
             
             var dict = getAction_TEA(UPDATE, previous_all_patient_index[codepatient].uid, TEA, valueDHIS, valueNew);
             listOfActions.push(dict);
-            logger_diff.info(`TEA_UPDATE; TEA ${TEA} will be updated for patient ${codepatient} (${previous_all_patient_index[codepatient].uid}). Previous value: ${valueDHIS} , New value: ${valueNew}`)
+            logger_diff.debug(`TEA_UPDATE; TEA ${TEA} will be updated for patient ${codepatient} (${previous_all_patient_index[codepatient].uid}). Previous value: ${valueDHIS} , New value: ${valueNew}`)
         }
 
         return updated_TEA;
@@ -479,7 +479,7 @@ function generate_diff_complete(SOURCE_OU_CODE, SOURCE_DATE){
                     dict.program = final_program_uid;
                     dict.programLabel = final_program_label;
                     listOfActions.push(dict);
-                    logger_diff.info(`ENROLLMENT_DELETE; Program: ${final_program_label} (${final_program_uid}). Enrollment: ${enrollment_date} (${enrollment_uid}) will be deleted from patient ${codepatient} (${tei_uid}). Not present in new data dump`);
+                    logger_diff.debug(`ENROLLMENT_DELETE; Program: ${final_program_label} (${final_program_uid}). Enrollment: ${enrollment_date} (${enrollment_uid}) will be deleted from patient ${codepatient} (${tei_uid}). Not present in new data dump`);
                 });
 
                 //There are new enrollments in the current dump
@@ -498,7 +498,7 @@ function generate_diff_complete(SOURCE_OU_CODE, SOURCE_DATE){
                     dict.programLabel = final_program_label;
                     dict.status = getEnrollmentStatus(current_TEI_file.enrollments, enrollment_uid);
                     listOfActions.push(dict);
-                    logger_diff.info(`ENROLLMENT_CREATE; Program: ${final_program_label} (${final_program_uid}). Enrollment: ${enrollment_date} (${enrollment_uid}) will be created from patient ${codepatient} (${tei_uid}). Not present in previous data dump`);
+                    logger_diff.debug(`ENROLLMENT_CREATE; Program: ${final_program_label} (${final_program_uid}). Enrollment: ${enrollment_date} (${enrollment_uid}) will be created from patient ${codepatient} (${tei_uid}). Not present in previous data dump`);
                 });
 
 
@@ -529,7 +529,7 @@ function generate_diff_complete(SOURCE_OU_CODE, SOURCE_DATE){
                     dict.program = final_program_uid;
                     dict.programLabel = final_program_label;
                     listOfActions.push(dict);
-                    logger_diff.info(`ENROLLMENT_DELETE; Program: ${final_program_label} (${final_program_uid}). Enrollment: ${enrollment_date} (${enrollment_uid}) will be deleted from patient ${codepatient} (${previous_all_patient_index[codepatient].uid}). Not present in new data dump`);
+                    logger_diff.debug(`ENROLLMENT_DELETE; Program: ${final_program_label} (${final_program_uid}). Enrollment: ${enrollment_date} (${enrollment_uid}) will be deleted from patient ${codepatient} (${previous_all_patient_index[codepatient].uid}). Not present in new data dump`);
                 }
             }
         } else { // Enrollment NOT in the previous data dump
@@ -550,7 +550,7 @@ function generate_diff_complete(SOURCE_OU_CODE, SOURCE_DATE){
                     dict.programLabel = final_program_label;
                     dict.status = getEnrollmentStatus(current_TEI_file.enrollments, enrollment_uid);
                     listOfActions.push(dict);
-                    logger_diff.info(`ENROLLMENT_CREATE; Program: ${final_program_label} (${final_program_uid}). Enrollment: ${enrollment_date} (${enrollment_uid}) will be created from patient ${codepatient} (${tei_uid}). Not present in previous data dump`);
+                    logger_diff.debug(`ENROLLMENT_CREATE; Program: ${final_program_label} (${final_program_uid}). Enrollment: ${enrollment_date} (${enrollment_uid}) will be created from patient ${codepatient} (${tei_uid}). Not present in previous data dump`);
                 }
             } else {
                 // Not Enrollment in the previous data dump AND not enrollment in the current dump.
@@ -636,7 +636,7 @@ function generate_diff_complete(SOURCE_OU_CODE, SOURCE_DATE){
             dict.previousStatus = status_previous;
             dict.currentStatus = status_current;
             listOfActions.push(dict);
-            logger_diff.info(`ENROLLMENT_STATUS_UPDATE; Program: ${final_program_label} (${final_program_uid}). Enrollment: ${enrollment_date} (${enrollment_uid}) STATUS will be updated from patient ${codepatient} (${tei_uid}). Previous status: ${status_previous}, New status: ${status_current}`)
+            logger_diff.debug(`ENROLLMENT_STATUS_UPDATE; Program: ${final_program_label} (${final_program_uid}). Enrollment: ${enrollment_date} (${enrollment_uid}) STATUS will be updated from patient ${codepatient} (${tei_uid}). Previous status: ${status_previous}, New status: ${status_current}`)
         }
 
         return changed;
@@ -708,7 +708,7 @@ function generate_diff_complete(SOURCE_OU_CODE, SOURCE_DATE){
                             dict.programLabel = final_program_label;
                             dict.programStage = stage;                        
                             listOfActions.push(dict);
-                            logger_diff.info(`EVENT_DELETE; Program: ${final_program_label} (${final_program_uid}). Program Stage ${[stage]}. Event (${event_uid}) on ${event_date} will be deleted for patient ${codepatient} (${patient_uid}) in previous dump but not present in current data dump`);
+                            logger_diff.debug(`EVENT_DELETE; Program: ${final_program_label} (${final_program_uid}). Program Stage ${[stage]}. Event (${event_uid}) on ${event_date} will be deleted for patient ${codepatient} (${patient_uid}) in previous dump but not present in current data dump`);
                         });
 
                         //There are new events for that stage in the current dump
@@ -728,7 +728,7 @@ function generate_diff_complete(SOURCE_OU_CODE, SOURCE_DATE){
                             dict.programLabel = final_program_label;
                             dict.programStage = stage;
                             listOfActions.push(dict);
-                            logger_diff.info(`EVENT_CREATE; Program: ${final_program_label} (${final_program_uid}). Program Stage ${[stage]}. Event (${event_uid}) on ${event_date} will be created for patient ${codepatient} (${patient_uid}). Not present in previous data dump`);
+                            logger_diff.debug(`EVENT_CREATE; Program: ${final_program_label} (${final_program_uid}). Program Stage ${[stage]}. Event (${event_uid}) on ${event_date} will be created for patient ${codepatient} (${patient_uid}). Not present in previous data dump`);
                         });
 
                         //Some events for that stage are present in both dumps
@@ -781,7 +781,7 @@ function generate_diff_complete(SOURCE_OU_CODE, SOURCE_DATE){
                                 dict.previousStatus = status_previous;
                                 dict.currentStatus = status_current;
                                 listOfActions.push(dict);
-                                logger_diff.info(`EVENT_UPDATE_STATUS; Program: ${final_program_label} (${final_program_uid}). Program Stage ${[stage]}. Event (${event_uid}) on ${event_date} will be updated for patient ${codepatient} (${patient_uid}). Previous status: ${status_previous}, New status: ${status_current}`);
+                                logger_diff.debug(`EVENT_UPDATE_STATUS; Program: ${final_program_label} (${final_program_uid}). Program Stage ${[stage]}. Event (${event_uid}) on ${event_date} will be updated for patient ${codepatient} (${patient_uid}). Previous status: ${status_previous}, New status: ${status_current}`);
                             }
 
                             /**
@@ -808,14 +808,14 @@ function generate_diff_complete(SOURCE_OU_CODE, SOURCE_DATE){
                                 dict.previousDueDate = dueDate_previous;
                                 dict.currentDueDate = dueDate_current;
                                 listOfActions.push(dict);
-                                logger_diff.info(`EVENT_UPDATE_DUEDATE; Program: ${final_program_label} (${final_program_uid}). Program Stage ${[stage]}. Event (${event_uid}) on ${event_date} will be updated for patient ${codepatient} (${patient_uid}). Previous dueDate: ${dueDate_previous}, New dueDate: ${dueDate_current}`);
+                                logger_diff.debug(`EVENT_UPDATE_DUEDATE; Program: ${final_program_label} (${final_program_uid}). Program Stage ${[stage]}. Event (${event_uid}) on ${event_date} will be updated for patient ${codepatient} (${patient_uid}). Previous dueDate: ${dueDate_previous}, New dueDate: ${dueDate_current}`);
                             }
 
                         });
 
                     } else { // Stage doesn't exist in current file enrollment
                         changed_missing = true;
-                        logger_diff.info(`All_Events_ProgramStage_DELETE; ${[stage]} stage from enrollment (${enrollment_uid_current}) and all its associated events will be deleted for patient ${codepatient} (${previous_all_patient_index[codepatient].uid}). Not present in new data dump`);
+                        logger_diff.debug(`All_Events_ProgramStage_DELETE; ${[stage]} stage from enrollment (${enrollment_uid_current}) and all its associated events will be deleted for patient ${codepatient} (${previous_all_patient_index[codepatient].uid}). Not present in new data dump`);
                         var events = Object.keys(previous_all_enrollment_events_index[stage]);
                         //For each event on that stage
                         if (typeof events !== "undefined") {
@@ -834,7 +834,7 @@ function generate_diff_complete(SOURCE_OU_CODE, SOURCE_DATE){
                                 dict.programLabel = final_program_label;
                                 dict.programStage = stage;
                                 listOfActions.push(dict);
-                                logger_diff.info(`EVENT_DELETE; Program: ${final_program_label} (${final_program_uid}). Program Stage ${[stage]}. Event (${event_uid}) on ${event_date} will be deleted for patient ${codepatient} (${patient_uid}) in previous dump but not present in current data dump`);
+                                logger_diff.debug(`EVENT_DELETE; Program: ${final_program_label} (${final_program_uid}). Program Stage ${[stage]}. Event (${event_uid}) on ${event_date} will be deleted for patient ${codepatient} (${patient_uid}) in previous dump but not present in current data dump`);
                             });
                         }
                     }
@@ -856,7 +856,7 @@ function generate_diff_complete(SOURCE_OU_CODE, SOURCE_DATE){
                             dict.programLabel = final_program_label;
                             dict.programStage = stage;
                             listOfActions.push(dict);
-                            logger_diff.info(`EVENT_CREATE; Program: ${final_program_label} (${final_program_uid}). Program Stage ${[stage]}. Event (${event_uid}) on ${event_date} will be created for patient ${codepatient} (${patient_uid}). Not present in previous data dump`);
+                            logger_diff.debug(`EVENT_CREATE; Program: ${final_program_label} (${final_program_uid}). Program Stage ${[stage]}. Event (${event_uid}) on ${event_date} will be created for patient ${codepatient} (${patient_uid}). Not present in previous data dump`);
                         })
 
                     } else {
@@ -867,7 +867,7 @@ function generate_diff_complete(SOURCE_OU_CODE, SOURCE_DATE){
                 var previousEvents_dates = []
                 if ("stage" in previous_all_enrollment_events_index){
                     previousEvents_dates = Object.keys(previous_all_enrollment_events_index[stage]);
-                    logger_diff.info(`All_Events_ProgramStage_DELETE; ${previous_enrollment_key} ${[stage]}`);
+                    logger_diff.debug(`All_Events_ProgramStage_DELETE; ${previous_enrollment_key} ${[stage]}`);
                 }
 
                 //There are new events for that stage in the current dump
@@ -887,7 +887,7 @@ function generate_diff_complete(SOURCE_OU_CODE, SOURCE_DATE){
                     dict.programLabel = final_program_label;
                     dict.programStage = stage;
                     listOfActions.push(dict);
-                    logger_diff.info(`EVENT_DELETE; Program: ${final_program_label} (${final_program_uid}). Program Stage ${[stage]}. Event (${event_uid}) on ${event_date} will be created for patient ${codepatient} (${patient_uid}). Not present in current data dump`);
+                    logger_diff.debug(`EVENT_DELETE; Program: ${final_program_label} (${final_program_uid}). Program Stage ${[stage]}. Event (${event_uid}) on ${event_date} will be created for patient ${codepatient} (${patient_uid}). Not present in current data dump`);
                 });
             }
         } else { // No events associated to that enrollment in the previous file, for any of the program stages
@@ -895,7 +895,7 @@ function generate_diff_complete(SOURCE_OU_CODE, SOURCE_DATE){
                 if (stage in current_all_enrollment_events_index) { // Stage exist in current file enrollment
 
                     var currentEvents_dates = Object.keys(current_all_enrollment_events_index[stage]);
-                    logger_diff.info(`All_Events_ProgramStage_CREATE; ${previous_enrollment_key} ${[stage]}`);
+                    logger_diff.debug(`All_Events_ProgramStage_CREATE; ${previous_enrollment_key} ${[stage]}`);
 
                     //There are new events for that stage in the current dump
                     currentEvents_dates.forEach((event_date) => {
@@ -914,7 +914,7 @@ function generate_diff_complete(SOURCE_OU_CODE, SOURCE_DATE){
                         dict.program = final_program_uid;
                         dict.programLabel = final_program_label;
                         listOfActions.push(dict);
-                        logger_diff.info(`EVENT_CREATE; Program: ${final_program_label} (${final_program_uid}). Program Stage ${[stage]}. Event (${event_uid}) on ${event_date} will be created for patient ${codepatient} (${patient_uid}). Not present in previous data dump`);
+                        logger_diff.debug(`EVENT_CREATE; Program: ${final_program_label} (${final_program_uid}). Program Stage ${[stage]}. Event (${event_uid}) on ${event_date} will be created for patient ${codepatient} (${patient_uid}). Not present in previous data dump`);
                     });
                 } else {
                     // No events in the current patient index for that stage
@@ -1045,7 +1045,7 @@ function generate_diff_complete(SOURCE_OU_CODE, SOURCE_DATE){
                     dict.programLabel = program_label;
                     dict.programStage = stage;
                     listOfActions.push(dict);
-                    logger_diff.info(`DV_DELETE; Patient ${codepatient} (${patient_uid}). Program: ${program_label} (${program_uid}). Program Stage ${[stage]}. Event (${event_uid}) ${event_date}. DataElement (${de_uid}) with value ${de_value} will be deleted. Not present in current data dump`);
+                    logger_diff.debug(`DV_DELETE; Patient ${codepatient} (${patient_uid}). Program: ${program_label} (${program_uid}). Program Stage ${[stage]}. Event (${event_uid}) ${event_date}. DataElement (${de_uid}) with value ${de_value} will be deleted. Not present in current data dump`);
                 });
 
                 //There are new DEs for that event in the current dump
@@ -1066,7 +1066,7 @@ function generate_diff_complete(SOURCE_OU_CODE, SOURCE_DATE){
                     dict.programLabel = program_label;
                     dict.programStage = stage;
                     listOfActions.push(dict);
-                    logger_diff.info(`DV_CREATE; Patient ${codepatient} (${patient_uid}). Program: ${program_label} (${program_uid}). Program Stage ${[stage]}. Event (${event_uid}) ${event_date}. DataElement (${de_uid}) with value ${de_value} will be created. Not present in previous data dump`);
+                    logger_diff.debug(`DV_CREATE; Patient ${codepatient} (${patient_uid}). Program: ${program_label} (${program_uid}). Program Stage ${[stage]}. Event (${event_uid}) ${event_date}. DataElement (${de_uid}) with value ${de_value} will be created. Not present in previous data dump`);
                 });
 
                 //Some events for that stage are present in both dumps
@@ -1096,7 +1096,7 @@ function generate_diff_complete(SOURCE_OU_CODE, SOURCE_DATE){
                     dict.programLabel = program_label;
                     dict.programStage = stage;
                     listOfActions.push(dict);
-                    logger_diff.info(`DV_DELETE; Patient ${codepatient} (${patient_uid}). Program: ${program_label} (${program_uid}). Program Stage ${[stage]}. Event (${event_uid}) ${event_date}. DataElement (${de_uid}) with value ${de_value} will be deleted. Not present in current data dump`);
+                    logger_diff.debug(`DV_DELETE; Patient ${codepatient} (${patient_uid}). Program: ${program_label} (${program_uid}). Program Stage ${[stage]}. Event (${event_uid}) ${event_date}. DataElement (${de_uid}) with value ${de_value} will be deleted. Not present in current data dump`);
                 });
             }
 
@@ -1124,7 +1124,7 @@ function generate_diff_complete(SOURCE_OU_CODE, SOURCE_DATE){
                     dict.programLabel = program_label;
                     dict.programStage = stage;
                     listOfActions.push(dict);
-                    logger_diff.info(`DV_CREATE; Patient ${codepatient} (${patient_uid}). Program: ${program_label} (${program_uid}). Program Stage ${[stage]}. Event (${event_uid}) ${event_date}. DataElement (${de_uid}) with value ${de_value} will be created. Not present in previous data dump`);
+                    logger_diff.debug(`DV_CREATE; Patient ${codepatient} (${patient_uid}). Program: ${program_label} (${program_uid}). Program Stage ${[stage]}. Event (${event_uid}) ${event_date}. DataElement (${de_uid}) with value ${de_value} will be created. Not present in previous data dump`);
                 });
 
             } else { //Event doesn't have dataValues in previous nor current dump
@@ -1172,9 +1172,9 @@ function generate_diff_complete(SOURCE_OU_CODE, SOURCE_DATE){
             dict.programLabel = program_label;
             dict.programStage = programStage;
             listOfActions.push(dict);
-            logger_diff.info(`DV_UPDATE; Patient ${codepatient} (${patient_uid}). Program: ${program_label} (${program_uid}). Program Stage ${programStage}. Event (${event_uid}) ${event_date}. DataElement (${de_uid}) will be updated. Previous value ${previous_value}, Current value ${current_value} `);
+            logger_diff.debug(`DV_UPDATE; Patient ${codepatient} (${patient_uid}). Program: ${program_label} (${program_uid}). Program Stage ${programStage}. Event (${event_uid}) ${event_date}. DataElement (${de_uid}) will be updated. Previous value ${previous_value}, Current value ${current_value} `);
         } else {
-            //logger_diff.info(`DV_INFO; DE ${DE} won't be updated for patient ${codepatient} (${patient_uid}); It has the same value as the previous dump`)
+            //logger_diff.debug(`DV_INFO; DE ${DE} won't be updated for patient ${codepatient} (${patient_uid}); It has the same value as the previous dump`)
         }
 
         return changed;
