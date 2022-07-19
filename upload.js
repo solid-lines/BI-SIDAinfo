@@ -71,6 +71,9 @@ function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
     /* Delete */
     // In 2.36, delete a TEI means: delete TEI, delete enrollment, delete events (but in 2.33, events were not deleted).
     const TEIs_toDelete = getActionByOperationType(TEIs, DELETE);
+    if (TEIs_toDelete.length != 0) { 
+        logger_upload.info(`DELETE ${TEIs_toDelete.length} TEIs`)
+    }
     i=0
     TEIs_toDelete.forEach((TEI) => {
         utils.wait(500)
@@ -78,13 +81,18 @@ function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         if ((i%50) == 0){
             utils.wait(10000)
         }
-        logger_upload.info(`Delete TEI ${TEI.uid}`);
+        logger_upload.debug(`Delete TEI ${TEI.uid}`);
         delete_resource(TEI_TYPE, TEI.uid)
     });
+
+    utils.wait(10000)
 
     /* Create */
     const TEIs_toCreate = getActionByOperationType(TEIs, CREATE);
     let list_teis_to_create = []
+    if (TEIs_toCreate.length != 0) { 
+        logger_upload.info(`CREATE ${TEIs_toCreate.length} TEIs`)
+    }    
     TEIs_toCreate.forEach((TEI) => {
         const payload = getTEIpayload(TEI.uid);
         logger_upload.debug(`Create TEI ${TEI.uid}, payload: ${JSON.stringify(payload)}`);
@@ -97,6 +105,9 @@ function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
             utils.wait(5000)
         }
     });
+
+    utils.wait(10000)
+
     // send last list of resources
     if (list_teis_to_create.length>0){
         post_list_resources(TEI_TYPE, list_teis_to_create);
@@ -110,6 +121,9 @@ function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
     TEIs_already_sent = []
     /* Delete */
     const TEAs_toDelete = getActionByOperationType(TEAs, DELETE);
+    if (TEAs_toDelete.length != 0) { 
+        logger_upload.info(`DELETE ${TEAs_toDelete.length} TEAs`)
+    }      
     i=0
     TEAs_toDelete.forEach((TEA) => {
         if (TEIs_already_sent.includes(TEA.TEI)){
@@ -123,12 +137,15 @@ function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
             utils.wait(10000)
         }
         const payload = getTEApayload(TEA.TEI);
-        logger_upload.info(`Delete TEA ${TEA.TEA} (TEI ${TEA.TEI}), payload: ${JSON.stringify(payload)}`);
+        logger_upload.debug(`Delete TEA ${TEA.TEA} (TEI ${TEA.TEI}), payload: ${JSON.stringify(payload)}`);
         put_resource(TEA_TYPE, TEA.TEI, payload);
     });
 
     /* Create */
     const TEAs_toCreate = getActionByOperationType(TEAs, CREATE);
+    if (TEAs_toCreate.length != 0) { 
+        logger_upload.info(`CREATE ${TEAs_toCreate.length} TEAs`)
+    } 
     i=0
     TEAs_toCreate.forEach((TEA) => {
         if (TEIs_already_sent.includes(TEA.TEI)){
@@ -143,12 +160,15 @@ function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
             utils.wait(10000)
         }
         const payload = getTEApayload(TEA.TEI);
-        logger_upload.info(`Create TEA ${TEA.TEA} (TEI ${TEA.TEI}), payload: ${JSON.stringify(payload)}`);
+        logger_upload.debug(`Create TEA ${TEA.TEA} (TEI ${TEA.TEI}), payload: ${JSON.stringify(payload)}`);
         put_resource(TEA_TYPE, TEA.TEI, payload);
     });
 
     /* Update */
     const TEAs_toUpdate = getActionByOperationType(TEAs, UPDATE);
+    if (TEAs_toUpdate.length != 0) { 
+        logger_upload.info(`UPDATE ${TEAs_toUpdate.length} TEAs`)
+    }
     i=0
     TEAs_toUpdate.forEach((TEA) => {
         if (TEIs_already_sent.includes(TEA.TEI)){
@@ -162,7 +182,7 @@ function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
             utils.wait(10000)
         }
         const payload = getTEApayload(TEA.TEI);
-        logger_upload.info(`Update TEA ${TEA.TEA} (TEI ${TEA.TEI}), payload: ${JSON.stringify(payload)}`);
+        logger_upload.debug(`Update TEA ${TEA.TEA} (TEI ${TEA.TEI}), payload: ${JSON.stringify(payload)}`);
         put_resource(TEA_TYPE, TEA.TEI, payload);
     });
 
@@ -171,6 +191,9 @@ function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
 
     /* Delete */
     const enrollments_to_delete = getActionByOperationType(enrollments, DELETE);
+    if (enrollments_to_delete.length != 0) { 
+        logger_upload.info(`DELETE ${enrollments_to_delete.length} ENROLLMENTS`)
+    }    
     i=0
     enrollments_to_delete.forEach((enrollment) => {
         utils.wait(500)
@@ -179,12 +202,15 @@ function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
             utils.wait(10000)
         }
         const enrollment_uid = enrollment.uid
-        logger_upload.info(`Delete enrollment ${enrollment_uid} (TEI ${enrollment.TEI})`);
+        logger_upload.debug(`Delete enrollment ${enrollment_uid} (TEI ${enrollment.TEI})`);
         delete_resource(ENROLLMENT_TYPE, enrollment_uid);
     });
 
     /* Create */
     const enrollments_to_create = getActionByOperationType(enrollments, CREATE);
+    if (enrollments_to_create.length != 0) { 
+        logger_upload.info(`CREATE ${enrollments_to_create.length} ENROLLMENTS`)
+    }
     i=0
     enrollments_to_create.forEach((enrollment) => {
         utils.wait(500)
@@ -194,13 +220,16 @@ function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         }
         const enrollment_uid = enrollment.uid
         const payload = get_enrollment_payload(enrollment.TEI, enrollment_uid);
-        logger_upload.info(`Create enrollment ${enrollment_uid} (TEI ${enrollment.TEI}), payload: ${JSON.stringify(payload)}`);
+        logger_upload.debug(`Create enrollment ${enrollment_uid} (TEI ${enrollment.TEI}), payload: ${JSON.stringify(payload)}`);
         post_resource(ENROLLMENT_TYPE, enrollment_uid, payload);
     });
 
     /* Update */
     //Enrollment_STATUS_UPDATE
     const enrollments_to_update = getActionByOperationType(enrollments, UPDATE);
+    if (enrollments_to_update.length != 0) { 
+        logger_upload.info(`UPDATE ${enrollments_to_update.length} ENROLLMENTS`)
+    }
     i=0
     enrollments_to_update.forEach((enrollment) => {
         utils.wait(500)
@@ -210,7 +239,7 @@ function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         }
         const enrollment_uid = enrollment.uid
         const payload = get_enrollment_status_payload(enrollment.TEI, enrollment_uid);
-        logger_upload.info(`Update enrollment status ${enrollment_uid} (TEI ${enrollment.TEI}), payload: ${JSON.stringify(payload)}`);
+        logger_upload.debug(`Update enrollment status ${enrollment_uid} (TEI ${enrollment.TEI}), payload: ${JSON.stringify(payload)}`);
         put_resource(ENROLLMENT_TYPE, enrollment_uid, payload);
     });
 
@@ -218,18 +247,21 @@ function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
 
     /* Delete */
     const events_to_delete = getActionByOperationType(events, DELETE);
+    if (events_to_delete.length != 0) { 
+        logger_upload.info(`DELETE ${events_to_delete.length} EVENTS`)
+    }    
     let list_events_to_delete = []
     events_to_delete.forEach((event) => {
         const event_uid = event.uid
         const enrollment_uid = event.enrollment
         const tei_uid = event.TEI
-        logger_upload.info(`Delete event ${event_uid} (TEI ${tei_uid}) (enrollment ${enrollment_uid})`);
+        logger_upload.debug(`Delete event ${event_uid} (TEI ${tei_uid}) (enrollment ${enrollment_uid})`);
         //delete_resource(EVENT_TYPE, event_uid);
         payload = {"event": event_uid}
         list_events_to_delete.push(payload)
         if ((list_events_to_delete.length % 50) == 0){
-            logger_upload.info("List lenght == 50")
-            logger_upload.info(list_events_to_delete)
+            logger_upload.debug("List lenght == 50")
+            logger_upload.debug(list_events_to_delete)
             delete_list_resources(EVENT_TYPE, list_events_to_delete);
             //clean list
             list_events_to_delete = []
@@ -243,18 +275,21 @@ function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
     /* Create */
 
     const events_to_create = getActionByOperationType(events, CREATE);
+    if (events_to_create.length != 0) { 
+        logger_upload.info(`CREATE ${events_to_create.length} EVENTS`)
+    }
     let list_events_to_create = []
     events_to_create.forEach((event) => {
         const event_uid = event.uid
         const enrollment_uid = event.enrollment
         const tei_uid = event.TEI
         const payload = get_event_payload(tei_uid, enrollment_uid, event_uid);
-        logger_upload.info(`Create event ${event_uid} (TEI ${tei_uid}) (enrollment ${enrollment_uid}), payload: ${JSON.stringify(payload)}`);
+        logger_upload.debug(`Create event ${event_uid} (TEI ${tei_uid}) (enrollment ${enrollment_uid}), payload: ${JSON.stringify(payload)}`);
         //post_resource(EVENT_TYPE, event_uid, payload);
         list_events_to_create.push(payload)
         if ((list_events_to_create.length % 50) == 0){
-            logger_upload.info("List lenght == 50")
-            logger_upload.info(list_events_to_create)
+            logger_upload.debug("List lenght == 50")
+            logger_upload.debug(list_events_to_create)
             post_list_resources(EVENT_TYPE, list_events_to_create);
             //clean list
             list_events_to_create = []
@@ -269,6 +304,9 @@ function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
     /* Update */
     //Event_STATUS_UPDATE + Event_DUEDATE_UPDATE
     const events_to_update = getActionByOperationType(events, UPDATE);
+    if (events_to_update.length != 0) { 
+        logger_upload.info(`UPDATE ${events_to_update.length} EVENTS`)
+    }
     i=0
     events_to_update.forEach((event) => {
         utils.wait(500)
@@ -281,7 +319,7 @@ function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         const enrollment_uid = event.enrollment
         const tei_uid = event.TEI
         const payload = get_event_payload(tei_uid, enrollment_uid, event_uid); // send all payload, incuding data values
-        logger_upload.info(`Update event ${event_uid} (TEI ${tei_uid}) (enrollment ${enrollment_uid}), payload: ${JSON.stringify(payload)}`);
+        logger_upload.debug(`Update event ${event_uid} (TEI ${tei_uid}) (enrollment ${enrollment_uid}), payload: ${JSON.stringify(payload)}`);
         put_resource(EVENT_TYPE, event_uid, payload);
     });
 
@@ -292,6 +330,9 @@ function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
     /* Delete */
     //send the datavalue empty ("")
     const dv_to_delete = getActionByOperationType(DVs, DELETE);
+    if (dv_to_delete.length != 0) { 
+        logger_upload.info(`DELETE ${dv_to_delete.length} DATA VALUE (EVENT)`)
+    }
     i=0
     dv_to_delete.forEach((dv) => {
         utils.wait(500)
@@ -304,12 +345,15 @@ function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         const enrollment_uid = dv.enrollment
         const tei_uid = dv.TEI
         const payload = get_dv_delete_event_payload(tei_uid, enrollment_uid, event_uid, dv_de);
-        logger_upload.info(`Delete datavalue ${dv_de} event ${event_uid} (TEI ${tei_uid}) (enrollment ${enrollment_uid}), payload: ${JSON.stringify(payload)}`);
+        logger_upload.debug(`Delete datavalue ${dv_de} event ${event_uid} (TEI ${tei_uid}) (enrollment ${enrollment_uid}), payload: ${JSON.stringify(payload)}`);
         put_resource(DV_TYPE, event_uid+"/"+dv_de, payload);
     });
 
     /* Create */
     const dv_to_create = getActionByOperationType(DVs, CREATE);
+    if (dv_to_create.length != 0) { 
+        logger_upload.info(`CREATE ${dv_to_create.length} DATA VALUE (EVENT)`)
+    }
     i = 0
     dv_to_create.forEach((dv) => {
         utils.wait(500)
@@ -322,13 +366,16 @@ function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         const enrollment_uid = dv.enrollment
         const tei_uid = dv.TEI
         const payload = get_dv_event_payload(tei_uid, enrollment_uid, event_uid, dv_de);
-        logger_upload.info(`Create datavalue ${dv_de} event ${event_uid} (TEI ${tei_uid}) (enrollment ${enrollment_uid}), payload: ${JSON.stringify(payload)}`);
+        logger_upload.debug(`Create datavalue ${dv_de} event ${event_uid} (TEI ${tei_uid}) (enrollment ${enrollment_uid}), payload: ${JSON.stringify(payload)}`);
         put_resource(DV_TYPE, event_uid+"/"+dv_de, payload);
     });
 
 
     /* Update */
     const dv_to_update = getActionByOperationType(DVs, UPDATE);
+    if (dv_to_update.length != 0) { 
+        logger_upload.info(`UPDATE ${dv_to_update.length} DATA VALUE (EVENT)`)
+    }
     i=0;
     dv_to_update.forEach((dv) => {
         utils.wait(500)
@@ -341,7 +388,7 @@ function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         const enrollment_uid = dv.enrollment
         const tei_uid = dv.TEI
         const payload = get_dv_event_payload(tei_uid, enrollment_uid, event_uid, dv_de);
-        logger_upload.info(`Update datavalue ${dv_de} event ${event_uid} (TEI ${tei_uid}) (enrollment ${enrollment_uid}), payload: ${JSON.stringify(payload)}`);
+        logger_upload.debug(`Update datavalue ${dv_de} event ${event_uid} (TEI ${tei_uid}) (enrollment ${enrollment_uid}), payload: ${JSON.stringify(payload)}`);
         put_resource(DV_TYPE, event_uid+"/"+dv_de, payload);
     });
 
@@ -375,7 +422,7 @@ function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         }
 
 
-        logger_upload.info(`POST ${resource_type} ${uid}. url '${mapping[resource_type]}'`);
+        logger_upload.debug(`POST ${resource_type} ${uid}. url '${mapping[resource_type]}'`);
         const baseURL = `https://${endpointConfig.dhisServer}/api/`
         const config = {
             baseURL: baseURL,
@@ -396,8 +443,8 @@ function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
 
         axios.post(mapping[resource_type], payload, config)
         .then(function (response) {
-            logger_upload.info(`POST ${resource_type} ${uid}. url '${mapping[resource_type]}'`);
-            logger_upload.info(JSON.stringify(response.data))
+            logger_upload.debug(`POST ${resource_type} ${uid}. url '${mapping[resource_type]}'`);
+            logger_upload.debug(JSON.stringify(response.data))
         })
         .catch(function (error) {
             logger_upload.error(`POST ${resource_type} ${uid}. url '${mapping[resource_type]}'`);
@@ -422,7 +469,7 @@ function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
 
         logger_upload.debug(JSON.stringify(payload))
 
-        logger_upload.info(`POST List of ${resource_type}. url '${mapping[resource_type]}/'`);
+        logger_upload.debug(`POST List of ${resource_type}. url '${mapping[resource_type]}/'`);
         const baseURL = `https://${endpointConfig.dhisServer}/api/`
         const config = {
             baseURL: baseURL,
@@ -443,7 +490,7 @@ function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
 
         try {
             const response = await axios.post(mapping[resource_type], payload, config)
-            logger_upload.info(JSON.stringify(response.data))
+            logger_upload.debug(JSON.stringify(response.data))
         } catch (error) {
             logger_upload.error(`POST List ${resource_type}. url '${mapping[resource_type]}/'`);
             logger_upload.error(error)
@@ -464,9 +511,9 @@ function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         let payload = new Object();
         payload[mapping[resource_type]] = list_resources;
 
-        logger_upload.info(JSON.stringify(payload))
+        logger_upload.debug(JSON.stringify(payload))
 
-        logger_upload.info(`POST ?strategy=DELETE List of ${resource_type}. url '${mapping[resource_type]}/'`);
+        logger_upload.debug(`POST ?strategy=DELETE List of ${resource_type}. url '${mapping[resource_type]}/'`);
         const baseURL = `https://${endpointConfig.dhisServer}/api/`
         const config = {
             baseURL: baseURL,
@@ -487,8 +534,8 @@ function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
 
         axios.post(mapping[resource_type]+"?strategy=DELETE", payload, config)
         .then(function (response) {
-            logger_upload.info(`POST ?strategy=DELETE ${resource_type}. url '${mapping[resource_type]}/'`);
-            logger_upload.info(JSON.stringify(response.data))
+            logger_upload.debug(`POST ?strategy=DELETE ${resource_type}. url '${mapping[resource_type]}/'`);
+            logger_upload.debug(JSON.stringify(response.data))
         })
         .catch(function (error) {
             logger_upload.error(`POST ?strategy=DELETE ${resource_type}. url '${mapping[resource_type]}/'`);
@@ -510,7 +557,7 @@ function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
             [DV_TYPE]: "events/"+uid
         }
 
-        logger_upload.info(`PUT ${resource_type} ${uid}. url '${mapping[resource_type]}'`);
+        logger_upload.debug(`PUT ${resource_type} ${uid}. url '${mapping[resource_type]}'`);
         const baseURL = `https://${endpointConfig.dhisServer}/api/`
         const config = {
             baseURL: baseURL,
@@ -531,8 +578,8 @@ function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
 
         axios.put(mapping[resource_type], payload, config)
         .then(function (response) {
-            logger_upload.info(`PUT ${resource_type} ${uid}. url '${mapping[resource_type]}'`);
-            logger_upload.info(JSON.stringify(response.data))
+            logger_upload.debug(`PUT ${resource_type} ${uid}. url '${mapping[resource_type]}'`);
+            logger_upload.debug(JSON.stringify(response.data))
         })
         .catch(function (error) {
             logger_upload.error(`PUT ${resource_type} ${uid}. url '${mapping[resource_type]}'`);
@@ -551,7 +598,7 @@ function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
             [EVENT_TYPE]: "events/"+uid
         }
 
-        logger_upload.info(`DELETE ${resource_type} ${uid}. url '${mapping[resource_type]}'`);
+        logger_upload.debug(`DELETE ${resource_type} ${uid}. url '${mapping[resource_type]}'`);
 
         const baseURL = `https://${endpointConfig.dhisServer}/api/`
         const config = {
@@ -573,8 +620,8 @@ function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
 
         axios.delete(mapping[resource_type], config)
         .then(function (response) {
-            logger_upload.info(`DELETE ${resource_type} ${uid}. url '${mapping[resource_type]}'`);
-            logger_upload.info(JSON.stringify(response.data))
+            logger_upload.debug(`DELETE ${resource_type} ${uid}. url '${mapping[resource_type]}'`);
+            logger_upload.debug(JSON.stringify(response.data))
         })
         .catch(function (error) {
             logger_upload.error(`DELETE ${resource_type} ${uid}. url '${mapping[resource_type]}'`);
