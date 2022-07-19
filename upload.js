@@ -117,7 +117,7 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
             post_list_resources(TEI_TYPE, list_teis_to_create);
             //clean list
             list_teis_to_create = []
-            utils.wait(3000)
+            utils.wait(10000)
         }
         process.stdout.write('.')
     });
