@@ -2427,10 +2427,10 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
         person.validatePerson()
     });
     
-    logger_generation.error(`Initial patient list size ${personList.length}`);
-    logger_generation_fr.error(`Taille de la liste initiale des patients ${personList.length}`);
-    logger_generation.error(`Patient blocked list size ${patientCodeBlockList.size}`);
-    logger_generation_fr.error(`Taille de la liste des patients bloqués ${patientCodeBlockList.size}`);
+    logger_generation.info(`Initial patient list size ${personList.length}`);
+    logger_generation_fr.info(`Taille de la liste initiale des patients ${personList.length}`);
+    logger_generation.info(`Patient blocked list size ${patientCodeBlockList.size}`);
+    logger_generation_fr.info(`Taille de la liste des patients bloqués ${patientCodeBlockList.size}`);
     
     const PARENT_TEIS_FOLDER = "GENERATED_data"
     const teis_folder = PARENT_TEIS_FOLDER + "/" + SOURCE_ID + "/" + "teis"
