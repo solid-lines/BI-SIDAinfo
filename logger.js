@@ -50,9 +50,9 @@ function get_logger_generation(SOURCE_ID) {
     ),
     transports: [
       // - Write all logs with level `warn` and below
-      new winston.transports.File({ filename: log_error_filename, level: 'warn', json: false }),
+      new winston.transports.File({ filename: log_error_filename, level: 'warn', json: false, options: { flags: 'w' }}),
       // - Write all logs with level `debug` and below
-      new winston.transports.File({ filename: log_filename, level: 'debug', json: false, options: { flags: 'w' }}),
+      new winston.transports.File({ filename: log_filename, level: 'debug', json: false}),
       // - Print on console all logs with level `info` and below
       new winston.transports.Console({ level: 'info' })
     ],
