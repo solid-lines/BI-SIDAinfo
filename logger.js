@@ -68,15 +68,9 @@ function get_logger_generation_fr(SOURCE_ID) {
 
   const logger_generation_fr = winston.createLogger({
     level: 'warn',
-    format: winston.format.combine(
-      winston.format.timestamp({
-        format: 'YYYY-MM-DD HH:mm:ss'
-      }),
-      winston.format.printf(info => `${info.timestamp} ${info.level}: ${info.message}`)
-    ),
     transports: [
       // - Write all logs with level `warn` and below
-      new winston.transports.File({ filename: log_filename, level: 'warn', json: false, options: { flags: 'w' }})
+      new winston.transports.File({ filename: log_filename, level: 'warn', json: false, options: { flags: 'w' }, format: winston.format.simple(), timestamp: false })
     ],
   });
   return logger_generation_fr
