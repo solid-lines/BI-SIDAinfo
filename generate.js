@@ -223,7 +223,7 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
                 if (this.ARV_DateSortie.isBefore(lastEvent.eventDate)) {
                     this.addLog(`01;Le patient a des evenements après une date sortie. Date sortie: ${this.ARV_DateSortie.format(DHIS2_DATEFORMAT)}. Dernier évènement enregistré : ${lastEvent.eventDate.format(DHIS2_DATEFORMAT)}`)
                     logger_generation.warn(`01;${this.code};Warning;Patient ${this.code} has events (visits) after its exit date. Date sortie: ${this.ARV_DateSortie.format(DHIS2_DATEFORMAT)}. Last known event date: ${lastEvent.eventDate.format(DHIS2_DATEFORMAT)}`)
-                    logger_generation_fr.warn(`01;${this.code};Notification;Le patient ${this.code} a des évènements (visites) après la date de Sortie. Date sortie: ${this.ARV_DateSortie.format(DHIS2_DATEFORMAT)}. Date du dernier événement connu: ${lastEvent.eventDate.format(DHIS2_DATEFORMAT)}`)
+                    logger_generation_fr.warn(`Le patient ${this.code} a des évènements (visites) après la date de Sortie. Date sortie: ${this.ARV_DateSortie.format(DHIS2_DATEFORMAT)}. Date du dernier événement connu: ${lastEvent.eventDate.format(DHIS2_DATEFORMAT)};Erreur 01;${this.code}`)
                 }
             }
         }
@@ -231,13 +231,13 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
         validateLTFU_RTT_events() {
             if (this.RTT.length > this.LTFU.length) { // More RTT than LTFU
                 logger_generation.error(`X1;${this.code};Error;Patient ${this.code} has more RTT than LTFU`)
-                logger_generation_fr.error(`X1;${this.code};Erreur;Le patient ${this.code} a plus de "retours à traitement" que "perdues de vue"`)
+                logger_generation_fr.error(`Le patient ${this.code} a plus de "retours à traitement" que "perdues de vue";Erreur X1;${this.code}`)
                 //this.addLog(`Le patient ${this.code} a plus de "retours à traitement" que "perdues de vue`)
             }
     
             if ((this.LTFU.length - this.RTT.length) > 1) { // The difference between LTFU and RTT is more than one
                 logger_generation.error(`X2;${this.code};Error;Patient ${this.code} has LTFU minus RTT > 1 (${this.LTFU.length - this.RTT.length})`)
-                logger_generation_fr.error(`X2;${this.code};Erreur;Le patient ${this.code} a perdus de vue moins retour à traitement > 1 (${this.LTFU.length - this.RTT.length})`)
+                logger_generation_fr.error(`Le patient ${this.code} a perdus de vue moins retour à traitement > 1 (${this.LTFU.length - this.RTT.length});Erreur X2;${this.code}`)
             }
     
         }
@@ -250,7 +250,7 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
             if (checkIfArrayIsUnique(datesToReview) == false) {
                 this.addLog(`03;Le patient a plus d'une consultation (table CONSULTATION) à la même date. La/les date(s) dupliquée(s) est/sont: ${duplicatesUnix.map(d => new Moment(d).format(DHIS2_DATEFORMAT))}`)
                 logger_generation.warn(`03;${this.code};Warning;Patient ${this.code} has more than one consultation (table CONSULTATION) for the same date. The duplicated date/s is/are: ${duplicatesUnix.map(d => new Moment(d).format(DHIS2_DATEFORMAT))}. All the dates of these consultations (field 'dateConsultation') are: ${datesToReview_moment.map(t => t.format(DHIS2_DATEFORMAT))}`)
-                logger_generation_fr.warn(`03;${this.code};Notification;Le patient ${this.code} a plus d'une consultation (table CONSULTATION) à la même date. La/les date(s) dupliquée(s) est/sont: ${duplicatesUnix.map(d => new Moment(d).format(DHIS2_DATEFORMAT))}. Toutes les dates des consultations (champs 'dateConsultation') sont : ${datesToReview_moment.map(t => t.format(DHIS2_DATEFORMAT))}`)
+                logger_generation_fr.warn(`Le patient ${this.code} a plus d'une consultation (table CONSULTATION) à la même date. La/les date(s) dupliquée(s) est/sont: ${duplicatesUnix.map(d => new Moment(d).format(DHIS2_DATEFORMAT))}. Toutes les dates des consultations (champs 'dateConsultation') sont : ${datesToReview_moment.map(t => t.format(DHIS2_DATEFORMAT))};Erreur 03;${this.code}`)
             }
         }
     
@@ -261,7 +261,7 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
                 if (this.sex != "F") {
                     this.addLog(`04;Le patient n'est pas une FEMME mais il est enregistré dans le programme PTME Mère.`)
                     logger_generation.warn(`04;${this.code};Warning;Patient ${this.code} is not FEMALE but it is enrolled in the PTME Mere program.`)
-                    logger_generation_fr.warn(`04;${this.code};Notification;Le patient ${this.code} n'est pas une FEMME mais il est enregistré dans le programme PTME Mère.`)
+                    logger_generation_fr.warn(`Le patient ${this.code} n'est pas une FEMME mais il est enregistré dans le programme PTME Mère.;Erreur 04;${this.code}`)
                 }
             }
     
@@ -275,7 +275,7 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
             if (enrollmentDates.length - enrollmentCloseDates.length > 1) {
                 patientCodeBlockList.add(this.code)
                 logger_generation.error(`05;${this.code};Blocked;Patient ${this.code} has more than one PTME admission active at the same time (start date without end date): ${JSON.stringify(this.getPregnancies())}`)
-                logger_generation_fr.error(`05;${this.code};Bloqué;Le patient ${this.code} a plus d'une admission PTME active au même temps (dateDebut sans DateFin) : ${JSON.stringify(this.getPregnancies())}`)
+                logger_generation_fr.error(`Le patient ${this.code} a plus d'une admission PTME active au même temps (dateDebut sans DateFin) : ${JSON.stringify(this.getPregnancies())};Erreur 05;${this.code}`)
             }
     
     
@@ -285,7 +285,7 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
             if (checkIfArrayIsUnique(datesToReview) == false) {
                 patientCodeBlockList.add(this.code)
                 logger_generation.error(`06;${this.code};Blocked;Patient ${this.code} has more than one pregnancy (entry in FEMME_ENCEINTE table) for the same date. The duplicated date/s is/are: ${duplicatesUnix.map(d => new Moment(d).format(DHIS2_DATEFORMAT))}. All the enrollment days in the PTME meré program (FEMME_ENCEINTE table, column DateVisitiSuiviPTME) are: ${enrollmentDates.map(d => d.format(DHIS2_DATEFORMAT))}`)
-                logger_generation_fr.error(`06;${this.code};Bloqué;Le patient ${this.code} a plus d'une grossesse (enregistrement dans la table FEMME_ENCEINTE) à la même date. La/les date(s) dupliquée(s) est/sont: ${duplicatesUnix.map(d => new Moment(d).format(DHIS2_DATEFORMAT))}. Toutes les dates de d'enregistrement dans le programme PTME meré (table FEMME_ENCEINTE, champ 'DateVisitiSuiviPTME') sont : ${enrollmentDates.map(d => d.format(DHIS2_DATEFORMAT))}`)
+                logger_generation_fr.error(`Le patient ${this.code} a plus d'une grossesse (enregistrement dans la table FEMME_ENCEINTE) à la même date. La/les date(s) dupliquée(s) est/sont: ${duplicatesUnix.map(d => new Moment(d).format(DHIS2_DATEFORMAT))}. Toutes les dates de d'enregistrement dans le programme PTME meré (table FEMME_ENCEINTE, champ 'DateVisitiSuiviPTME') sont : ${enrollmentDates.map(d => d.format(DHIS2_DATEFORMAT))};Erreur 06;${this.code}`)
             }
     
     
@@ -300,14 +300,14 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
             
             if (datedebuts.length != enrollmentDates.length) {
                 logger_generation.warn(`41;${this.code};Warning;Patient ${this.code} has more PTME admissions [${datedebuts.length}] (ADMISSION_DETAIL table) than pregnancies [${enrollmentDates.length}] (FEMME_ENCEINTE table). Missed admission/datedebut dates: ${difference_datedebut}`)
-                logger_generation_fr.warn(`41;${this.code};Notification;Le patient ${this.code} a plus d’admissions PTME ([${datedebuts.length}]) dans la table ADMISSION_DETAIL que grossesses ([${enrollmentDates.length}]) dans la table FEMME_ENCEINTE.`)
+                logger_generation_fr.warn(`Le patient ${this.code} a plus d’admissions PTME ([${datedebuts.length}]) dans la table ADMISSION_DETAIL que grossesses ([${enrollmentDates.length}]) dans la table FEMME_ENCEINTE.;Erreur 41;${this.code}`)
             }
 
             const enrollmentCloseDates_str = enrollmentCloseDates.map(t => t.format(SIDAINFO_DATEFORMAT))
             const difference_datefins = datefins.filter(x => !enrollmentCloseDates_str.includes(x));
             if (datefins.length != enrollmentCloseDates.length) {
                 logger_generation.warn(`41;${this.code};Warning;Patient ${this.code} has more PTME admissions [${datedebuts.length}] (ADMISSION_DETAIL table) than pregnancies [${enrollmentDates.length}] (FEMME_ENCEINTE table). Missed admission datefins dates: ${difference_datefins}`)
-                logger_generation_fr.warn(`41;${this.code};Notification;Le patient ${this.code} a plus d’admissions PTME ([${datedebuts.length}]) dans la table ADMISSION_DETAIL que grossesses ([${enrollmentDates.length}]) dans la table FEMME_ENCEINTE.`)
+                logger_generation_fr.warn(`Le patient ${this.code} a plus d’admissions PTME ([${datedebuts.length}]) dans la table ADMISSION_DETAIL que grossesses ([${enrollmentDates.length}]) dans la table FEMME_ENCEINTE.;Erreur 41;${this.code}`)
             }
     
         }
@@ -317,7 +317,7 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
             if ((this.ARV_treatments.length > 0) && (typeof this.ARVdatedebut === 'undefined')) {
                 const table_ARV_firstEventDate = this.ARV_treatments[0].eventDate
                 logger_generation.warn(`38;${this.code};Warning;Patient ${this.code} has a Table ARV first event: ${table_ARV_firstEventDate.format(DHIS2_DATEFORMAT)} but FileActive ARV debut is empty.`);
-                logger_generation_fr.warn(`38;${this.code};Notification;Le patient ${this.code} a un premier évènement dans Table_ARV (${table_ARV_firstEventDate.format(DHIS2_DATEFORMAT)}) mais le champs debut ARV dans FileActive est vide.`);
+                logger_generation_fr.warn(`Le patient ${this.code} a un premier évènement dans Table_ARV (${table_ARV_firstEventDate.format(DHIS2_DATEFORMAT)}) mais le champs debut ARV dans FileActive est vide.;Erreur 38;${this.code}`);
             }
         }
     
@@ -363,7 +363,7 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
             // Check if there is already this date in the list
             if (this.RTT.includes(rttDate)) {
                 logger_generation.error(`X3;${this.code};Error;Patient ${this.code} has same RTT date for different LTFU: ${rttDate.format(DHIS2_DATEFORMAT)}`)
-                logger_generation_fr.error(`X3;${this.code};Error;Le patient ${this.code} a la même date de retour au traitement pour des différentes dates de perdu de vue: ${rttDate.format(DHIS2_DATEFORMAT)}`)
+                logger_generation_fr.error(`Le patient ${this.code} a la même date de retour au traitement pour des différentes dates de perdu de vue: ${rttDate.format(DHIS2_DATEFORMAT)};Erreur X3;${this.code}`)
             } else {
                 this.RTT.push(rttDate);
                 this.RTT.sort((a, b) => a - b)
@@ -421,11 +421,11 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
             if (typeof file_active_ARV_debut !== "undefined") {
                 if (!file_active_ARV_debut.isSame(admission_detail_ARV_debut)) {
                     logger_generation.warn(`36;${this.code};Warning;Patient ${this.code} has unexpected different dates for File Active ARV debut: ${file_active_debut_log} and Admission detail ARV debut: ${admission_detail_ARV_debut.format(DHIS2_DATEFORMAT)}`);
-                    logger_generation_fr.warn(`36;${this.code};Notification;Le patient ${this.code} a une difference inattendue de dates pour le debut ARV dans FileActive (${file_active_debut_log}) et Admission_detail (${admission_detail_ARV_debut.format(DHIS2_DATEFORMAT)})`);
+                    logger_generation_fr.warn(`Le patient ${this.code} a une difference inattendue de dates pour le debut ARV dans FileActive (${file_active_debut_log}) et Admission_detail (${admission_detail_ARV_debut.format(DHIS2_DATEFORMAT)});Erreur 36;${this.code}`);
                 }
                 if (file_active_ARV_debut.isAfter(table_ARV_firstEvent)) {
                     logger_generation.warn(`37;${this.code};Warning;Patient ${this.code} has a date for File Active ARV debut: ${file_active_debut_log} which is later than the earliest visit in Table ARV: ${table_ARV_firstEvent.format(DHIS2_DATEFORMAT)}`)
-                    logger_generation_fr.warn(`37;${this.code};Notification;Le patient ${this.code} a dans FileActive une date debut ARV de ${file_active_debut_log} qui est plus tard que la première visite TARV dans TableARV : ${table_ARV_firstEvent.format(DHIS2_DATEFORMAT)}`)
+                    logger_generation_fr.warn(`Le patient ${this.code} a dans FileActive une date debut ARV de ${file_active_debut_log} qui est plus tard que la première visite TARV dans TableARV : ${table_ARV_firstEvent.format(DHIS2_DATEFORMAT)};Erreur 37;${this.code}`)
                 }
                 if (file_active_ARV_debut.isSame(table_ARV_firstEvent)) { //Create Program Stage Premier Debut
                     return true;
@@ -782,7 +782,7 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
                 return (OU_MAPPING[SOURCE_OU_CODE])
             } else {
                 logger_generation.error("07;;Blocked;The Org Unit of the files (" + SOURCE_OU_CODE + ") is not mapped against DHIS2")
-                logger_generation_fr.error("07;;Bloqué;Le site des fichiers (" + SOURCE_OU_CODE + ") n'est pas lié avec une unité organisationelle de DHIS2")
+                logger_generation_fr.error("Le site des fichiers (" + SOURCE_OU_CODE + ") n'est pas lié avec une unité organisationelle de DHIS2;Erreur 07;")
                 process.exit(1);
             }
         }
@@ -1628,7 +1628,7 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
         const codepatient = site + SEPARATOR_PATIENT + paddy(row[1],5) + "E"; // code
         if (codepatient === site + SEPARATOR_PATIENT){
             logger_generation.error(`39;;Blocked;Patient with empty patient code. Check the row number ${row_number + 1} in the ${CURRENT_TABLE} table`)
-            logger_generation_fr.error(`39;;Bloqué;Patient avec un champs code patient vide. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE}`)
+            logger_generation_fr.error(`Patient avec un champs code patient vide. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE};Erreur 39`)
             return false;
         }
     
@@ -1643,21 +1643,21 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
         if (validateDate(birthdate, MIN_YEAR_BIRTH) == false) {
             patient_enfant.addLog(`08;Le patient a une date de naissance avec une DATE inattendu : ${birthdate}.`)
             logger_generation.warn(`08;${codepatient};Warning;Patient ${codepatient} has a Birth date with an unexpected DATE ${birthdate}. Check the row number ${row_number + 1} in the ${CURRENT_TABLE} table`)
-            logger_generation_fr.warn(`08;${codepatient};Notification;Le patient ${codepatient} a une date de naissance avec une DATE inattendu : ${birthdate}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE}`)
+            logger_generation_fr.warn(`Le patient ${codepatient} a une date de naissance avec une DATE inattendu : ${birthdate}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE};Erreur 08;${codepatient}`)
         }
     
         /** Create PTME enfant program */
         const DateAdmissionEnfPTME_raw = row[2];
         if (DateAdmissionEnfPTME_raw==""){ // if the date admission is empty
             logger_generation.error(`09;${codepatient};Blocked;Patient ${codepatient} has a Date Admission Enfant PTME with an empty DATE. Check the row number ${row_number + 1} in the ${CURRENT_TABLE} table`)
-            logger_generation_fr.error(`09;${codepatient};Bloqué;Le patient ${codepatient} a une Date Admission Enfant PTME avec une DATE vacie. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE}`)
+            logger_generation_fr.error(`Le patient ${codepatient} a une Date Admission Enfant PTME avec une DATE vacie. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE};Erreur 09;${codepatient}`)
             return false; // not create the enfant
         }
         const DateAdmissionEnfPTME = Moment(DateAdmissionEnfPTME_raw, SIDAINFO_DATEFORMAT)
         
         if (validateDate(DateAdmissionEnfPTME, MIN_YEAR_EVENTS) == false) {
             logger_generation.error(`09;${codepatient};Blocked;Patient ${codepatient} has a Date Admission Enfant PTME with an unexpected DATE ${DateAdmissionEnfPTME_raw}. Check the row number ${row_number + 1} in the ${CURRENT_TABLE} table`)
-            logger_generation_fr.error(`09;${codepatient};Bloqué;Le patient ${codepatient} a une Date Admission Enfant PTME avec une DATE inattendu : ${DateAdmissionEnfPTME_raw}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE}`)
+            logger_generation_fr.error(`Le patient ${codepatient} a une Date Admission Enfant PTME avec une DATE inattendu : ${DateAdmissionEnfPTME_raw}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE};Erreur 09;${codepatient}`)
             return false; // not create the enfant
         }
     
@@ -1667,7 +1667,7 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
         if (PCR1Prelevement_raw && validateDate(PCR1Prelevement, MIN_YEAR_EVENTS) == false) {
             patient_enfant.addLog(`10;Le patient a une date PCR 1 avec une DATE inattendu : ${PCR1Prelevement_raw}.`)
             logger_generation.warn(`10;${codepatient};Warning;Patient ${codepatient} has a PCR 1 with an unexpected DATE ${PCR1Prelevement_raw}. Check the row number ${row_number + 1} in the ${CURRENT_TABLE} table`)
-            logger_generation_fr.warn(`10;${codepatient};Notification;Le patient ${codepatient} a une date PCR 1 avec une DATE inattendu : ${PCR1Prelevement_raw}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE}`)
+            logger_generation_fr.warn(`Le patient ${codepatient} a une date PCR 1 avec une DATE inattendu : ${PCR1Prelevement_raw}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE};Erreur 10;${codepatient}`)
         }
     
         const PCR2Prelevement_raw = row[19];
@@ -1675,7 +1675,7 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
         if (PCR2Prelevement_raw && validateDate(PCR2Prelevement, MIN_YEAR_EVENTS) == false) {
             patient_enfant.addLog(`10;Date PCR 2 avec une DATE inattendu : ${PCR2Prelevement_raw}.`)
             logger_generation.warn(`10;${codepatient};Warning;Patient ${codepatient} has a PCR 2 with an unexpected DATE ${PCR2Prelevement_raw}. Check the row number ${row_number + 1} in the ${CURRENT_TABLE} table`)
-            logger_generation_fr.warn(`10;${codepatient};Notification;Le patient ${codepatient} a une date PCR 2 avec une DATE inattendu : ${PCR2Prelevement_raw}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE}`)
+            logger_generation_fr.warn(`Le patient ${codepatient} a une date PCR 2 avec une DATE inattendu : ${PCR2Prelevement_raw}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE};Erreur 10;${codepatient}`)
         }
     
         const PCR3Prelevement_raw = row[20];
@@ -1683,7 +1683,7 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
         if (PCR3Prelevement_raw && validateDate(PCR3Prelevement, MIN_YEAR_EVENTS) == false) {
             patient_enfant.addLog(`10;Date PCR 3 avec une DATE inattendu : ${PCR3Prelevement_raw}.`)
             logger_generation.warn(`10;${codepatient};Warning;Patient ${codepatient} has a PCR 3 with an unexpected DATE ${PCR3Prelevement_raw}. Check the row number ${row_number + 1} in the ${CURRENT_TABLE} table`)
-            logger_generation_fr.warn(`10;${codepatient};Notification;Le patient ${codepatient} a une date PCR 3 avec une DATE inattendu : ${PCR3Prelevement_raw}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE}`)
+            logger_generation_fr.warn(`Le patient ${codepatient} a une date PCR 3 avec une DATE inattendu : ${PCR3Prelevement_raw}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE};Erreur 10;${codepatient}`)
         }
     
         const PCR4Prelevement_raw = row[21];
@@ -1691,7 +1691,7 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
         if (PCR4Prelevement_raw && validateDate(PCR4Prelevement, MIN_YEAR_EVENTS) == false) {
             patient_enfant.addLog(`10;Date PCR 4 avec une DATE inattendu : ${PCR4Prelevement_raw}.`)
             logger_generation.warn(`10;${codepatient};Warning;Patient ${codepatient} has a PCR 4 with an unexpected DATE ${PCR4Prelevement_raw}. Check the row number ${row_number + 1} in the ${CURRENT_TABLE} table`)
-            logger_generation_fr.warn(`10;${codepatient};Notification;Le patient ${codepatient} a une date PCR 4 avec une DATE inattendu : ${PCR4Prelevement_raw}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE}`)
+            logger_generation_fr.warn(`Le patient ${codepatient} a une date PCR 4 avec une DATE inattendu : ${PCR4Prelevement_raw}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE};Erreur 10;${codepatient}`)
         }
     
         const PrelevementAutre_raw = row[24];
@@ -1699,7 +1699,7 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
         if (PrelevementAutre_raw && validateDate(PrelevementAutre, MIN_YEAR_EVENTS) == false) {
             patient_enfant.addLog(`10;Date PCR Prelevement Autre avec une DATE inattendu : ${PrelevementAutre_raw}.`)
             logger_generation.warn(`10;${codepatient};Warning;Patient ${codepatient} has a PCR Autre with an unexpected DATE ${PrelevementAutre_raw}. Check the row number ${row_number + 1} in the ${CURRENT_TABLE} table`)
-            logger_generation_fr.warn(`10;${codepatient};Notification;Le patient ${codepatient} a une date PCR Prelevement Autre avec une DATE inattendu : ${PrelevementAutre_raw}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE}`)
+            logger_generation_fr.warn(`Le patient ${codepatient} a une date PCR Prelevement Autre avec une DATE inattendu : ${PrelevementAutre_raw}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE};Erreur 10;${codepatient}`)
         }
     
         const PCR1 = row[25]; // PCR1_resultat
@@ -1742,7 +1742,7 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
         if (DateSortie_raw && validateDate(DateSortie, MIN_YEAR_EVENTS) == false) {
             patient_enfant.addLog(`11;Le patient a une date Sortie avec une DATE inattendu : ${DateSortie_raw}.`)
             logger_generation.warn(`11;${codepatient};Warning;Patient ${codepatient} has a Date Sortie with an unexpected DATE ${DateSortie_raw}. Check the row number ${row_number + 1} in the ${CURRENT_TABLE} table`)
-            logger_generation_fr.warn(`11;${codepatient};Notification;Le patient ${codepatient} a une Date Sortie avec une DATE inattendu : ${DateSortie_raw}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE}`)
+            logger_generation_fr.warn(`Le patient ${codepatient} a une Date Sortie avec une DATE inattendu : ${DateSortie_raw}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE};Erreur 11;${codepatient}`)
         }
     
         const CauseSortie = row[41];
@@ -1785,7 +1785,7 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
             if (context.index === 17) { // entryMode. Sometimes is 08 instead of 8
                 if (Object.is(parseInt(value, 10), NaN)) {
                     logger_generation.error(`12;${tmp_patientCode};Error;Patient ${tmp_patientCode} in the FileActive table has a value for entryMode (${value}) that is not a number. Please, check patient ${tmp_patientCode} or line ${context.lines} in the FileActive table.`);
-                    logger_generation_fr.error(`12;${tmp_patientCode};Erreur;Le patient ${tmp_patientCode} de la table FileActive a une valeur pour codeModeEntree (${value}) qui n'est pas un nombre. Veuillez vérifier patient ${tmp_patientCode} ou la ligne ${context.lines} dans la table FileActive.`);
+                    logger_generation_fr.error(`Le patient ${tmp_patientCode} de la table FileActive a une valeur pour codeModeEntree (${value}) qui n'est pas un nombre. Veuillez vérifier patient ${tmp_patientCode} ou la ligne ${context.lines} dans la table FileActive.;Erreur 12;${tmp_patientCode}`);
                 } else {
                     return String(parseInt(value, 10))
                 }
@@ -1820,14 +1820,14 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
         if (validateDate(birthdate, MIN_YEAR_BIRTH) == false) {
             patient.addLog(`08;Date de naissance avec une DATE inattendu : ${birthdate}.`)
             logger_generation.warn(`08;${codepatient};Warning;Patient ${codepatient} has a Birth date with an unexpected DATE ${birthdate}. Check the row number ${row_number + 1} in the ${CURRENT_TABLE} table`)
-            logger_generation_fr.warn(`08;${codepatient};Notification;Le patient ${codepatient} a une date de naissance avec une DATE inattendu : ${birthdate}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE}`)
+            logger_generation_fr.warn(`Le patient ${codepatient} a une date de naissance avec une DATE inattendu : ${birthdate}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE};Erreur 08;${codepatient}`)
         }
     
         if (ARVdatedebut_raw != "") {
             if (validateDate(patient.ARVdatedebut, MIN_YEAR_EVENTS) == false) {
                 patient.addLog(`40;Debut date avec une DATE inattendu : ${patient.ARVdatedebut}.`)
                 logger_generation.warn(`40;${codepatient};Warning;Patient ${codepatient} has a ARVdatedebut date with an unexpected DATE ${patient.ARVdatedebut}. Check the row number ${row_number + 1} in the ${CURRENT_TABLE} table`)
-                logger_generation_fr.warn(`40;${codepatient};Notification;Le patient ${codepatient} a un ARVdatedebut inattendu : ${patient.ARVdatedebut}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE}`)
+                logger_generation_fr.warn(`Le patient ${codepatient} a un ARVdatedebut inattendu : ${patient.ARVdatedebut}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE};Erreur 40;${codepatient}`)
             }
         }
     
@@ -1838,7 +1838,7 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
             if (validateDate(Moment(datedepist_raw, SIDAINFO_DATEFORMAT), MIN_YEAR_EVENTS) == false) {
                 patient.addLog(`13;Le patient a une date Depist avec une DATE inattendu : ${datedepist_raw}.`)
                 logger_generation.warn(`13;${codepatient};Warning;Patient ${codepatient} has a Date Depist with an unexpected DATE ${datedepist_raw}. Check the row number ${row_number + 1} in the ${CURRENT_TABLE} table`)
-                logger_generation_fr.warn(`13;${codepatient};Notification;Le patient ${codepatient} a une Date Depist avec une DATE inattendu : ${datedepist_raw}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE}`)
+                logger_generation_fr.warn(`Le patient ${codepatient} a une Date Depist avec une DATE inattendu : ${datedepist_raw}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE};Erreur 13;${codepatient}`)
             }
         }
     
@@ -1849,7 +1849,7 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
         if (sortie === "Vrai" && validateDate(datesortie, MIN_YEAR_EVENTS) == false) {
             patient.addLog(`14;Le patient a une date Sortie avec une DATE inattendu : ${datesortie_raw}.`)
             logger_generation.warn(`14;${codepatient};Error;Warning ${codepatient} has a Date Sortie with an unexpected DATE ${datesortie_raw}. Check the row number ${row_number + 1} in the ${CURRENT_TABLE} table`)
-            logger_generation_fr.warn(`14;${codepatient};Notification;Le patient ${codepatient} a une Date Sortie avec une DATE inattendu : ${datesortie_raw}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE}`)
+            logger_generation_fr.warn(`Le patient ${codepatient} a une Date Sortie avec une DATE inattendu : ${datesortie_raw}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE};Erreur 14;${codepatient}`)
         }
     
         var causesortie = row[9];
@@ -1914,25 +1914,25 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
         if (typeof patient === 'undefined') {
             patientCodeBlockList.add(codepatient);
             logger_generation.error(`18;${codepatient};Blocked;Patient ${codepatient} appears in the ${CURRENT_TABLE} table but not in the File_Active table. Check the row number ${row_number + 1} in the ${CURRENT_TABLE} table.`)
-            logger_generation_fr.error(`18;${codepatient};Bloqué;Le patient ${codepatient} est dans la table ${CURRENT_TABLE} mais n'est pas dans la table File_Active. Veuillez confirmer la ligne ${row_number + 1} de la table ${CURRENT_TABLE}.`)
+            logger_generation_fr.error(`Le patient ${codepatient} est dans la table ${CURRENT_TABLE} mais n'est pas dans la table File_Active. Veuillez confirmer la ligne ${row_number + 1} de la table ${CURRENT_TABLE}.;Erreur 18;${codepatient}`)
         }
     
         if (datedebut && validateDate(Moment(datedebut, SIDAINFO_DATEFORMAT), MIN_YEAR_EVENTS) == false) {
             patient.addLog(`15;Le patient a une date Debut avec une DATE inattendu : ${datedebut}.`)
             logger_generation.warn(`15;${codepatient};Warning;Patient ${codepatient} has a Date Debut with an unexpected DATE ${datedebut}. Check the row number ${row_number + 1} in the ${CURRENT_TABLE} table`)
-            logger_generation_fr.warn(`15;${codepatient};Notification;Le patient ${codepatient} a une Date Debut avec une DATE inattendu : ${datedebut}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE}`)
+            logger_generation_fr.warn(`Le patient ${codepatient} a une Date Debut avec une DATE inattendu : ${datedebut}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE};Erreur 15;${codepatient}`)
         }
     
         if (datefin && validateDate(Moment(datefin, SIDAINFO_DATEFORMAT), MIN_YEAR_EVENTS) == false) {
             patient.addLog(`16;Le patient a une date Fin avec une DATE inattendu : ${datefin}.`)
             logger_generation.warn(`16;${codepatient};Warning;Patient ${codepatient} has a Date Fin with an unexpected DATE ${datefin}. Check the row number ${row_number + 1} in the ${CURRENT_TABLE} table`)
-            logger_generation_fr.warn(`16;${codepatient};Notification;Le patient ${codepatient} a une Date Fin avec une DATE inattendu : ${datefin}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE}`)
+            logger_generation_fr.warn(`Le patient ${codepatient} a une Date Fin avec une DATE inattendu : ${datefin}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE};Erreur 16;${codepatient}`)
         }
     
         if (datefin != "" && (isBeforeDate(Moment(datedebut, SIDAINFO_DATEFORMAT), Moment(datefin, SIDAINFO_DATEFORMAT)) == false)) {
             patientCodeBlockList.add(codepatient);
             logger_generation.error(`17;${codepatient};Blocked;Patient ${codepatient} has an ADMISSION where the start date (datedebut ${datedebut}) is not before the end date (datefin ${datefin}).`);
-            logger_generation_fr.error(`17;${codepatient};Bloqué;Le patient ${codepatient} a une ADMISSION dont la dateDebut (${datedebut}) n'est pas avant la dateFIN (${datefin}).`);
+            logger_generation_fr.error(`Le patient ${codepatient} a une ADMISSION dont la dateDebut (${datedebut}) n'est pas avant la dateFIN (${datefin}).;Erreur 17;${codepatient}`);
         }
     
         if ((enrollment === "ARV") && (typeof patient !== 'undefined')) {
@@ -1975,7 +1975,7 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
         if (typeof patient === 'undefined') {
             patientCodeBlockList.add(codepatient);
             logger_generation.error(`18;${codepatient};Blocked;Patient ${codepatient} appears in the ${CURRENT_TABLE} table but not in the File_Active table. Check the row number ${row_number + 1} in the ${CURRENT_TABLE} table.`);
-            logger_generation_fr.error(`18;${codepatient};Bloqué;Le patient ${codepatient} est dans la table ${CURRENT_TABLE} mais n'est pas dans la table File_Active. Veuillez confirmer la ligne ${row_number + 1} de la table ${CURRENT_TABLE}.`);
+            logger_generation_fr.error(`Le patient ${codepatient} est dans la table ${CURRENT_TABLE} mais n'est pas dans la table File_Active. Veuillez confirmer la ligne ${row_number + 1} de la table ${CURRENT_TABLE}.;Erreur 18;${codepatient}`);
         }
     
         if (datetraitement && validateDate(Moment(datetraitement, SIDAINFO_DATEFORMAT), MIN_YEAR_EVENTS) == false) {
@@ -1983,7 +1983,7 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
                 patient.addLog(`19;Le patient a une date traitement avec une DATE inattendu : ${datetraitement}.`)
             }
             logger_generation.warn(`19;${codepatient};Warning;Patient ${codepatient} has a Date traitement with an unexpected DATE ${datetraitement}. Check the row number ${row_number + 1} in the ${CURRENT_TABLE} table`)
-            logger_generation_fr.warn(`19;${codepatient};Notification;Le patient ${codepatient} a une Date traitement avec une DATE inattendu : ${datetraitement}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE}`)
+            logger_generation_fr.warn(`Le patient ${codepatient} a une Date traitement avec une DATE inattendu : ${datetraitement}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE};Erreur 19;${codepatient}`)
         }
     
         if (dateprochainrendev < 0 || dateprochainrendev > 365) { // number of days until the next treatment SHOULD NOT be minor than cero
@@ -1991,7 +1991,7 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
                 patient.addLog(`02;Le patient a un nombre de jours au prochain rendez-vous qui est inférieur à 0 ou supérieur à 365 (le nombre de jours est ${dateprochainrendev} à ${datetraitement}).`)
             }
             logger_generation.warn(`02;${codepatient};Warning;Patient ${codepatient} has a number of days until next treatment below 0 or above 365 (the number of days is ${dateprochainrendev}). Check the row number ${row_number + 1} in the ${CURRENT_TABLE} table`)
-            logger_generation_fr.warn(`02;${codepatient};Notification;Le patient ${codepatient} a un nombre de jours au prochain rendez-vous qui est inférieur à 0 ou supérieur à 365 (le nombre de jours est ${dateprochainrendev}). Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE}`)
+            logger_generation_fr.warn(`Le patient ${codepatient} a un nombre de jours au prochain rendez-vous qui est inférieur à 0 ou supérieur à 365 (le nombre de jours est ${dateprochainrendev}). Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE};Erreur 02;${codepatient}`)
         }
     
         if (typeof patient !== 'undefined') {
@@ -2002,7 +2002,7 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
                 } else { // if duplicated
                     if (dateprochainrendev != treatment_already.num_days) { // different number of treatment days. Select the minimum number of days
                         logger_generation.warn(`20;${codepatient};Warning;Patient ${codepatient} has two ARV treatments on the same date (${datetraitement}), but each with different number of days until next appointment:  ${dateprochainrendev}  ${treatment_already.num_days}. (The smaller number will be imported.)`);
-                        logger_generation_fr.warn(`20;${codepatient};Notification;Le patient ${codepatient} a deux traitements ARV à la même date (${datetraitement}), mais le nombre de jours au prochain rendez-vous est différent : ${dateprochainrendev} et ${treatment_already.num_days} (le nombre plus petit sera importé).`);
+                        logger_generation_fr.warn(`Le patient ${codepatient} a deux traitements ARV à la même date (${datetraitement}), mais le nombre de jours au prochain rendez-vous est différent : ${dateprochainrendev} et ${treatment_already.num_days} (le nombre plus petit sera importé).;Erreur 20;${codepatient}`);
                         patient.addLog(`20;Le patient a deux traitements ARV à la même date (${datetraitement}), mais le nombre de jours au prochain rendez-vous est différent : ${dateprochainrendev} et ${treatment_already.num_days} (le nombre plus petit sera importé).`);
                         if (parseInt(dateprochainrendev) < parseInt(treatment_already.num_days)) { // change the values
                             logger_generation.info(`Patient ${codepatient}. Internal change due selection of the minimum number of days (datetraitement:${datetraitement}). OLD values: dateprochainrendev: ${treatment_already.num_days} ; codemolecule: ${treatment_already.codemolecule} ; qte: ${treatment_already.qte}. NEW values: dateprochainrendev: ${dateprochainrendev} ; codemolecule: ${codemolecule} ; qte: ${qte}`);
@@ -2012,15 +2012,15 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
                         }
                     } else {
                         // Only warning
-                        logger_generation.warn(`21;${codepatient};Warning;Patient ${codepatient} has duplicated ARV_treatment date: datetraitement:${datetraitement}; dateprochainrendev: ${dateprochainrendev}. Error automatically resolved during import (the duplicate treatment dates have been merged into a single treatment date).`);
-                        logger_generation_fr.warn(`21;${codepatient};Notification;Le patient ${codepatient} a des dates de traitement ARV dupliquées : datetraitement ${datetraitement} (dateprochainrendev ${dateprochainrendev}) Erreur automatiquement résolue lors de l’importation (les dates traitements dupliquées sont fusionnées dans une seule date traitement).`);
+                        logger_generation.warn(`21;${codepatient};Warning;Patient ${codepatient} has duplicated ARV_treatment date: datetraitement: ${datetraitement}, dateprochainrendev: ${dateprochainrendev}. Error automatically resolved during import (the duplicate treatment dates have been merged into a single treatment date).`);
+                        logger_generation_fr.warn(`Le patient ${codepatient} a des dates de traitement ARV dupliquées : datetraitement ${datetraitement}, (dateprochainrendev ${dateprochainrendev}) Erreur automatiquement résolue lors de l’importation (les dates traitements dupliquées sont fusionnées dans une seule date traitement).;Erreur 21;${codepatient}`);
                         //patient.addLog(`21;Dupliqué ARV_treatment date: datetraitement:${datetraitement}; dateprochainrendev: ${dateprochainrendev}`);
                     }
                 }
             } else {
                 patientCodeBlockList.add(codepatient);
-                logger_generation.error(`22;${codepatient};Blocked;Patient ${codepatient} has missing data for the ARV_treatment: datetraitement:${datetraitement}; dateprochainrendev: ${dateprochainrendev}`);
-                logger_generation_fr.error(`22;${codepatient};Bloqué;Le patient ${codepatient} manque des données pour le traitement ARV : datetraitement: ${datetraitement}; dateprochainrendev: ${dateprochainrendev}`);
+                logger_generation.error(`22;${codepatient};Blocked;Patient ${codepatient} has missing data for the ARV_treatment: datetraitement:${datetraitement}, dateprochainrendev: ${dateprochainrendev}`);
+                logger_generation_fr.error(`Le patient ${codepatient} manque des données pour le traitement ARV : datetraitement: ${datetraitement}, dateprochainrendev: ${dateprochainrendev};Erreur 22;${codepatient}`);
             }
         }
     })
@@ -2058,7 +2058,7 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
             if (TBDateDebutTraitement && validateDate(Moment(TBDateDebutTraitement, SIDAINFO_DATEFORMAT), MIN_YEAR_EVENTS) == false) {
                 patient.addLog(`23;TB Date Debut Traitement avec une DATE inattendu : ${TBDateDebutTraitement}.`)
                 logger_generation.warn(`23;${codepatient};Warning;Patient ${codepatient} has a TB Date Debut Traitement with an unexpected DATE ${TBDateDebutTraitement}. Check the row number ${row_number + 1} in the ${CURRENT_TABLE} table`)
-                logger_generation_fr.warn(`23;${codepatient};Notification;Le patient ${codepatient} a une TB Date Debut Traitement avec une DATE inattendu : ${TBDateDebutTraitement}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE}`)
+                logger_generation_fr.warn(`Le patient ${codepatient} a une TB Date Debut Traitement avec une DATE inattendu : ${TBDateDebutTraitement}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE};Erreur 23;${codepatient}`)
             }
     
             const dateConsultationMoment = Moment(dateConsultation, SIDAINFO_DATEFORMAT)
@@ -2068,22 +2068,22 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
                 if (datesToReview.includes(dateConsultationMoment.valueOf())) {
                     patient.addLog(`03;Plus d'une consultation (table CONSULTATION) à la même date. La date dupliquée est: ${dateConsultationMoment.format(DHIS2_DATEFORMAT)}`)
                     logger_generation.warn(`03;${patient.code};Warning;Patient ${patient.code} has more than one consultation (table CONSULTATION) for the same date. The duplicated date is: ${dateConsultationMoment.format(DHIS2_DATEFORMAT)}.`)
-                    logger_generation_fr.warn(`03;${patient.code};Notification;Le patient ${patient.code} a plus d'une consultation (table CONSULTATION) à la même date. La date dupliquée est: ${dateConsultationMoment.format(DHIS2_DATEFORMAT)}.`)
+                    logger_generation_fr.warn(`Le patient ${patient.code} a plus d'une consultation (table CONSULTATION) à la même date. La date dupliquée est: ${dateConsultationMoment.format(DHIS2_DATEFORMAT)}.;Erreur 03;${codepatient}`)
                 } else {
                     patient.addConsultation(dateConsultationMoment, TBTypeExamen, TBResultat, TBDateDebutTraitement);
                 }
             } else {
                 patient.addLog(`24;CONSULTATION avec une DATE inattendu : ${dateConsultation}.`)
                 logger_generation.warn(`24;${codepatient};Warning;Patient ${codepatient} has a CONSULTATION with an unexpected DATE ${dateConsultation}. Check the row number ${row_number + 1} in the ${CURRENT_TABLE} table`)
-                logger_generation_fr.warn(`24;${codepatient};Notification;Le patient ${codepatient} a une CONSULTATION avec une DATE inattendu : ${dateConsultation}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE}`)
+                logger_generation_fr.warn(`Le patient ${codepatient} a une CONSULTATION avec une DATE inattendu : ${dateConsultation}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE};Erreur 24;${codepatient}`)
             }
         } else if (codepatient === '') {
             logger_generation.error(`25;;Error;NO codepatient appears in row number ${row_number + 1} of the ${CURRENT_TABLE} table.`)
-            logger_generation_fr.error(`25;;Erreur;Il n'y a pas de codepatient dans la ligne ${row_number + 1} de la table ${CURRENT_TABLE}.`)
+            logger_generation_fr.error(`Il n'y a pas de codepatient dans la ligne ${row_number + 1} de la table ${CURRENT_TABLE}.;Erreur 25;`)
         } else {
             patientCodeBlockList.add(codepatient);
             logger_generation.error(`18;${codepatient};Blocked;Patient ${codepatient} appears in the ${CURRENT_TABLE} table but not in the File_Active table. Check the row number ${row_number + 1} in the ${CURRENT_TABLE} table`)
-            logger_generation_fr.error(`18;${codepatient};Bloqué;Le patient ${codepatient} est dans la table ${CURRENT_TABLE} mais n'est pas dans la table File_Active. Veuillez confirmer la ligne ${row_number + 1} de la table ${CURRENT_TABLE}.`)
+            logger_generation_fr.error(`Le patient ${codepatient} est dans la table ${CURRENT_TABLE} mais n'est pas dans la table File_Active. Veuillez confirmer la ligne ${row_number + 1} de la table ${CURRENT_TABLE}.;Erreur 18;${codepatient}`)
         }
     })
     
@@ -2122,7 +2122,7 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
         if (deliveryDate && isBeforeDate(Moment(deliveryDate, SIDAINFO_DATEFORMAT), Moment(enrollmentDate, SIDAINFO_DATEFORMAT)) && twoMonthsBefore.isBefore(Moment(enrollmentDate, SIDAINFO_DATEFORMAT))) {
             patientCodeBlockList.add(codepatient);
             logger_generation.error(`28;${codepatient};Blocked;Patient ${codepatient} has an enrollment Date ${enrollmentDate} after the delivery Date ${deliveryDate}. Check the row number ${row_number + 1} in the ${CURRENT_TABLE} table`)
-            logger_generation_fr.error(`28;${codepatient};Bloqué;Le patient ${codepatient} la DateVisiteSuiviPTME (${enrollmentDate}) n'est pas avant la DateAccoucheSuiviPTME (${deliveryDate}). Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE}`);
+            logger_generation_fr.error(`Le patient ${codepatient} la DateVisiteSuiviPTME (${enrollmentDate}) n'est pas avant la DateAccoucheSuiviPTME (${deliveryDate}). Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE};Erreur 28;${codepatient}`);
         }
     
         let patient = personList.find(x => x.code === codepatient);
@@ -2131,13 +2131,13 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
             if (enrollmentDate && validateDate(Moment(enrollmentDate, SIDAINFO_DATEFORMAT), MIN_YEAR_EVENTS) == false) {
                 patient.addLog(`26;DateVisiteSuiviPTME avec une DATE inattendu : ${enrollmentDate}.`)
                 logger_generation.warn(`26;${codepatient};Warning;Patient ${codepatient} has a enrollment Date with an unexpected DATE ${enrollmentDate}. Check the row number ${row_number + 1} in the ${CURRENT_TABLE} table`)
-                logger_generation_fr.warn(`26;${codepatient};Notification;Le patient ${codepatient} a une DateVisiteSuiviPTME avec une DATE inattendu : ${enrollmentDate}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE}`)
+                logger_generation_fr.warn(`Le patient ${codepatient} a une DateVisiteSuiviPTME avec une DATE inattendu : ${enrollmentDate}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE};Erreur 26;${codepatient}`)
             }
     
             if (deliveryDate && validateDate(Moment(deliveryDate, SIDAINFO_DATEFORMAT), MIN_YEAR_EVENTS) == false) {
                 patient.addLog(`27;DateAccoucheSuiviPTME avec une DATE inattendu : ${deliveryDate}.`)
                 logger_generation.warn(`27;${codepatient};Warning;Patient ${codepatient} has a delivery Date with an unexpected DATE ${deliveryDate}. Check the row number ${row_number + 1} in the ${CURRENT_TABLE} table`)
-                logger_generation_fr.warn(`27;${codepatient};Notification;Le patient ${codepatient} a une DateAccoucheSuiviPTME avec une DATE inattendu : ${deliveryDate}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE}`)
+                logger_generation_fr.warn(`Le patient ${codepatient} a une DateAccoucheSuiviPTME avec une DATE inattendu : ${deliveryDate}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE};Erreur 27;${codepatient}`)
             }
     
             const PTME_admission = patient.PTME_mere_admissions.find(x => x.datedebut === enrollmentDate);
@@ -2152,12 +2152,12 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
             } else {
                 patientCodeBlockList.add(codepatient);
                 logger_generation.error(`29;${codepatient};Blocked;Patient ${codepatient} has a DateVisiteSuiviPTME (${enrollmentDate}) in the table ${CURRENT_TABLE} that is not present in the ADMISSION table. It should match the date debut of one of the PTME mere admissions. List of PTME meré admissions records of the table ADMISSION: ${JSON.stringify(patient.PTME_mere_admissions)}`)
-                logger_generation_fr.error(`29;${codepatient};Bloqué;Le patient ${codepatient} a une DateVisiteSuiviPTME (${enrollmentDate}) dans la table ${CURRENT_TABLE} qui n'est pas présente dans la table ADMISSION. La DataVisiteSuiviPTME devrait correspondre à l'une des dateDebut des admissions PTME mère. Liste des admissions PTME mère de la table ADMISSION : ${JSON.stringify(patient.PTME_mere_admissions)}`)
+                logger_generation_fr.error(`Le patient ${codepatient} a une DateVisiteSuiviPTME (${enrollmentDate}) dans la table ${CURRENT_TABLE} qui n'est pas présente dans la table ADMISSION. La DataVisiteSuiviPTME devrait correspondre à l'une des dateDebut des admissions PTME mère. Liste des admissions PTME mère de la table ADMISSION : ${JSON.stringify(patient.PTME_mere_admissions)};Erreur 29;${codepatient}`)
             }
         } else {
             patientCodeBlockList.add(codepatient);
             logger_generation.error(`18;${codepatient};Blocked;Patient ${codepatient} appears in the ${CURRENT_TABLE} table but not in the File_Active table. Check the row number ${row_number + 1} in the ${CURRENT_TABLE} table.`)
-            logger_generation_fr.error(`18;${codepatient};Bloqué;Le patient ${codepatient} est dans la table ${CURRENT_TABLE} mais n'est pas dans la table File_Active. Veuillez confirmer la ligne ${row_number + 1} de la table ${CURRENT_TABLE}.`)
+            logger_generation_fr.error(`Le patient ${codepatient} est dans la table ${CURRENT_TABLE} mais n'est pas dans la table File_Active. Veuillez confirmer la ligne ${row_number + 1} de la table ${CURRENT_TABLE}.;Erreur 18;${codepatient}`)
         }
     })
     
@@ -2211,7 +2211,7 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
         } else {
             patientCodeBlockList.add(code);
             logger_generation.error(`30;${code};Blocked;Patient ${code} is duplicated.`);
-            logger_generation_fr.error(`30;${code};Bloqué;Le patient ${code} est un doublon.`);
+            logger_generation_fr.error(`Le patient ${code} est un doublon.;Erreur 30;${code}`);
             return true;
         }
     }
@@ -2254,11 +2254,11 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
             if (tableName == "") {
                 patientCodeBlockList.add(patientCode);
                 logger_generation.error(`31;${patientCode};Blocked;Patient ${patientCode}. Unexpected option value: '${optionToValidate}' for the optionSet '${optionSets[optionSetUID].name}'. Expected values are: ${validOptions}`);
-                logger_generation_fr.error(`31;${patientCode};Bloqué;Le patient ${patientCode} a une valeur inattendue '${optionToValidate}' pour la liste d'options '${optionSets[optionSetUID].name}'. Les valeurs attendues sont : ${validOptions}`);
+                logger_generation_fr.error(`Le patient ${patientCode} a une valeur inattendue '${optionToValidate}' pour la liste d'options '${optionSets[optionSetUID].name}'. Les valeurs attendues sont : ${validOptions};Erreur 31;${patientCode}`);
             } else {
                 patientCodeBlockList.add(patientCode);
                 logger_generation.error(`31;${patientCode};Blocked;Patient ${patientCode}. In table ${tableName}, unexpected option value: '${optionToValidate}' for the optionSet '${optionSets[optionSetUID].name}'. Expected values are: ${validOptions}`);
-                logger_generation_fr.error(`31;${patientCode};Bloqué;Le patient ${patientCode} a une valeur inattendue '${optionToValidate}' pour la liste d'options '${optionSets[optionSetUID].name}' de la table ${tableName}. Les valeurs attendues sont : ${validOptions}`);
+                logger_generation_fr.error(`Le patient ${patientCode} a une valeur inattendue '${optionToValidate}' pour la liste d'options '${optionSets[optionSetUID].name}' de la table ${tableName}. Les valeurs attendues sont : ${validOptions};Erreur 31;${patientCode}`);
             }
             return false;
         }
@@ -2273,7 +2273,7 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
         if ((re_patient_code.test(patientCode) == false) && (re_enfant_code.test(patientCode) == false)) {
             patientCodeBlockList.add(patientCode);
             logger_generation.error(`32;${patientCode};Blocked;Patient '${patientCode}' has a patient code that does not follow the expected pattern (6 numbers or 5 numbers + the character E))`);
-            logger_generation_fr.error(`32;${patientCode};Bloqué;Le patient '${patientCode}' a un code de patient qui ne suit pas le modèle attendu (6 chiffres or 5 chiffres + la lettre E)).`);
+            logger_generation_fr.error(`Le patient '${patientCode}' a un code de patient qui ne suit pas le modèle attendu (6 chiffres or 5 chiffres + la lettre E)).;Erreur 32;${patientCode}`);
         }
     }
     
@@ -2309,7 +2309,7 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
                     flag = false
                     patient_enfant.addLog(`33;Résultat PCR valid mais sans date : ${JSON.stringify(pcr)}`);
                     logger_generation.warn(`33;${patientCode};Warning;Patient ${patientCode} (enfant) has a valid PCR result BUT without PCR date: ${JSON.stringify(pcr)}`);
-                    logger_generation_fr.warn(`33;${patientCode};Notification;Le patient ${patientCode} (enfant) a un résultat PCR valid mais sans date : ${JSON.stringify(pcr)}`);
+                    logger_generation_fr.warn(`Le patient ${patientCode} (enfant) a un résultat PCR valid mais sans date : ${JSON.stringify(pcr)};Erreur 33;${patientCode}`);
                 }
             }
         })
@@ -2322,7 +2322,7 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
             flag = false
             patient_enfant.addLog(`34;Le patient a des dates de PCR qui ne sont pas consécutives : ${JSON.stringify(pcr_dates)}`);
             logger_generation.warn(`34;${patientCode};Warning;Patient ${patientCode} (enfant) has PCR dates that are not consecutive: ${JSON.stringify(pcr_dates)}`);
-            logger_generation_fr.warn(`34;${patientCode};Notification;Le patient ${patientCode} (enfant) a des dates de PCR qui ne sont pas consécutives : ${JSON.stringify(pcr_dates)}`);
+            logger_generation_fr.warn(`Le patient ${patientCode} (enfant) a des dates de PCR qui ne sont pas consécutives : ${JSON.stringify(pcr_dates)};Erreur 34;${patientCode}`);
         }
     
         // Validate that all PCRs have different day
@@ -2332,7 +2332,7 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
             flag = false
             patient_enfant.addLog(`35;Le patient (enfant) a deux PCR à la même date : ${JSON.stringify(pcr_dates)}`);
             logger_generation.warn(`35;${patientCode};Warning;Patient ${patientCode} (enfant) with more than one PCR on the very same date: ${duplicateElements}`);
-            logger_generation_fr.warn(`35;${patientCode};Notification;Le patient ${patientCode} (enfant) a deux PCR à la même date : ${duplicateElements}`);
+            logger_generation_fr.warn(`Le patient ${patientCode} (enfant) a deux PCR à la même date : ${duplicateElements};Erreur 35;${patientCode}`);
         }
     
         return flag
@@ -2448,11 +2448,11 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
             logger_generation_fr.info(`${person.code};Patient ${person.code} is bloqué. Ignorer payload generation`)
         } else if (["7", "9"].includes(person.entryMode)) {
             logger_generation.info(`${person.code};Patient ${person.code} is skipped due to entryMode (entryMode=${person.entryMode}). Skipping payload generation`)
-            logger_generation_fr.warn(`${person.code};Le patient ${person.code} is bloqué (mode d'entrée=${person.entryMode}). Ignorer payload generation`);
+            logger_generation_fr.warn(`Le patient ${person.code} is bloqué (mode d'entrée=${person.entryMode}). Ignorer payload generation;${person.code}`);
             //} else if (person.tobereviewed){
         } else if (person.has_enrollments() == false){
             logger_generation.info(`${person.code};Patient ${person.code} is skipped due to empty enrollments. Skipping payload generation`)
-            logger_generation_fr.warn(`${person.code};Le patient ${person.code} is bloqué (inscriptions vides). Ignorer payload generation`);
+            logger_generation_fr.warn(`Le patient ${person.code} is bloqué (inscriptions vides). Ignorer payload generation;${person.code}`);
         } else {
             logger_generation.info("Generating TEI payload for patient " + person.code)
             saveJSONFile(PARENT_TEIS_FOLDER + "/" + SOURCE_ID + "/teis/" + person.getUID() + ".json", person.generateDHIS2_TEI_Payload())
