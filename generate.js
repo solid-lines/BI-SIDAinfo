@@ -1986,12 +1986,12 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
             logger_generation_fr.warn(`Le patient ${codepatient} a une Date traitement avec une DATE inattendu : ${datetraitement}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE};Erreur 19;${codepatient}`)
         }
     
-        if (dateprochainrendev < 0 || dateprochainrendev > 365) { // number of days until the next treatment SHOULD NOT be minor than cero
+        if (dateprochainrendev < 0) { // number of days until the next treatment SHOULD NOT be minor than cero
             if (typeof patient !== 'undefined') {
-                patient.addLog(`02;Le patient a un nombre de jours au prochain rendez-vous qui est inférieur à 0 ou supérieur à 365 (le nombre de jours est ${dateprochainrendev} à ${datetraitement}).`)
+                patient.addLog(`02;Le patient a un nombre de jours au prochain rendez-vous qui est inférieur à 0 (le nombre de jours est ${dateprochainrendev} à ${datetraitement}).`)
             }
-            logger_generation.warn(`02;${codepatient};Warning;Patient ${codepatient} has a number of days until next treatment below 0 or above 365 (the number of days is ${dateprochainrendev}). Check the row number ${row_number + 1} in the ${CURRENT_TABLE} table`)
-            logger_generation_fr.warn(`Le patient ${codepatient} a un nombre de jours au prochain rendez-vous qui est inférieur à 0 ou supérieur à 365 (le nombre de jours est ${dateprochainrendev}). Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE};Erreur 02;${codepatient}`)
+            logger_generation.warn(`02;${codepatient};Warning;Patient ${codepatient} has a number of days until next treatment below 0 (the number of days is ${dateprochainrendev}). Check the row number ${row_number + 1} in the ${CURRENT_TABLE} table`)
+            logger_generation_fr.warn(`Le patient ${codepatient} a un nombre de jours au prochain rendez-vous qui est inférieur à 0 (le nombre de jours est ${dateprochainrendev}). Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE};Erreur 02;${codepatient}`)
         }
     
         if (typeof patient !== 'undefined') {
