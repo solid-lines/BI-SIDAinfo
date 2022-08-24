@@ -2444,15 +2444,14 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
     // Not all patientCodes in patienCodeBlockList are in the personList (because some could appear in Admission table but not in File Active or enfant PTME)
     personList.forEach(person => {
         if (patientCodeBlockList.has(person.code)) {
-            logger_generation.info(`${person.code};Patient ${person.code} is blocked. Skipping payload generation`)
-            logger_generation_fr.info(`${person.code};Patient ${person.code} is bloqué. Ignorer payload generation`)
+            logger_generation.error(`${person.code};Patient ${person.code} is blocked. Skipping payload generation`)
+            //logger_generation_fr.info(`${person.code};Patient ${person.code} is bloqué. Ignorer payload generation`)
         } else if (["7", "9"].includes(person.entryMode)) {
-            logger_generation.info(`${person.code};Patient ${person.code} is skipped due to entryMode (entryMode=${person.entryMode}). Skipping payload generation`)
-            logger_generation_fr.warn(`Le patient ${person.code} is bloqué (mode d'entrée=${person.entryMode}). Ignorer payload generation;${person.code}`);
-            //} else if (person.tobereviewed){
+            logger_generation.error(`42;${person.code};Patient ${person.code} is excluded due to entryMode ${person.entryMode} (prophylaxis patients and decentralised follow-ups are excluded from import).`)
+            logger_generation_fr.error(`Le patient ${person.code} est exclu en raison du CodeModeEntrée ${person.entryMode} (les patients en prophylaxie post-exposition et les suivis décentralisés sont exclus de l’import);42;${person.code}`);
         } else if (person.has_enrollments() == false){
-            logger_generation.info(`${person.code};Patient ${person.code} is skipped due to empty enrollments. Skipping payload generation`)
-            logger_generation_fr.warn(`Le patient ${person.code} is bloqué (inscriptions vides). Ignorer payload generation;${person.code}`);
+            logger_generation.error(`43;${person.code};Patient ${person.code} is blocked because they have no enrollments/admissions.`)
+            logger_generation_fr.error(`Le patient ${person.code} est bloqué parce qu’ils n’ont pas d’inscriptions/admission;43;${person.code}`);
         } else {
             logger_generation.info("Generating TEI payload for patient " + person.code)
             saveJSONFile(PARENT_TEIS_FOLDER + "/" + SOURCE_ID + "/teis/" + person.getUID() + ".json", person.generateDHIS2_TEI_Payload())
