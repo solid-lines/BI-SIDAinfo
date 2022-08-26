@@ -2455,8 +2455,8 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
             logger_generation.error(`42;${person.code};Patient ${person.code} is excluded due to entryMode ${person.entryMode} (prophylaxis patients and decentralised follow-ups are excluded from import).`)
             logger_generation_fr.error(`Le patient ${person.code} est exclu en raison du CodeModeEntrée ${person.entryMode} (les patients en prophylaxie post-exposition et les suivis décentralisés sont exclus de l’import);42;${person.code}`);
         } else if (person.has_enrollments() == false){
-            logger_generation.error(`43;${person.code};Patient ${person.code} is blocked because they have no enrollments/admissions.`)
-            logger_generation_fr.error(`Le patient ${person.code} est bloqué parce qu’ils n’ont pas d’inscriptions/admission;43;${person.code}`);
+            logger_generation.error(`43;${person.code};Patient ${person.code} is blocked because they have no ARV or PTME admissions/enrollments in the Admission_detail table.`)
+            logger_generation_fr.error(`Le patient ${person.code} est bloqué parce qu’ils n’ont pas d’admissions/inscriptions ARV ou PTME dans la table Admission_detail.;43;${person.code}`);
         } else {
             logger_generation.info("Generating TEI payload for patient " + person.code)
             saveJSONFile(PARENT_TEIS_FOLDER + "/" + SOURCE_ID + "/teis/" + person.getUID() + ".json", person.generateDHIS2_TEI_Payload())
