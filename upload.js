@@ -84,7 +84,6 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         logger_upload.info(`DELETE ${TEIs_toDelete.length} TEIs`)
         process.stdout.write('Press any key to continue\n')
         await keypress()
-        utils.wait(3000)
     }
     i=0
     TEIs_toDelete.forEach((TEI) => {
@@ -106,7 +105,6 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         logger_upload.info(`CREATE ${TEIs_toCreate.length} TEIs`)
         process.stdout.write('Press any key to continue\n')
         await keypress()
-        utils.wait(3000)
     }    
     TEIs_toCreate.forEach((TEI) => {
         const payload = getTEIpayload(TEI.uid);
@@ -140,7 +138,6 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         logger_upload.info(`DELETE ${TEAs_toDelete.length} TEAs`)
         process.stdout.write('Press any key to continue\n')
         await keypress()
-        utils.wait(3000)
     }
     i=0
     TEAs_toDelete.forEach((TEA) => {
@@ -167,7 +164,6 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         logger_upload.info(`CREATE ${TEAs_toCreate.length} TEAs`)
         process.stdout.write('Press any key to continue\n')
         await keypress()
-        utils.wait(3000)
     } 
     i=0
     TEAs_toCreate.forEach((TEA) => {
@@ -195,7 +191,6 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         logger_upload.info(`UPDATE ${TEAs_toUpdate.length} TEAs`)
         process.stdout.write('Press any key to continue\n')
         await keypress()
-        utils.wait(3000)
     }
     i=0
     TEAs_toUpdate.forEach((TEA) => {
@@ -225,7 +220,6 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         logger_upload.info(`DELETE ${enrollments_to_delete.length} ENROLLMENTS`)
         process.stdout.write('Press any key to continue\n')
         await keypress()
-        utils.wait(3000)
     }    
     i=0
     enrollments_to_delete.forEach((enrollment) => {
@@ -247,7 +241,6 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         logger_upload.info(`CREATE ${enrollments_to_create.length} ENROLLMENTS`)
         process.stdout.write('Press any key to continue\n')
         await keypress()
-        utils.wait(3000)
     }
     i=0
     enrollments_to_create.forEach((enrollment) => {
@@ -271,7 +264,6 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         logger_upload.info(`UPDATE ${enrollments_to_update.length} ENROLLMENTS`)
         process.stdout.write('Press any key to continue\n')
         await keypress()
-        utils.wait(3000)
     }
     i=0
     enrollments_to_update.forEach((enrollment) => {
@@ -296,7 +288,6 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         logger_upload.info(`DELETE ${events_to_delete.length} EVENTS`)
         process.stdout.write('Press any key to continue\n')
         await keypress()
-        utils.wait(3000)
     }    
     let list_events_to_delete = []
     events_to_delete.forEach((event) => {
@@ -327,7 +318,6 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         logger_upload.info(`CREATE ${events_to_create.length} EVENTS`)
         process.stdout.write('Press any key to continue\n')
         await keypress()
-        utils.wait(3000)
     }
     let list_events_to_create = []
     events_to_create.forEach((event) => {
@@ -359,7 +349,6 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         logger_upload.info(`UPDATE ${events_to_update.length} EVENTS`)
         process.stdout.write('Press any key to continue\n')
         await keypress()
-        utils.wait(3000)
     }
     i=0
     events_to_update.forEach((event) => {
@@ -389,7 +378,6 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         logger_upload.info(`DELETE ${dv_to_delete.length} DATA VALUE (EVENT)`)
         process.stdout.write('Press any key to continue\n')
         await keypress()
-        utils.wait(3000)
     }
     i=0
     dv_to_delete.forEach((dv) => {
@@ -415,7 +403,6 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         logger_upload.info(`CREATE ${dv_to_create.length} DATA VALUE (EVENT)`)
         process.stdout.write('Press any key to continue\n')
         await keypress()
-        utils.wait(3000)
     }
     i = 0
     dv_to_create.forEach((dv) => {
@@ -442,7 +429,6 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         logger_upload.info(`UPDATE ${dv_to_update.length} DATA VALUE (EVENT)`)
         process.stdout.write('Press any key to continue\n')
         await keypress()
-        utils.wait(3000)
     }
     i=0;
     dv_to_update.forEach((dv) => {
