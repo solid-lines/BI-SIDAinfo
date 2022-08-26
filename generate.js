@@ -374,8 +374,13 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
             this.log.push(message);
         }
     
-        getLog() {
-            return this.log;
+        get_str_log() {
+            const complete_log = this.log.join("\n")
+            if (complete_log.length > 1200){
+                return "##IMPORTANT##. Il y a plus d'erreurs, mais en raison de la taille de ce champ, il n'est pas possible de les afficher\n\n" + complete_log.slice(0, 1000);
+            } else {
+                return complete_log;
+            }
         }
     
         getTARV_enrollment_date() {
@@ -848,9 +853,9 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
             attributes.push({ "attribute": TEA_SEX, "value": this.sex, "storedBy": STORED_BY_USERNAME }) // sex
             attributes.push({ "attribute": TEA_BIRTHDATE, "value": this.birthdate.format(DHIS2_DATEFORMAT), "storedBy": STORED_BY_USERNAME }) // birthdate
             attributes.push({ "attribute": TEA_ENTRYMODE, "value": this.entryMode, "storedBy": STORED_BY_USERNAME }) // entryMode
-            if (this.getLog().length) {
+            if (this.get_str_log().length) {
                 attributes.push({ "attribute": TEA_TOBEREVIEWED, "value": "true", "storedBy": STORED_BY_USERNAME }) // log
-                attributes.push({ "attribute": TEA_LOG, "value": this.getLog().join("\n"), "storedBy": STORED_BY_USERNAME }) // log
+                attributes.push({ "attribute": TEA_LOG, "value": this.get_str_log(), "storedBy": STORED_BY_USERNAME }) // log
             }
     
             return attributes;
