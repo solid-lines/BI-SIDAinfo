@@ -144,7 +144,7 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
     i=0
     for (const TEA of TEAs_toDelete) {
         if (TEIs_already_sent.includes(TEA.TEI)){
-            return;
+            continue;
         } else {
             TEIs_already_sent.push(TEA.TEI)
         }
@@ -170,7 +170,7 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
     i=0
     for (const TEA of TEAs_toCreate) {
         if (TEIs_already_sent.includes(TEA.TEI)){
-            return;
+            continue;
         } else {
             TEIs_already_sent.push(TEA.TEI)
         }
@@ -197,7 +197,7 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
     i=0
     for (const TEA of TEAs_toUpdate) {
         if (TEIs_already_sent.includes(TEA.TEI)){
-            return;
+            continue;
         } else {
             TEIs_already_sent.push(TEA.TEI)
         }
