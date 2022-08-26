@@ -32,7 +32,8 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
 
     const endpoint_filename='./config.json'
     const endpoint_rawdata = fs.readFileSync(endpoint_filename);
-    const endpointConfig = JSON.parse(endpoint_rawdata);    
+    const endpointConfig = JSON.parse(endpoint_rawdata);
+    const auth_token = Buffer.from(`${endpointConfig.dhisUser}:${endpointConfig.dhisPass}`, 'utf8').toString('base64')
 
     /*********** Read actions.json ********/
     const SOURCE_ID = SOURCE_OU_CODE + '_' + SOURCE_DATE
@@ -486,11 +487,8 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
                 'Cache-Control': 'no-cache',
+                'Authorization': `Basic ${auth_token}`,                
                 'Pragma': 'no-cache'
-            },
-            auth: {
-                username: endpointConfig.dhisUser,
-                password: endpointConfig.dhisPass
             },
             validateStatus: function (status) {
                 return status == 200; // TEI. not only create also update
@@ -533,11 +531,8 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
                 'Cache-Control': 'no-cache',
+                'Authorization': `Basic ${auth_token}`,
                 'Pragma': 'no-cache'
-            },
-            auth: {
-                username: endpointConfig.dhisUser,
-                password: endpointConfig.dhisPass
             },
             validateStatus: function (status) {
                 return status == 200; // TEI. not only create also update
@@ -578,11 +573,8 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
                 'Cache-Control': 'no-cache',
+                'Authorization': `Basic ${auth_token}`,
                 'Pragma': 'no-cache'
-            },
-            auth: {
-                username: endpointConfig.dhisUser,
-                password: endpointConfig.dhisPass
             },
             validateStatus: function (status) {
                 return status == 200; // TEI. not only create also update
@@ -622,11 +614,8 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
                 'Cache-Control': 'no-cache',
+                'Authorization': `Basic ${auth_token}`,
                 'Pragma': 'no-cache'
-            },
-            auth: {
-                username: endpointConfig.dhisUser,
-                password: endpointConfig.dhisPass
             },
             validateStatus: function (status) {
                 return status == 200;
@@ -664,11 +653,8 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
                 'Cache-Control': 'no-cache',
+                'Authorization': `Basic ${auth_token}`,
                 'Pragma': 'no-cache'
-            },
-            auth: {
-                username: endpointConfig.dhisUser,
-                password: endpointConfig.dhisPass
             },
             validateStatus: function (status) {
                 return status == 200;
