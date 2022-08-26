@@ -79,14 +79,15 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
     /* Delete */
     // In 2.36, delete a TEI means: delete TEI, delete enrollment, delete events (but in 2.33, events were not deleted).
     const TEIs_toDelete = getActionByOperationType(TEIs, DELETE);
-    if (TEIs_toDelete.length != 0) { 
+    if (TEIs_toDelete.length != 0) {
         process.stdout.write('\n')
         logger_upload.info(`DELETE ${TEIs_toDelete.length} TEIs`)
         process.stdout.write('Press any key to continue\n')
         await keypress()
     }
+    // KUDOS https://stackoverflow.com/questions/37576685/using-async-await-with-a-foreach-loop
     i=0
-    TEIs_toDelete.forEach((TEI) => {
+    for (const TEI of TEIs_toDelete) {
         utils.wait(500)
         i=i+1
         if ((i%50) == 0){
@@ -95,18 +96,18 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         logger_upload.debug(`Delete TEI ${TEI.uid}`);
         delete_resource(TEI_TYPE, TEI.uid)
         process.stdout.write('.')
-    });
+    }
 
     /* Create */
     const TEIs_toCreate = getActionByOperationType(TEIs, CREATE);
     let list_teis_to_create = []
-    if (TEIs_toCreate.length != 0) { 
+    if (TEIs_toCreate.length != 0) {
         process.stdout.write('\n')
         logger_upload.info(`CREATE ${TEIs_toCreate.length} TEIs`)
         process.stdout.write('Press any key to continue\n')
         await keypress()
     }    
-    TEIs_toCreate.forEach((TEI) => {
+    for (const TEI of TEIs_toCreate) {
         const payload = getTEIpayload(TEI.uid);
         logger_upload.debug(`Create TEI ${TEI.uid}, payload: ${JSON.stringify(payload)}`);
         //post_resource(TEI_TYPE, TEI.uid, payload);
@@ -118,7 +119,7 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
             utils.wait(10000)
         }
         process.stdout.write('.')
-    });
+    }
 
     // send last list of resources
     if (list_teis_to_create.length>0){
@@ -133,14 +134,14 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
     TEIs_already_sent = []
     /* Delete */
     const TEAs_toDelete = getActionByOperationType(TEAs, DELETE);
-    if (TEAs_toDelete.length != 0) { 
+    if (TEAs_toDelete.length != 0) {
         process.stdout.write('\n')
         logger_upload.info(`DELETE ${TEAs_toDelete.length} TEAs`)
         process.stdout.write('Press any key to continue\n')
         await keypress()
     }
     i=0
-    TEAs_toDelete.forEach((TEA) => {
+    for (const TEA of TEAs_toDelete) {
         if (TEIs_already_sent.includes(TEA.TEI)){
             return;
         } else {
@@ -155,18 +156,18 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         logger_upload.debug(`Delete TEA ${TEA.TEA} (TEI ${TEA.TEI}), payload: ${JSON.stringify(payload)}`);
         put_resource(TEA_TYPE, TEA.TEI, payload);
         process.stdout.write('.')
-    });
+    }
 
     /* Create */
     const TEAs_toCreate = getActionByOperationType(TEAs, CREATE);
-    if (TEAs_toCreate.length != 0) { 
+    if (TEAs_toCreate.length != 0) {
         process.stdout.write('\n')
         logger_upload.info(`CREATE ${TEAs_toCreate.length} TEAs`)
         process.stdout.write('Press any key to continue\n')
         await keypress()
     } 
     i=0
-    TEAs_toCreate.forEach((TEA) => {
+    for (const TEA of TEAs_toCreate) {
         if (TEIs_already_sent.includes(TEA.TEI)){
             return;
         } else {
@@ -182,18 +183,18 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         logger_upload.debug(`Create TEA ${TEA.TEA} (TEI ${TEA.TEI}), payload: ${JSON.stringify(payload)}`);
         put_resource(TEA_TYPE, TEA.TEI, payload);
         process.stdout.write('.')
-    });
+    }
 
     /* Update */
     const TEAs_toUpdate = getActionByOperationType(TEAs, UPDATE);
-    if (TEAs_toUpdate.length != 0) { 
+    if (TEAs_toUpdate.length != 0) {
         process.stdout.write('\n')
         logger_upload.info(`UPDATE ${TEAs_toUpdate.length} TEAs`)
         process.stdout.write('Press any key to continue\n')
         await keypress()
     }
     i=0
-    TEAs_toUpdate.forEach((TEA) => {
+    for (const TEA of TEAs_toUpdate) {
         if (TEIs_already_sent.includes(TEA.TEI)){
             return;
         } else {
@@ -208,21 +209,21 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         logger_upload.debug(`Update TEA ${TEA.TEA} (TEI ${TEA.TEI}), payload: ${JSON.stringify(payload)}`);
         put_resource(TEA_TYPE, TEA.TEI, payload);
         process.stdout.write('.')
-    });
+    }
 
 
     /************** Enrollment actions upload *********************/
 
     /* Delete */
     const enrollments_to_delete = getActionByOperationType(enrollments, DELETE);
-    if (enrollments_to_delete.length != 0) { 
+    if (enrollments_to_delete.length != 0) {
         process.stdout.write('\n')
         logger_upload.info(`DELETE ${enrollments_to_delete.length} ENROLLMENTS`)
         process.stdout.write('Press any key to continue\n')
         await keypress()
     }    
     i=0
-    enrollments_to_delete.forEach((enrollment) => {
+    for (const enrollment of enrollments_to_delete) {
         utils.wait(500)
         i=i+1
         if ((i%50) == 0){
@@ -232,18 +233,18 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         logger_upload.debug(`Delete enrollment ${enrollment_uid} (TEI ${enrollment.TEI})`);
         delete_resource(ENROLLMENT_TYPE, enrollment_uid);
         process.stdout.write('.')
-    });
+    }
 
     /* Create */
     const enrollments_to_create = getActionByOperationType(enrollments, CREATE);
-    if (enrollments_to_create.length != 0) { 
+    if (enrollments_to_create.length != 0) {
         process.stdout.write('\n')
         logger_upload.info(`CREATE ${enrollments_to_create.length} ENROLLMENTS`)
         process.stdout.write('Press any key to continue\n')
         await keypress()
     }
     i=0
-    enrollments_to_create.forEach((enrollment) => {
+    for (const enrollment of enrollments_to_create) {
         utils.wait(500)
         i=i+1
         if ((i%50) == 0){
@@ -254,19 +255,19 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         logger_upload.debug(`Create enrollment ${enrollment_uid} (TEI ${enrollment.TEI}), payload: ${JSON.stringify(payload)}`);
         post_resource(ENROLLMENT_TYPE, enrollment_uid, payload);
         process.stdout.write('.')
-    });
+    }
 
     /* Update */
     //Enrollment_STATUS_UPDATE
     const enrollments_to_update = getActionByOperationType(enrollments, UPDATE);
-    if (enrollments_to_update.length != 0) { 
+    if (enrollments_to_update.length != 0) {
         process.stdout.write('\n')
         logger_upload.info(`UPDATE ${enrollments_to_update.length} ENROLLMENTS`)
         process.stdout.write('Press any key to continue\n')
         await keypress()
     }
     i=0
-    enrollments_to_update.forEach((enrollment) => {
+    for (const enrollment of enrollments_to_update) {
         utils.wait(500)
         i=i+1
         if ((i%50) == 0){
@@ -277,20 +278,20 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         logger_upload.debug(`Update enrollment status ${enrollment_uid} (TEI ${enrollment.TEI}), payload: ${JSON.stringify(payload)}`);
         put_resource(ENROLLMENT_TYPE, enrollment_uid, payload);
         process.stdout.write('.')
-    });
+    }
 
     /************** Events actions upload *********************/
 
     /* Delete */
     const events_to_delete = getActionByOperationType(events, DELETE);
-    if (events_to_delete.length != 0) { 
+    if (events_to_delete.length != 0) {
         process.stdout.write('\n')
         logger_upload.info(`DELETE ${events_to_delete.length} EVENTS`)
         process.stdout.write('Press any key to continue\n')
         await keypress()
     }    
     let list_events_to_delete = []
-    events_to_delete.forEach((event) => {
+    for (const event of events_to_delete) {
         const event_uid = event.uid
         const enrollment_uid = event.enrollment
         const tei_uid = event.TEI
@@ -304,7 +305,7 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
             list_events_to_delete = []
         }
         process.stdout.write('.')
-    });
+    }
     // send last list of events
     if (list_events_to_delete.length>0){
         delete_list_resources(EVENT_TYPE, list_events_to_delete);
@@ -313,14 +314,14 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
     /* Create */
 
     const events_to_create = getActionByOperationType(events, CREATE);
-    if (events_to_create.length != 0) { 
+    if (events_to_create.length != 0) {
         process.stdout.write('\n')
         logger_upload.info(`CREATE ${events_to_create.length} EVENTS`)
         process.stdout.write('Press any key to continue\n')
         await keypress()
     }
     let list_events_to_create = []
-    events_to_create.forEach((event) => {
+    for (const event of events_to_create) {
         const event_uid = event.uid
         const enrollment_uid = event.enrollment
         const tei_uid = event.TEI
@@ -334,7 +335,7 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
             list_events_to_create = []
         }
         process.stdout.write('.')
-    });
+    }
     // send last list of events
     if (list_events_to_create.length>0){
         post_list_resources(EVENT_TYPE, list_events_to_create);
@@ -344,14 +345,14 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
     /* Update */
     //Event_STATUS_UPDATE + Event_DUEDATE_UPDATE
     const events_to_update = getActionByOperationType(events, UPDATE);
-    if (events_to_update.length != 0) { 
+    if (events_to_update.length != 0) {
         process.stdout.write('\n')
         logger_upload.info(`UPDATE ${events_to_update.length} EVENTS`)
         process.stdout.write('Press any key to continue\n')
         await keypress()
     }
     i=0
-    events_to_update.forEach((event) => {
+    for (const event of events_to_update) {
         utils.wait(500)
         i=i+1
         if ((i%50) == 0){
@@ -364,7 +365,7 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         logger_upload.debug(`Update event ${event_uid} (TEI ${tei_uid}) (enrollment ${enrollment_uid}), payload: ${JSON.stringify(payload)}`);
         put_resource(EVENT_TYPE, event_uid, payload);
         process.stdout.write('.')
-    });
+    }
 
     // /************** DataElements/DataValues actions upload *********************/
 
@@ -373,14 +374,14 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
     /* Delete */
     //send the datavalue empty ("")
     const dv_to_delete = getActionByOperationType(DVs, DELETE);
-    if (dv_to_delete.length != 0) { 
+    if (dv_to_delete.length != 0) {
         process.stdout.write('\n')
         logger_upload.info(`DELETE ${dv_to_delete.length} DATA VALUE (EVENT)`)
         process.stdout.write('Press any key to continue\n')
         await keypress()
     }
     i=0
-    dv_to_delete.forEach((dv) => {
+    for (const dv of dv_to_delete) {
         utils.wait(500)
         i=i+1
         if ((i%50) == 0){
@@ -394,18 +395,18 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         logger_upload.debug(`Delete datavalue ${dv_de} event ${event_uid} (TEI ${tei_uid}) (enrollment ${enrollment_uid}), payload: ${JSON.stringify(payload)}`);
         put_resource(DV_TYPE, event_uid+"/"+dv_de, payload);
         process.stdout.write('.')
-    });
+    }
 
     /* Create */
     const dv_to_create = getActionByOperationType(DVs, CREATE);
-    if (dv_to_create.length != 0) { 
+    if (dv_to_create.length != 0) {
         process.stdout.write('\n')
         logger_upload.info(`CREATE ${dv_to_create.length} DATA VALUE (EVENT)`)
         process.stdout.write('Press any key to continue\n')
         await keypress()
     }
     i = 0
-    dv_to_create.forEach((dv) => {
+    for (const dv of dv_to_create) {
         utils.wait(500)
         i=i+1
         if ((i%50) == 0){
@@ -419,19 +420,19 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         logger_upload.debug(`Create datavalue ${dv_de} event ${event_uid} (TEI ${tei_uid}) (enrollment ${enrollment_uid}), payload: ${JSON.stringify(payload)}`);
         put_resource(DV_TYPE, event_uid+"/"+dv_de, payload);
         process.stdout.write('.')
-    });
+    }
 
 
     /* Update */
     const dv_to_update = getActionByOperationType(DVs, UPDATE);
-    if (dv_to_update.length != 0) { 
+    if (dv_to_update.length != 0) {
         process.stdout.write('\n')
         logger_upload.info(`UPDATE ${dv_to_update.length} DATA VALUE (EVENT)`)
         process.stdout.write('Press any key to continue\n')
         await keypress()
     }
     i=0;
-    dv_to_update.forEach((dv) => {
+    for (const dv of dv_to_update) {
         utils.wait(500)
         i=i+1
         if ((i%50) == 0){
@@ -445,7 +446,7 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         logger_upload.debug(`Update datavalue ${dv_de} event ${event_uid} (TEI ${tei_uid}) (enrollment ${enrollment_uid}), payload: ${JSON.stringify(payload)}`);
         put_resource(DV_TYPE, event_uid+"/"+dv_de, payload);
         process.stdout.write('.')
-    });
+    }
 
 
     function getActionByResourceType(actions, resource_type) {
