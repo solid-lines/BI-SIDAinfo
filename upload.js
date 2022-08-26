@@ -89,13 +89,8 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         await keypress()
     }
     // KUDOS https://stackoverflow.com/questions/37576685/using-async-await-with-a-foreach-loop
-    i=0
     for (const TEI of TEIs_toDelete) {
-        utils.wait(500)
-        i=i+1
-        if ((i%50) == 0){
-            utils.wait(10000)
-        }
+        utils.wait(1000)
         logger_upload.debug(`Delete TEI ${TEI.uid}`);
         await delete_resource(TEI_TYPE, TEI.uid)
         process.stdout.write('.')
@@ -115,8 +110,8 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         logger_upload.debug(`Create TEI ${TEI.uid}, payload: ${JSON.stringify(payload)}`);
         //post_resource(TEI_TYPE, TEI.uid, payload);
         list_teis_to_create.push(payload)
-        if ((list_teis_to_create.length % 20) == 0){
-            process.stdout.write('.'.repeat(20))
+        if ((list_teis_to_create.length % 10) == 0){
+            process.stdout.write('.'.repeat(10))
             await post_list_resources(TEI_TYPE, list_teis_to_create);
             //clean list
             list_teis_to_create = []
@@ -133,85 +128,54 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
 
     /************** TEA actions upload *********************/
 
-    // TODO: improvement. send one PUT per TEI (no one PUT per each TEA)
-
-    TEIs_already_sent = []
     /* Delete */
     const TEAs_toDelete = getActionByOperationType(TEAs, DELETE);
+    const TEIs_TEAs_toDelete = Array.from(new Set(TEAs_toDelete.map(tea => tea.TEI)));
     if (TEAs_toDelete.length != 0) {
-        process.stdout.write('\n')
-        logger_upload.info(`DELETE ${TEAs_toDelete.length} TEAs`)
-        process.stdout.write('Press any key to continue\n')
-        await keypress()
-    }
-    i=0
-    for (const TEA of TEAs_toDelete) {
-        if (TEIs_already_sent.includes(TEA.TEI)){
-            continue;
-        } else {
-            TEIs_already_sent.push(TEA.TEI)
+        logger_upload.info(`DELETE ${TEAs_toDelete.length} TEAs from ${TEIs_TEAs_toDelete.length} TEIs`)
+        for (const TEA of TEAs_toDelete) {
+            const payload = getTEApayload(TEA.TEI);
+            logger_upload.debug(`Delete TEA ${TEA.TEA} (TEI ${TEA.TEI}), payload: ${JSON.stringify(payload)}`);
         }
-        utils.wait(500)
-        i=i+1
-        if ((i%50) == 0){
-            utils.wait(10000)
-        }
-        const payload = getTEApayload(TEA.TEI);
-        logger_upload.debug(`Delete TEA ${TEA.TEA} (TEI ${TEA.TEI}), payload: ${JSON.stringify(payload)}`);
-        await put_resource(TEA_TYPE, TEA.TEI, payload);
-        process.stdout.write('.')
     }
+
 
     /* Create */
     const TEAs_toCreate = getActionByOperationType(TEAs, CREATE);
+    const TEIs_TEAs_toCreate = Array.from(new Set(TEAs_toCreate.map(tea => tea.TEI)));
     if (TEAs_toCreate.length != 0) {
-        process.stdout.write('\n')
         logger_upload.info(`CREATE ${TEAs_toCreate.length} TEAs`)
-        process.stdout.write('Press any key to continue\n')
-        await keypress()
-    } 
-    i=0
-    for (const TEA of TEAs_toCreate) {
-        if (TEIs_already_sent.includes(TEA.TEI)){
-            continue;
-        } else {
-            TEIs_already_sent.push(TEA.TEI)
+        for (const TEA of TEAs_toCreate) {
+            const payload = getTEApayload(TEA.TEI);
+            logger_upload.debug(`CREATE TEA ${TEA.TEA} (TEI ${TEA.TEI}), payload: ${JSON.stringify(payload)}`);
         }
-
-        utils.wait(500)
-        i=i+1
-        if ((i%50) == 0){
-            utils.wait(10000)
-        }
-        const payload = getTEApayload(TEA.TEI);
-        logger_upload.debug(`Create TEA ${TEA.TEA} (TEI ${TEA.TEI}), payload: ${JSON.stringify(payload)}`);
-        await put_resource(TEA_TYPE, TEA.TEI, payload);
-        process.stdout.write('.')
     }
 
     /* Update */
     const TEAs_toUpdate = getActionByOperationType(TEAs, UPDATE);
+    const TEIs_TEAs_toUpdate = Array.from(new Set(TEAs_toUpdate.map(tea => tea.TEI)));
     if (TEAs_toUpdate.length != 0) {
-        process.stdout.write('\n')
         logger_upload.info(`UPDATE ${TEAs_toUpdate.length} TEAs`)
+        for (const TEA of TEAs_toUpdate) {
+            const payload = getTEApayload(TEA.TEI);
+            logger_upload.debug(`UPDATE TEA ${TEA.TEA} (TEI ${TEA.TEI}), payload: ${JSON.stringify(payload)}`);
+        }
+    }
+
+    // final upload process (DELETE, CREATE, UPDATE)
+    const TEIs_TEAs_toUpload = Array.from(new Set(TEIs_TEAs_toDelete.concat(TEIs_TEAs_toCreate, TEIs_TEAs_toUpdate)))
+    if (TEIs_TEAs_toUpload.length != 0) {
+        process.stdout.write('\n')
+        logger_upload.info(`Updating ${TEIs_TEAs_toUpload.length} TEIs due to change/s in the TEA/s`)
         process.stdout.write('Press any key to continue\n')
         await keypress()
-    }
-    i=0
-    for (const TEA of TEAs_toUpdate) {
-        if (TEIs_already_sent.includes(TEA.TEI)){
-            continue;
-        } else {
-            TEIs_already_sent.push(TEA.TEI)
-        }
-        utils.wait(500)
-        i=i+1
-        if ((i%50) == 0){
-            utils.wait(10000)
-        }
-        const payload = getTEApayload(TEA.TEI);
-        logger_upload.debug(`Update TEA ${TEA.TEA} (TEI ${TEA.TEI}), payload: ${JSON.stringify(payload)}`);
-        await put_resource(TEA_TYPE, TEA.TEI, payload);
+    }    
+    for (const TEI of TEIs_TEAs_toUpload) {
+        logger_upload.error(TEIs_TEAs_toUpload)
+        utils.wait(1000)
+        const payload = getTEApayload(TEI);
+        logger_upload.debug(`Updating TEI: ${TEI} due to change/s in the TEA/s, payload: ${JSON.stringify(payload)}`);
+        await put_resource(TEA_TYPE, TEI, payload);
         process.stdout.write('.')
     }
 
@@ -226,13 +190,8 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         process.stdout.write('Press any key to continue\n')
         await keypress()
     }    
-    i=0
     for (const enrollment of enrollments_to_delete) {
-        utils.wait(500)
-        i=i+1
-        if ((i%50) == 0){
-            utils.wait(10000)
-        }
+        utils.wait(1000)
         const enrollment_uid = enrollment.uid
         logger_upload.debug(`Delete enrollment ${enrollment_uid} (TEI ${enrollment.TEI})`);
         await delete_resource(ENROLLMENT_TYPE, enrollment_uid);
@@ -300,11 +259,10 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         const enrollment_uid = event.enrollment
         const tei_uid = event.TEI
         logger_upload.debug(`Delete event ${event_uid} (TEI ${tei_uid}) (enrollment ${enrollment_uid})`);
-        //delete_resource(EVENT_TYPE, event_uid);
         payload = {"event": event_uid}
         list_events_to_delete.push(payload)
         if ((list_events_to_delete.length % 50) == 0){
-            process.stdout.write('.'.repeat(20))
+            process.stdout.write('.'.repeat(50))
             await delete_list_resources(EVENT_TYPE, list_events_to_delete);
             //clean list
             list_events_to_delete = []
@@ -316,8 +274,8 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         await delete_list_resources(EVENT_TYPE, list_events_to_delete);
     }
 
-    /* Create */
 
+    /* Create */
     const events_to_create = getActionByOperationType(events, CREATE);
     if (events_to_create.length != 0) {
         process.stdout.write('\n')
@@ -335,7 +293,7 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         //post_resource(EVENT_TYPE, event_uid, payload);
         list_events_to_create.push(payload)
         if ((list_events_to_create.length % 50) == 0){
-            process.stdout.write('.'.repeat(20))            
+            process.stdout.write('.'.repeat(50))            
             await post_list_resources(EVENT_TYPE, list_events_to_create);
             //clean list
             list_events_to_create = []
