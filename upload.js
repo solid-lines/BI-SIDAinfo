@@ -497,13 +497,13 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
 
         axios.post(mapping[resource_type], payload, config)
         .then(function (response) {
-            logger_upload.debug(`POST ${resource_type} ${uid}. url '${mapping[resource_type]}'`);
+            logger_upload.debug(`Response POST ${resource_type} ${uid}. url '${mapping[resource_type]}'`);
             logger_upload.debug(JSON.stringify(response.data))
         })
         .catch(function (error) {
-            logger_upload.error(`POST ${resource_type} ${uid}. url '${mapping[resource_type]}'`);
-            logger_upload.error(error)
-            if (("response" in error) && ("data" in error.response)) {
+            logger_upload.error(`Response POST ${resource_type} ${uid}. url '${mapping[resource_type]}'`);
+            logger_upload.error(JSON.stringify(error.toJSON()))
+            if (error.response !== undefined) {
                 logger_upload.error(JSON.stringify(error.response.data))
             }
         });
@@ -522,7 +522,6 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         payload[mapping[resource_type]] = list_resources;
 
         logger_upload.debug(JSON.stringify(payload))
-
         logger_upload.debug(`POST List of ${resource_type}. url '${mapping[resource_type]}/'`);
         const baseURL = `https://${endpointConfig.dhisServer}/api/`
         const config = {
@@ -541,12 +540,13 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
 
         axios.post(mapping[resource_type], payload, config)
         .then(function (response) {
+            logger_upload.debug(`Response POST List ${resource_type}. url '${mapping[resource_type]}/'`);
             logger_upload.debug(JSON.stringify(response.data))
-            logger_upload.debug(`POST List ${resource_type}. url '${mapping[resource_type]}/'`);
         })
         .catch(function (error) {
-            logger_upload.error(`POST List ${resource_type}. url '${mapping[resource_type]}/'`);
-            if (("response" in error) && ("data" in error.response)) {
+            logger_upload.error(`Response POST List ${resource_type}. url '${mapping[resource_type]}/'`);
+            logger_upload.error(JSON.stringify(error.toJSON()))
+            if (error.response !== undefined) {
                 logger_upload.error(JSON.stringify(error.response.data))
             }
         });
@@ -583,13 +583,13 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
 
         axios.post(mapping[resource_type]+"?strategy=DELETE", payload, config)
         .then(function (response) {
-            logger_upload.debug(`POST ?strategy=DELETE ${resource_type}. url '${mapping[resource_type]}/'`);
+            logger_upload.debug(`Response POST ?strategy=DELETE ${resource_type}. url '${mapping[resource_type]}/'`);
             logger_upload.debug(JSON.stringify(response.data))
         })
         .catch(function (error) {
-            logger_upload.error(`POST ?strategy=DELETE ${resource_type}. url '${mapping[resource_type]}/'`);
-            logger_upload.error(error)
-            if (("response" in error) && ("data" in error.response)) {
+            logger_upload.error(`Response POST ?strategy=DELETE ${resource_type}. url '${mapping[resource_type]}/'`);
+            logger_upload.error(JSON.stringify(error.toJSON()))
+            if (error.response !== undefined) {
                 logger_upload.error(JSON.stringify(error.response.data))
             }
         });
@@ -624,13 +624,13 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
 
         axios.put(mapping[resource_type], payload, config)
         .then(function (response) {
-            logger_upload.debug(`PUT ${resource_type} ${uid}. url '${mapping[resource_type]}'`);
+            logger_upload.debug(`Response PUT ${resource_type} ${uid}. url '${mapping[resource_type]}'`);
             logger_upload.debug(JSON.stringify(response.data))
         })
         .catch(function (error) {
-            logger_upload.error(`PUT ${resource_type} ${uid}. url '${mapping[resource_type]}'`);
-            logger_upload.error(error);
-            if (("response" in error) && ("data" in error.response)) {
+            logger_upload.error(`Response PUT ${resource_type} ${uid}. url '${mapping[resource_type]}'`);
+            logger_upload.error(JSON.stringify(error.toJSON()))
+            if (error.response !== undefined) {
                 logger_upload.error(JSON.stringify(error.response.data))
             }
         });
@@ -663,13 +663,13 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
 
         axios.delete(mapping[resource_type], config)
         .then(function (response) {
-            logger_upload.debug(`DELETE ${resource_type} ${uid}. url '${mapping[resource_type]}'`);
+            logger_upload.debug(`Response DELETE ${resource_type} ${uid}. url '${mapping[resource_type]}'`);
             logger_upload.debug(JSON.stringify(response.data))
         })
         .catch(function (error) {
-            logger_upload.error(`DELETE ${resource_type} ${uid}. url '${mapping[resource_type]}'`);
-            logger_upload.error(error)
-            if (("response" in error) && ("data" in error.response)) {
+            logger_upload.error(`Response DELETE ${resource_type} ${uid}. url '${mapping[resource_type]}'`);
+            logger_upload.error(JSON.stringify(error.toJSON()))
+            if (error.response !== undefined) {
                 logger_upload.error(JSON.stringify(error.response.data))
             }
         });
