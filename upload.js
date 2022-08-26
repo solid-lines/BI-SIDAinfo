@@ -13,17 +13,19 @@ const keypress = async () => {
   }
 
 
-function upload_data(SOURCE_OU_CODE, SOURCE_DATE) {
+async function upload_data(SOURCE_OU_CODE, SOURCE_DATE) {
     const SOURCE_ID = SOURCE_OU_CODE + '_' + SOURCE_DATE
     global.logger_upload = logger.get_logger_upload(SOURCE_ID)
     logger_upload.info(`Running upload. Version ${pjson.version}`)
     try{
-        upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE)
+        await upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE)
+        //logger_upload.info(`*** PROCESS FINISHED ***`);
     } catch (error) {
         logger_upload.error(error.stack)
+        logger_upload.error(`*** PROCESS FINISHED WITH ERRORS ***`);
         process.exit(1)
     }
-    // TODO logger_generation.info(`*** PROCESS FINISHED SUCCESSFULLY ***`);
+    // TODO logger_upload.info(`*** PROCESS FINISHED SUCCESSFULLY ***`);
 }
 
 //TODO add await in requests
@@ -95,7 +97,7 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
             utils.wait(10000)
         }
         logger_upload.debug(`Delete TEI ${TEI.uid}`);
-        delete_resource(TEI_TYPE, TEI.uid)
+        await delete_resource(TEI_TYPE, TEI.uid)
         process.stdout.write('.')
     }
 
@@ -114,17 +116,18 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         //post_resource(TEI_TYPE, TEI.uid, payload);
         list_teis_to_create.push(payload)
         if ((list_teis_to_create.length % 20) == 0){
-            post_list_resources(TEI_TYPE, list_teis_to_create);
+            process.stdout.write('.'.repeat(20))
+            await post_list_resources(TEI_TYPE, list_teis_to_create);
             //clean list
             list_teis_to_create = []
             utils.wait(10000)
         }
-        process.stdout.write('.')
     }
 
     // send last list of resources
     if (list_teis_to_create.length>0){
-        post_list_resources(TEI_TYPE, list_teis_to_create);
+        process.stdout.write(".".repeat(list_teis_to_create.length))
+        await post_list_resources(TEI_TYPE, list_teis_to_create);
     }
 
 
@@ -155,7 +158,7 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         }
         const payload = getTEApayload(TEA.TEI);
         logger_upload.debug(`Delete TEA ${TEA.TEA} (TEI ${TEA.TEI}), payload: ${JSON.stringify(payload)}`);
-        put_resource(TEA_TYPE, TEA.TEI, payload);
+        await put_resource(TEA_TYPE, TEA.TEI, payload);
         process.stdout.write('.')
     }
 
@@ -182,7 +185,7 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         }
         const payload = getTEApayload(TEA.TEI);
         logger_upload.debug(`Create TEA ${TEA.TEA} (TEI ${TEA.TEI}), payload: ${JSON.stringify(payload)}`);
-        put_resource(TEA_TYPE, TEA.TEI, payload);
+        await put_resource(TEA_TYPE, TEA.TEI, payload);
         process.stdout.write('.')
     }
 
@@ -208,7 +211,7 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         }
         const payload = getTEApayload(TEA.TEI);
         logger_upload.debug(`Update TEA ${TEA.TEA} (TEI ${TEA.TEI}), payload: ${JSON.stringify(payload)}`);
-        put_resource(TEA_TYPE, TEA.TEI, payload);
+        await put_resource(TEA_TYPE, TEA.TEI, payload);
         process.stdout.write('.')
     }
 
@@ -232,7 +235,7 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         }
         const enrollment_uid = enrollment.uid
         logger_upload.debug(`Delete enrollment ${enrollment_uid} (TEI ${enrollment.TEI})`);
-        delete_resource(ENROLLMENT_TYPE, enrollment_uid);
+        await delete_resource(ENROLLMENT_TYPE, enrollment_uid);
         process.stdout.write('.')
     }
 
@@ -254,7 +257,7 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         const enrollment_uid = enrollment.uid
         const payload = get_enrollment_payload(enrollment.TEI, enrollment_uid);
         logger_upload.debug(`Create enrollment ${enrollment_uid} (TEI ${enrollment.TEI}), payload: ${JSON.stringify(payload)}`);
-        post_resource(ENROLLMENT_TYPE, enrollment_uid, payload);
+        await post_resource(ENROLLMENT_TYPE, enrollment_uid, payload);
         process.stdout.write('.')
     }
 
@@ -277,7 +280,7 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         const enrollment_uid = enrollment.uid
         const payload = get_enrollment_status_payload(enrollment.TEI, enrollment_uid);
         logger_upload.debug(`Update enrollment status ${enrollment_uid} (TEI ${enrollment.TEI}), payload: ${JSON.stringify(payload)}`);
-        put_resource(ENROLLMENT_TYPE, enrollment_uid, payload);
+        await put_resource(ENROLLMENT_TYPE, enrollment_uid, payload);
         process.stdout.write('.')
     }
 
@@ -301,15 +304,16 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         payload = {"event": event_uid}
         list_events_to_delete.push(payload)
         if ((list_events_to_delete.length % 50) == 0){
-            delete_list_resources(EVENT_TYPE, list_events_to_delete);
+            process.stdout.write('.'.repeat(20))
+            await delete_list_resources(EVENT_TYPE, list_events_to_delete);
             //clean list
             list_events_to_delete = []
         }
-        process.stdout.write('.')
     }
     // send last list of events
     if (list_events_to_delete.length>0){
-        delete_list_resources(EVENT_TYPE, list_events_to_delete);
+        process.stdout.write(".".repeat(list_events_to_delete.length))
+        await delete_list_resources(EVENT_TYPE, list_events_to_delete);
     }
 
     /* Create */
@@ -331,15 +335,16 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         //post_resource(EVENT_TYPE, event_uid, payload);
         list_events_to_create.push(payload)
         if ((list_events_to_create.length % 50) == 0){
-            post_list_resources(EVENT_TYPE, list_events_to_create);
+            process.stdout.write('.'.repeat(20))            
+            await post_list_resources(EVENT_TYPE, list_events_to_create);
             //clean list
             list_events_to_create = []
         }
-        process.stdout.write('.')
     }
     // send last list of events
     if (list_events_to_create.length>0){
-        post_list_resources(EVENT_TYPE, list_events_to_create);
+        process.stdout.write(".".repeat(list_events_to_create.length))
+        await post_list_resources(EVENT_TYPE, list_events_to_create);
     }
 
 
@@ -364,7 +369,7 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         const tei_uid = event.TEI
         const payload = get_event_payload(tei_uid, enrollment_uid, event_uid); // send all payload, incuding data values
         logger_upload.debug(`Update event ${event_uid} (TEI ${tei_uid}) (enrollment ${enrollment_uid}), payload: ${JSON.stringify(payload)}`);
-        put_resource(EVENT_TYPE, event_uid, payload);
+        await put_resource(EVENT_TYPE, event_uid, payload);
         process.stdout.write('.')
     }
 
@@ -394,7 +399,7 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         const tei_uid = dv.TEI
         const payload = get_dv_delete_event_payload(tei_uid, enrollment_uid, event_uid, dv_de);
         logger_upload.debug(`Delete datavalue ${dv_de} event ${event_uid} (TEI ${tei_uid}) (enrollment ${enrollment_uid}), payload: ${JSON.stringify(payload)}`);
-        put_resource(DV_TYPE, event_uid+"/"+dv_de, payload);
+        await put_resource(DV_TYPE, event_uid+"/"+dv_de, payload);
         process.stdout.write('.')
     }
 
@@ -419,7 +424,7 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         const tei_uid = dv.TEI
         const payload = get_dv_event_payload(tei_uid, enrollment_uid, event_uid, dv_de);
         logger_upload.debug(`Create datavalue ${dv_de} event ${event_uid} (TEI ${tei_uid}) (enrollment ${enrollment_uid}), payload: ${JSON.stringify(payload)}`);
-        put_resource(DV_TYPE, event_uid+"/"+dv_de, payload);
+        await put_resource(DV_TYPE, event_uid+"/"+dv_de, payload);
         process.stdout.write('.')
     }
 
@@ -445,7 +450,7 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         const tei_uid = dv.TEI
         const payload = get_dv_event_payload(tei_uid, enrollment_uid, event_uid, dv_de);
         logger_upload.debug(`Update datavalue ${dv_de} event ${event_uid} (TEI ${tei_uid}) (enrollment ${enrollment_uid}), payload: ${JSON.stringify(payload)}`);
-        put_resource(DV_TYPE, event_uid+"/"+dv_de, payload);
+        await put_resource(DV_TYPE, event_uid+"/"+dv_de, payload);
         process.stdout.write('.')
     }
 
@@ -495,7 +500,7 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
             },
         }
 
-        axios.post(mapping[resource_type], payload, config)
+        await axiosInstance.post(mapping[resource_type], payload, config)
         .then(function (response) {
             logger_upload.debug(`Response POST ${resource_type} ${uid}. url '${mapping[resource_type]}'`);
             logger_upload.debug(JSON.stringify(response.data))
@@ -538,7 +543,7 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
             },
         }
 
-        axios.post(mapping[resource_type], payload, config)
+        await axiosInstance.post(mapping[resource_type], payload, config)
         .then(function (response) {
             logger_upload.debug(`Response POST List ${resource_type}. url '${mapping[resource_type]}/'`);
             logger_upload.debug(JSON.stringify(response.data))
@@ -581,7 +586,7 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
             },
         }
 
-        axios.post(mapping[resource_type]+"?strategy=DELETE", payload, config)
+        await axiosInstance.post(mapping[resource_type]+"?strategy=DELETE", payload, config)
         .then(function (response) {
             logger_upload.debug(`Response POST ?strategy=DELETE ${resource_type}. url '${mapping[resource_type]}/'`);
             logger_upload.debug(JSON.stringify(response.data))
@@ -622,7 +627,7 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
             },
         }
 
-        axios.put(mapping[resource_type], payload, config)
+        await axiosInstance.put(mapping[resource_type], payload, config)
         .then(function (response) {
             logger_upload.debug(`Response PUT ${resource_type} ${uid}. url '${mapping[resource_type]}'`);
             logger_upload.debug(JSON.stringify(response.data))
@@ -661,7 +666,7 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
             },
         }
 
-        axios.delete(mapping[resource_type], config)
+        await axiosInstance.delete(mapping[resource_type], config)
         .then(function (response) {
             logger_upload.debug(`Response DELETE ${resource_type} ${uid}. url '${mapping[resource_type]}'`);
             logger_upload.debug(JSON.stringify(response.data))
