@@ -169,15 +169,16 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         logger_upload.info(`Updating ${TEIs_TEAs_toUpload.length} TEIs due to change/s in the TEA/s`)
         process.stdout.write('Press any key to continue\n')
         await keypress()
+        for (const TEI of TEIs_TEAs_toUpload) {
+            logger_upload.error(TEIs_TEAs_toUpload)
+            utils.wait(1000)
+            const payload = getTEApayload(TEI);
+            logger_upload.debug(`Updating TEI: ${TEI} due to change/s in the TEA/s, payload: ${JSON.stringify(payload)}`);
+            await put_resource(TEA_TYPE, TEI, payload);
+            process.stdout.write('.')
+        }
     }    
-    for (const TEI of TEIs_TEAs_toUpload) {
-        logger_upload.error(TEIs_TEAs_toUpload)
-        utils.wait(1000)
-        const payload = getTEApayload(TEI);
-        logger_upload.debug(`Updating TEI: ${TEI} due to change/s in the TEA/s, payload: ${JSON.stringify(payload)}`);
-        await put_resource(TEA_TYPE, TEI, payload);
-        process.stdout.write('.')
-    }
+
 
 
     /************** Enrollment actions upload *********************/
