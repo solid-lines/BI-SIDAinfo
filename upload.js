@@ -108,7 +108,6 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
     for (const TEI of TEIs_toCreate) {
         const payload = getTEIpayload(TEI.uid);
         logger_upload.debug(`Create TEI ${TEI.uid}, payload: ${JSON.stringify(payload)}`);
-        //post_resource(TEI_TYPE, TEI.uid, payload);
         list_teis_to_create.push(payload)
         if ((list_teis_to_create.length % 10) == 0){
             process.stdout.write('.'.repeat(10))
@@ -170,7 +169,6 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         process.stdout.write('Press any key to continue\n')
         await keypress()
         for (const TEI of TEIs_TEAs_toUpload) {
-            logger_upload.error(TEIs_TEAs_toUpload)
             utils.wait(1000)
             const payload = getTEApayload(TEI);
             logger_upload.debug(`Updating TEI: ${TEI} due to change/s in the TEA/s, payload: ${JSON.stringify(payload)}`);
