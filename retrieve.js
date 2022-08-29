@@ -32,6 +32,8 @@ function retrieve_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
     const endpoint_rawdata = fs.readFileSync(endpoint_filename);
     const endpointConfig = JSON.parse(endpoint_rawdata);
 
+    const auth_token = Buffer.from(`${endpointConfig.dhisUser}:${endpointConfig.dhisPass}`, 'utf8').toString('base64')
+
     const ou_mapping_filename='./ou_mapping.json'
     const rawdata = fs.readFileSync(ou_mapping_filename);
     const OU_MAPPING = JSON.parse(rawdata);
@@ -106,11 +108,11 @@ function retrieve_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
                     path: '/api/trackedEntityInstances.json?program=' + encodeURIComponent(programUID) + '&ou=' + orgUnit + '&fields=*,enrollments&skipPaging=true', // the rest of the url with parameters if needed
                     method: 'GET', // do GET
                     headers: {
+                        'Authorization': `Basic ${auth_token}`,
                         'Content-Type': 'application/json',
                         'Cache-Control': 'no-cache',
                         'Pragma': 'no-cache'
-                    },
-                    auth: endpointConfig.dhisUser + ':' + endpointConfig.dhisPass
+                    }
                 };
 
                 // do the GET request
