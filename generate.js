@@ -1637,11 +1637,16 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
             return false;
         }
     
-        validateOption("sexe", sex, codepatient, CURRENT_TABLE);
-    
         const birthdate_raw = row[5]
-        const birthdate = Moment(birthdate_raw, SIDAINFO_DATEFORMAT);
-    
+        const birthdate = Moment(birthdate_raw, SIDAINFO_DATEFORMAT, true)  // strict mode ON
+        if (! birthdate.isValid()){
+            const msg_dateformat = `Unexpected Date Format. Enfant Birth date=${birthdate_raw}. Expected date format=${SIDAINFO_DATEFORMAT}`
+            logger_generation.error(msg_dateformat)
+            throw new Error(msg_dateformat);
+        }
+
+        validateOption("sexe", sex, codepatient, CURRENT_TABLE);
+
         const entryMode = "10"; //10: PTME enfant
         var patient_enfant = new Person(codepatient, sex, birthdate, entryMode);
     
@@ -1813,7 +1818,12 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
     
         const codepatient = site + SEPARATOR_PATIENT + row[1];
         const birthdate_raw = row[3]
-        const birthdate = Moment(birthdate_raw, SIDAINFO_DATEFORMAT);
+        const birthdate = Moment(birthdate_raw, SIDAINFO_DATEFORMAT, true) // strict mode ON
+        if (! birthdate.isValid()){
+            const msg_dateformat = `Unexpected Date Format. FileActive Birth date=${birthdate_raw}. Expected date format=${SIDAINFO_DATEFORMAT}`
+            logger_generation.error(msg_dateformat)
+            throw new Error(msg_dateformat);
+        }
         const ARVdatedebut_raw = row[5];
     
         const sex = row[4];
