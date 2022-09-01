@@ -14,14 +14,14 @@ function change_encoding(filename){
 }
 
 // {
-//     "003BDI003S010912": "FG6tYYTDf5d", // Centre Akabanga Rumonge
-//     "003BDI006S010120": "g9r6PbRYVAi", // Centre Akabanga Gitega
-//     "003BDI010S020502": "nniW4f9J1tB", // Centre Akabanga Nyanza-Lac
-//     "003BDI012S010120": "yW1SToCNaYm", // Centre Akabanga Muyinga
-//     "003BDI013S010301": "IFiJar1g6y9", // Hôpital de Kibumbu
-//     "003BDI014S010120": "ZAZapFNLXru", // Centre Akabanga Ngozi
-//     "003BDI017S010401": "YIJAETW8k0a", // Centre Akabanga Bujumbura
 //     "17020203": "DLsHsaJhtnk", // Hôpital Militaire de Kamenge
+//     "03010912": "FG6tYYTDf5d", // Centre Akabanga Rumonge
+//     "06010120": "g9r6PbRYVAi", // Centre Akabanga Gitega
+//     "10020502": "nniW4f9J1tB", // Centre Akabanga Nyanza-Lac
+//     "12010120": "yW1SToCNaYm", // Centre Akabanga Muyinga
+//     "13010301": "IFiJar1g6y9", // Hôpital de Kibumbu
+//     "14010120": "ZAZapFNLXru", // Centre Akabanga Ngozi
+//     "17010401": "YIJAETW8k0a", // Centre Akabanga Bujumbura
 // }
 
 
