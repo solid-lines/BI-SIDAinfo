@@ -19,10 +19,11 @@ async function upload_data(SOURCE_OU_CODE, SOURCE_DATE) {
     logger_upload.info(`Running upload. Version ${pjson.version}`)
     try{
         await upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE)
-        //logger_upload.info(`*** PROCESS FINISHED ***`);
+        logger_upload.info(`\n*** PROCESS FINISHED ***`);
+        process.exit(0)
     } catch (error) {
         logger_upload.error(error.stack)
-        logger_upload.error(`*** PROCESS FINISHED WITH ERRORS ***`);
+        logger_upload.error(`\n*** PROCESS FINISHED WITH ERRORS ***`);
         process.exit(1)
     }
     // TODO logger_upload.info(`*** PROCESS FINISHED SUCCESSFULLY ***`);
@@ -123,6 +124,7 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         process.stdout.write(".".repeat(list_teis_to_create.length))
         await post_list_resources(TEI_TYPE, list_teis_to_create);
     }
+    process.stdout.write("\n")
 
 
     /************** TEA actions upload *********************/
@@ -143,7 +145,7 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
     const TEAs_toCreate = getActionByOperationType(TEAs, CREATE);
     const TEIs_TEAs_toCreate = Array.from(new Set(TEAs_toCreate.map(tea => tea.TEI)));
     if (TEAs_toCreate.length != 0) {
-        logger_upload.info(`CREATE ${TEAs_toCreate.length} TEAs`)
+        logger_upload.info(`CREATE ${TEAs_toCreate.length} TEAs from ${TEIs_TEAs_toCreate.length} TEIs`)
         for (const TEA of TEAs_toCreate) {
             const payload = getTEApayload(TEA.TEI);
             logger_upload.debug(`CREATE TEA ${TEA.TEA} (TEI ${TEA.TEI}), payload: ${JSON.stringify(payload)}`);
@@ -154,7 +156,7 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
     const TEAs_toUpdate = getActionByOperationType(TEAs, UPDATE);
     const TEIs_TEAs_toUpdate = Array.from(new Set(TEAs_toUpdate.map(tea => tea.TEI)));
     if (TEAs_toUpdate.length != 0) {
-        logger_upload.info(`UPDATE ${TEAs_toUpdate.length} TEAs`)
+        logger_upload.info(`UPDATE ${TEAs_toUpdate.length} TEAs from ${TEIs_TEAs_toUpdate.length} TEIs`)
         for (const TEA of TEAs_toUpdate) {
             const payload = getTEApayload(TEA.TEI);
             logger_upload.debug(`UPDATE TEA ${TEA.TEA} (TEI ${TEA.TEI}), payload: ${JSON.stringify(payload)}`);
