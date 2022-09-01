@@ -1112,10 +1112,12 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
                     dhis2_PremierDebutARV_event["eventDate"] = this.getPremier_debut_ARV_eventDate();
                     dhis2_PremierDebutARV_event["dueDate"] = this.getPremier_debut_ARV_eventDate();
                     dhis2_PremierDebutARV_event["dataValues"] = [];
-                    dhis2_PremierDebutARV_event["dataValues"].push({
-                        "dataElement": DE_TARV_Molecule, // BI SIDAInfo - Molecule
-                        "value": this.getPremier_debut_ARV_treatment().codemolecule
-                    })
+                    if (this.getPremier_debut_ARV_treatment().codemolecule != "") {
+                        dhis2_PremierDebutARV_event["dataValues"].push({
+                            "dataElement": DE_TARV_Molecule, // BI SIDAInfo - Molecule
+                            "value": this.getPremier_debut_ARV_treatment().codemolecule
+                        })
+                    }
     
                     if (this.getPremier_debut_ARV_treatment().qte != "") {
                         dhis2_PremierDebutARV_event["dataValues"].push({
@@ -1142,10 +1144,12 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
                     dhis2_TARV_event["eventDate"] = this.getPremier_debut_ARV_eventDate();
                     dhis2_TARV_event["dueDate"] = this.getPremier_debut_ARV_eventDate();
                     dhis2_TARV_event["dataValues"] = [];
-                    dhis2_TARV_event["dataValues"].push({
-                        "dataElement": DE_TARV_Molecule, // BI SIDAInfo - Molecule
-                        "value": this.getPremier_debut_ARV_treatment().codemolecule
-                    })
+                    if (this.getPremier_debut_ARV_treatment().codemolecule != "") {
+                        dhis2_TARV_event["dataValues"].push({
+                            "dataElement": DE_TARV_Molecule, // BI SIDAInfo - Molecule
+                            "value": this.getPremier_debut_ARV_treatment().codemolecule
+                        })
+                    }
                     if (this.getPremier_debut_ARV_treatment().qte != "") {
                         dhis2_TARV_event["dataValues"].push({
                             "dataElement": DE_TARV_Quantité, // BI SIDAInfo - Quantité (jours)
@@ -1182,10 +1186,12 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
                     dhis2_TARV_event["eventDate"] = tarv.datetraitement.format(DHIS2_DATEFORMAT);
                     dhis2_TARV_event["dueDate"] = tarv.dueDate.format(DHIS2_DATEFORMAT);
                     dhis2_TARV_event["dataValues"] = [];
-                    dhis2_TARV_event["dataValues"].push({
-                        "dataElement": DE_TARV_Molecule, // BI SIDAInfo - Molecule
-                        "value": tarv.codemolecule
-                    })
+                    if (tarv.codemolecule != "") {
+                        dhis2_TARV_event["dataValues"].push({
+                            "dataElement": DE_TARV_Molecule, // BI SIDAInfo - Molecule
+                            "value": tarv.codemolecule
+                        })
+                    }
                     if (tarv.qte != "") {
                         dhis2_TARV_event["dataValues"].push({
                             "dataElement": DE_TARV_Quantité, // BI SIDAInfo - Quantité (jours)
