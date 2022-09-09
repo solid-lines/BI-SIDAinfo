@@ -83,10 +83,12 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
     }
     // KUDOS https://stackoverflow.com/questions/37576685/using-async-await-with-a-foreach-loop
     for (const TEI of TEIs_toDelete) {
-        utils.wait(1000)
         logger_upload.debug(`Delete TEI ${TEI.uid}`);
         await delete_resource(TEI_TYPE, TEI.uid)
         process.stdout.write('.')
+    }
+    if (TEIs_toDelete.length>0) {
+        process.stdout.write("\n")
     }
 
     /* Create */
@@ -104,7 +106,6 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
             await post_list_resources(TEI_TYPE, list_teis_to_create);
             //clean list
             list_teis_to_create = []
-            utils.wait(10000)
         }
     }
 
@@ -113,8 +114,9 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         process.stdout.write(".".repeat(list_teis_to_create.length))
         await post_list_resources(TEI_TYPE, list_teis_to_create);
     }
-    process.stdout.write("\n")
-
+    if (TEIs_toCreate.length>0) {
+        process.stdout.write("\n")
+    }
 
     /************** TEA actions upload *********************/
 
@@ -157,12 +159,15 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
     if (TEIs_TEAs_toUpload.length != 0) {
         logger_upload.info(`Updating ${TEIs_TEAs_toUpload.length} TEIs due to change/s in the TEA/s`)
         for (const TEI of TEIs_TEAs_toUpload) {
-            utils.wait(1000)
             const payload = getTEApayload(TEI);
             logger_upload.debug(`Updating TEI: ${TEI} due to change/s in the TEA/s, payload: ${JSON.stringify(payload)}`);
             await put_resource(TEA_TYPE, TEI, payload);
             process.stdout.write('.')
         }
+    }
+
+    if (TEIs_TEAs_toUpload.length>0) {
+        process.stdout.write("\n")
     }
 
 
@@ -174,31 +179,30 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         logger_upload.info(`DELETE ${enrollments_to_delete.length} ENROLLMENTS`)
     }    
     for (const enrollment of enrollments_to_delete) {
-        utils.wait(1000)
         const enrollment_uid = enrollment.uid
         logger_upload.debug(`Delete enrollment ${enrollment_uid} (TEI ${enrollment.TEI})`);
         await delete_resource(ENROLLMENT_TYPE, enrollment_uid);
         process.stdout.write('.')
     }
+    if (enrollments_to_delete.length>0) {
+        process.stdout.write("\n")
+    }    
 
     /* Create */
     const enrollments_to_create = getActionByOperationType(enrollments, CREATE);
     if (enrollments_to_create.length != 0) {
         logger_upload.info(`CREATE ${enrollments_to_create.length} ENROLLMENTS`)
     }
-    i=0
     for (const enrollment of enrollments_to_create) {
-        utils.wait(500)
-        i=i+1
-        if ((i%50) == 0){
-            utils.wait(10000)
-        }
         const enrollment_uid = enrollment.uid
         const payload = get_enrollment_payload(enrollment.TEI, enrollment_uid);
         logger_upload.debug(`Create enrollment ${enrollment_uid} (TEI ${enrollment.TEI}), payload: ${JSON.stringify(payload)}`);
         await post_resource(ENROLLMENT_TYPE, enrollment_uid, payload);
         process.stdout.write('.')
     }
+    if (enrollments_to_create.length>0) {
+        process.stdout.write("\n")
+    }     
 
     /* Update */
     //Enrollment_STATUS_UPDATE
@@ -206,19 +210,16 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
     if (enrollments_to_update.length != 0) {
         logger_upload.info(`UPDATE ${enrollments_to_update.length} ENROLLMENTS`)
     }
-    i=0
     for (const enrollment of enrollments_to_update) {
-        utils.wait(500)
-        i=i+1
-        if ((i%50) == 0){
-            utils.wait(10000)
-        }
         const enrollment_uid = enrollment.uid
         const payload = get_enrollment_status_payload(enrollment.TEI, enrollment_uid);
         logger_upload.debug(`Update enrollment status ${enrollment_uid} (TEI ${enrollment.TEI}), payload: ${JSON.stringify(payload)}`);
         await put_resource(ENROLLMENT_TYPE, enrollment_uid, payload);
         process.stdout.write('.')
     }
+    if (enrollments_to_update.length>0) {
+        process.stdout.write("\n")
+    }    
 
     /************** Events actions upload *********************/
 
@@ -247,6 +248,9 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         process.stdout.write(".".repeat(list_events_to_delete.length))
         await delete_list_resources(EVENT_TYPE, list_events_to_delete);
     }
+    if (events_to_delete.length>0) {
+        process.stdout.write("\n")
+    }    
 
 
     /* Create */
@@ -275,7 +279,9 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         process.stdout.write(".".repeat(list_events_to_create.length))
         await post_list_resources(EVENT_TYPE, list_events_to_create);
     }
-
+    if (events_to_create.length>0) {
+        process.stdout.write("\n")
+    }  
 
     /* Update */
     //Event_STATUS_UPDATE + Event_DUEDATE_UPDATE
@@ -283,13 +289,7 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
     if (events_to_update.length != 0) {
         logger_upload.info(`UPDATE ${events_to_update.length} EVENTS`)
     }
-    i=0
     for (const event of events_to_update) {
-        utils.wait(500)
-        i=i+1
-        if ((i%50) == 0){
-            utils.wait(10000)
-        }
         const event_uid = event.uid
         const enrollment_uid = event.enrollment
         const tei_uid = event.TEI
@@ -298,6 +298,9 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         await put_resource(EVENT_TYPE, event_uid, payload);
         process.stdout.write('.')
     }
+    if (events_to_update.length>0) {
+        process.stdout.write("\n")
+    }     
 
     // /************** DataElements/DataValues actions upload *********************/
 
@@ -309,13 +312,7 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
     if (dv_to_delete.length != 0) {
         logger_upload.info(`DELETE ${dv_to_delete.length} DATA VALUE (EVENT)`)
     }
-    i=0
     for (const dv of dv_to_delete) {
-        utils.wait(500)
-        i=i+1
-        if ((i%50) == 0){
-            utils.wait(10000)
-        }       
         const dv_de = dv.dataElement
         const event_uid = dv.event
         const enrollment_uid = dv.enrollment
@@ -325,19 +322,16 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         await put_resource(DV_TYPE, event_uid+"/"+dv_de, payload);
         process.stdout.write('.')
     }
+    if (dv_to_delete.length>0) {
+        process.stdout.write("\n")
+    }
 
     /* Create */
     const dv_to_create = getActionByOperationType(DVs, CREATE);
     if (dv_to_create.length != 0) {
         logger_upload.info(`CREATE ${dv_to_create.length} DATA VALUE (EVENT)`)
     }
-    i = 0
     for (const dv of dv_to_create) {
-        utils.wait(500)
-        i=i+1
-        if ((i%50) == 0){
-            utils.wait(10000)
-        }    
         const dv_de = dv.dataElement
         const event_uid = dv.event
         const enrollment_uid = dv.enrollment
@@ -347,20 +341,16 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         await put_resource(DV_TYPE, event_uid+"/"+dv_de, payload);
         process.stdout.write('.')
     }
-
+    if (dv_to_create.length>0) {
+        process.stdout.write("\n")
+    }
 
     /* Update */
     const dv_to_update = getActionByOperationType(DVs, UPDATE);
     if (dv_to_update.length != 0) {
         logger_upload.info(`UPDATE ${dv_to_update.length} DATA VALUE (EVENT)`)
     }
-    i=0;
     for (const dv of dv_to_update) {
-        utils.wait(500)
-        i=i+1
-        if ((i%50) == 0){
-            utils.wait(10000)
-        }    
         const dv_de = dv.dataElement
         const event_uid = dv.event
         const enrollment_uid = dv.enrollment
@@ -370,7 +360,9 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
         await put_resource(DV_TYPE, event_uid+"/"+dv_de, payload);
         process.stdout.write('.')
     }
-
+    if (dv_to_update.length>0) {
+        process.stdout.write("\n")
+    }
 
     function getActionByResourceType(actions, resource_type) {
         var actions = actions.filter((action) => {
