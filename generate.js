@@ -299,15 +299,15 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
             const difference_datedebut = datedebuts.filter(x => !enrollmentDates_str.includes(x));
             
             if (datedebuts.length != enrollmentDates.length) {
-                logger_generation.warn(`41;${this.code};Patient ${this.code} has more PTME admissions [${datedebuts.length}] (ADMISSION_DETAIL table) than pregnancies [${enrollmentDates.length}] (FEMME_ENCEINTE table). The missed admission dates are: ${difference_datedebut}`)
-                logger_generation_fr.warn(`Le patient ${this.code} a plus d’admissions PTME ([${datedebuts.length}]) dans la table ADMISSION_DETAIL que grossesses ([${enrollmentDates.length}]) dans la table FEMME_ENCEINTE.;Erreur 41;${this.code}`)
+                logger_generation.warn(`41;${this.code};Patient ${this.code} has more PTME admissions [${datedebuts.length}] (ADMISSION_DETAIL table) than pregnancies [${enrollmentDates.length}] (FEMME_ENCEINTE table).  The missed admission dates are: ${difference_datedebut}`)
+                logger_generation_fr.warn(`Le patient ${this.code} a plus d’admissions PTME ([${datedebuts.length}]) dans la table ADMISSION_DETAIL que grossesses ([${enrollmentDates.length}]) dans la table FEMME_ENCEINTE. Les dates d’admission manquantes sont : ${difference_datedebut};Erreur 41;${this.code}`)
             }
 
             const enrollmentCloseDates_str = enrollmentCloseDates.map(t => t.format(SIDAINFO_DATEFORMAT))
             const difference_datefins = datefins.filter(x => !enrollmentCloseDates_str.includes(x));
             if (datefins.length != enrollmentCloseDates.length) {
-                logger_generation.warn(`44;${this.code};Patient ${this.code} has more PTME finalized [${datefins.length}] (ADMISSION_DETAIL table) than pregnancies [${enrollmentDates.length}] (FEMME_ENCEINTE table). The missed finalized dates are: ${difference_datefins}`)
-                logger_generation_fr.warn(`Le patient ${this.code} a plus d’admissions PTME ([${datedebuts.length}]) dans la table ADMISSION_DETAIL que grossesses ([${enrollmentDates.length}]) dans la table FEMME_ENCEINTE.;Erreur 44;${this.code}`)
+                logger_generation.warn(`44;${this.code};Patient ${this.code} has more PMTCT admissions completed (${datefins.length},  ADMISSION_DETAIL table) than pregnancies (${enrollmentDates.length},  FEMME_ENCEINTE table). The missing dates are: ${difference_datefins}`)
+                logger_generation_fr.warn(`Le patient ${this.code} a plus d’admissions au PTME [${datefins.length}] (table ADMISSION_DETAIL) que grossesses (${enrollmentDates.length}, table FEMME_ENCEINTE). Les dates manquantes sont : ${difference_datefins};Erreur 44;${this.code}`)
             }
     
         }
