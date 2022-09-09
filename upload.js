@@ -4,14 +4,7 @@ const logger = require('./logger.js');
 const utils = require('./utils.js');
 var pjson = require('./package.json');
 
-const keypress = async () => {
-    process.stdin.setRawMode(true)
-    return new Promise(resolve => process.stdin.once('data', () => {
-      process.stdin.setRawMode(false)
-      resolve()
-    }))
-  }
-
+const axiosInstance = axios.create();
 
 async function upload_data(SOURCE_OU_CODE, SOURCE_DATE) {
     const SOURCE_ID = SOURCE_OU_CODE + '_' + SOURCE_DATE
@@ -19,11 +12,13 @@ async function upload_data(SOURCE_OU_CODE, SOURCE_DATE) {
     logger_upload.info(`Running upload. Version ${pjson.version}`)
     try{
         await upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE)
-        logger_upload.info(`\n*** PROCESS FINISHED ***`);
+        process.stdout.write("\n")
+        logger_upload.info(`*** PROCESS FINISHED ***`);
         process.exit(0)
     } catch (error) {
         logger_upload.error(error.stack)
-        logger_upload.error(`\n*** PROCESS FINISHED WITH ERRORS ***`);
+        process.stdout.write("\n")
+        logger_upload.error(`*** PROCESS FINISHED WITH ERRORS ***`);
         process.exit(1)
     }
     // TODO logger_upload.info(`*** PROCESS FINISHED SUCCESSFULLY ***`);
@@ -84,10 +79,7 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
     // In 2.36, delete a TEI means: delete TEI, delete enrollment, delete events (but in 2.33, events were not deleted).
     const TEIs_toDelete = getActionByOperationType(TEIs, DELETE);
     if (TEIs_toDelete.length != 0) {
-        process.stdout.write('\n')
         logger_upload.info(`DELETE ${TEIs_toDelete.length} TEIs`)
-        process.stdout.write('Press any key to continue\n')
-        await keypress()
     }
     // KUDOS https://stackoverflow.com/questions/37576685/using-async-await-with-a-foreach-loop
     for (const TEI of TEIs_toDelete) {
@@ -101,10 +93,7 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
     const TEIs_toCreate = getActionByOperationType(TEIs, CREATE);
     let list_teis_to_create = []
     if (TEIs_toCreate.length != 0) {
-        process.stdout.write('\n')
         logger_upload.info(`CREATE ${TEIs_toCreate.length} TEIs`)
-        process.stdout.write('Press any key to continue\n')
-        await keypress()
     }    
     for (const TEI of TEIs_toCreate) {
         const payload = getTEIpayload(TEI.uid);
@@ -166,10 +155,7 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
     // final upload process (DELETE, CREATE, UPDATE)
     const TEIs_TEAs_toUpload = Array.from(new Set(TEIs_TEAs_toDelete.concat(TEIs_TEAs_toCreate, TEIs_TEAs_toUpdate)))
     if (TEIs_TEAs_toUpload.length != 0) {
-        process.stdout.write('\n')
         logger_upload.info(`Updating ${TEIs_TEAs_toUpload.length} TEIs due to change/s in the TEA/s`)
-        process.stdout.write('Press any key to continue\n')
-        await keypress()
         for (const TEI of TEIs_TEAs_toUpload) {
             utils.wait(1000)
             const payload = getTEApayload(TEI);
@@ -177,8 +163,7 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
             await put_resource(TEA_TYPE, TEI, payload);
             process.stdout.write('.')
         }
-    }    
-
+    }
 
 
     /************** Enrollment actions upload *********************/
@@ -186,10 +171,7 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
     /* Delete */
     const enrollments_to_delete = getActionByOperationType(enrollments, DELETE);
     if (enrollments_to_delete.length != 0) {
-        process.stdout.write('\n')
         logger_upload.info(`DELETE ${enrollments_to_delete.length} ENROLLMENTS`)
-        process.stdout.write('Press any key to continue\n')
-        await keypress()
     }    
     for (const enrollment of enrollments_to_delete) {
         utils.wait(1000)
@@ -202,10 +184,7 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
     /* Create */
     const enrollments_to_create = getActionByOperationType(enrollments, CREATE);
     if (enrollments_to_create.length != 0) {
-        process.stdout.write('\n')
         logger_upload.info(`CREATE ${enrollments_to_create.length} ENROLLMENTS`)
-        process.stdout.write('Press any key to continue\n')
-        await keypress()
     }
     i=0
     for (const enrollment of enrollments_to_create) {
@@ -225,10 +204,7 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
     //Enrollment_STATUS_UPDATE
     const enrollments_to_update = getActionByOperationType(enrollments, UPDATE);
     if (enrollments_to_update.length != 0) {
-        process.stdout.write('\n')
         logger_upload.info(`UPDATE ${enrollments_to_update.length} ENROLLMENTS`)
-        process.stdout.write('Press any key to continue\n')
-        await keypress()
     }
     i=0
     for (const enrollment of enrollments_to_update) {
@@ -249,11 +225,8 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
     /* Delete */
     const events_to_delete = getActionByOperationType(events, DELETE);
     if (events_to_delete.length != 0) {
-        process.stdout.write('\n')
         logger_upload.info(`DELETE ${events_to_delete.length} EVENTS`)
-        process.stdout.write('Press any key to continue\n')
-        await keypress()
-    }    
+    }
     let list_events_to_delete = []
     for (const event of events_to_delete) {
         const event_uid = event.uid
@@ -279,10 +252,7 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
     /* Create */
     const events_to_create = getActionByOperationType(events, CREATE);
     if (events_to_create.length != 0) {
-        process.stdout.write('\n')
         logger_upload.info(`CREATE ${events_to_create.length} EVENTS`)
-        process.stdout.write('Press any key to continue\n')
-        await keypress()
     }
     let list_events_to_create = []
     for (const event of events_to_create) {
@@ -311,10 +281,7 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
     //Event_STATUS_UPDATE + Event_DUEDATE_UPDATE
     const events_to_update = getActionByOperationType(events, UPDATE);
     if (events_to_update.length != 0) {
-        process.stdout.write('\n')
         logger_upload.info(`UPDATE ${events_to_update.length} EVENTS`)
-        process.stdout.write('Press any key to continue\n')
-        await keypress()
     }
     i=0
     for (const event of events_to_update) {
@@ -340,10 +307,7 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
     //send the datavalue empty ("")
     const dv_to_delete = getActionByOperationType(DVs, DELETE);
     if (dv_to_delete.length != 0) {
-        process.stdout.write('\n')
         logger_upload.info(`DELETE ${dv_to_delete.length} DATA VALUE (EVENT)`)
-        process.stdout.write('Press any key to continue\n')
-        await keypress()
     }
     i=0
     for (const dv of dv_to_delete) {
@@ -365,10 +329,7 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
     /* Create */
     const dv_to_create = getActionByOperationType(DVs, CREATE);
     if (dv_to_create.length != 0) {
-        process.stdout.write('\n')
         logger_upload.info(`CREATE ${dv_to_create.length} DATA VALUE (EVENT)`)
-        process.stdout.write('Press any key to continue\n')
-        await keypress()
     }
     i = 0
     for (const dv of dv_to_create) {
@@ -391,10 +352,7 @@ async function upload_data_complete(SOURCE_OU_CODE, SOURCE_DATE) {
     /* Update */
     const dv_to_update = getActionByOperationType(DVs, UPDATE);
     if (dv_to_update.length != 0) {
-        process.stdout.write('\n')
         logger_upload.info(`UPDATE ${dv_to_update.length} DATA VALUE (EVENT)`)
-        process.stdout.write('Press any key to continue\n')
-        await keypress()
     }
     i=0;
     for (const dv of dv_to_update) {
