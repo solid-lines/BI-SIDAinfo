@@ -320,7 +320,10 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
                 logger_generation_fr.warn(`Le patient ${this.code} a un premier évènement dans Table_ARV (${table_ARV_firstEventDate.format(DHIS2_DATEFORMAT)}) mais le champs debut ARV dans FileActive est vide.;Erreur 38;${this.code}`);
             }
         }
-    
+        setCodeMother(codemother){
+            this.codemother = codemother
+        }
+
         setDatedepist(datedepist) {
             this.datedepist = datedepist;// TODO change to Moment
         }
@@ -1636,6 +1639,7 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
         // [40] DateSortie - [41] CauseSortie - [42] Dateseuvrage
     
         const sex = row[3]; //SexeEnfant
+        const codemother = row[4]; //CodeMere
         const codepatient = site + SEPARATOR_PATIENT + paddy(row[1],5) + "E"; // code
         if (codepatient === site + SEPARATOR_PATIENT){
             logger_generation.error(`39;;Patient with empty patient code. Check the row number ${row_number + 1} in the ${CURRENT_TABLE} table`)
@@ -1655,25 +1659,26 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
 
         const entryMode = "10"; //10: PTME enfant
         var patient_enfant = new Person(codepatient, sex, birthdate, entryMode);
+        patient_enfant.setCodeMother(codemother)
     
         if (validateDate(birthdate, MIN_YEAR_BIRTH) == false) {
             patient_enfant.addLog(`08;Le patient a une date de naissance avec une DATE inattendu : ${birthdate}.`)
-            logger_generation.warn(`08;${codepatient};Patient ${codepatient} has a Birth date with an unexpected DATE ${birthdate}. Check the row number ${row_number + 1} in the ${CURRENT_TABLE} table`)
-            logger_generation_fr.warn(`Le patient ${codepatient} a une date de naissance avec une DATE inattendu : ${birthdate}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE};Erreur 08;${codepatient}`)
+            logger_generation.warn(`08;${codepatient};Patient ${codepatient} (enfant) (mother ${codemother}) has a Birth date with an unexpected DATE ${birthdate}. Check the row number ${row_number + 1} in the ${CURRENT_TABLE} table`)
+            logger_generation_fr.warn(`Le patient ${codepatient} (enfant) (mère ${codemother}) a une date de naissance avec une DATE inattendu : ${birthdate}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE};Erreur 08;${codepatient}`)
         }
     
         /** Create PTME enfant program */
         const DateAdmissionEnfPTME_raw = row[2];
         if (DateAdmissionEnfPTME_raw==""){ // if the date admission is empty
-            logger_generation.error(`09;${codepatient};Patient ${codepatient} has a Date Admission Enfant PTME with an empty DATE. Check the row number ${row_number + 1} in the ${CURRENT_TABLE} table`)
-            logger_generation_fr.error(`Le patient ${codepatient} a une Date Admission Enfant PTME avec une DATE vacie. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE};Erreur 09;${codepatient}`)
+            logger_generation.error(`09;${codepatient};Patient ${codepatient} (enfant) (mother ${codemother}) has a Date Admission Enfant PTME with an empty DATE. Check the row number ${row_number + 1} in the ${CURRENT_TABLE} table`)
+            logger_generation_fr.error(`Le patient ${codepatient} (mère ${codemother}) (enfant) a une Date Admission Enfant PTME avec une DATE vacie. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE};Erreur 09;${codepatient}`)
             return false; // not create the enfant
         }
         const DateAdmissionEnfPTME = Moment(DateAdmissionEnfPTME_raw, SIDAINFO_DATEFORMAT)
         
         if (validateDate(DateAdmissionEnfPTME, MIN_YEAR_EVENTS) == false) {
-            logger_generation.error(`09;${codepatient};Patient ${codepatient} has a Date Admission Enfant PTME with an unexpected DATE ${DateAdmissionEnfPTME_raw}. Check the row number ${row_number + 1} in the ${CURRENT_TABLE} table`)
-            logger_generation_fr.error(`Le patient ${codepatient} a une Date Admission Enfant PTME avec une DATE inattendu : ${DateAdmissionEnfPTME_raw}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE};Erreur 09;${codepatient}`)
+            logger_generation.error(`09;${codepatient};Patient ${codepatient} (enfant) (mother ${codemother}) has a Date Admission Enfant PTME with an unexpected DATE ${DateAdmissionEnfPTME_raw}. Check the row number ${row_number + 1} in the ${CURRENT_TABLE} table`)
+            logger_generation_fr.error(`Le patient ${codepatient} (enfant) (mère ${codemother}) a une Date Admission Enfant PTME avec une DATE inattendu : ${DateAdmissionEnfPTME_raw}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE};Erreur 09;${codepatient}`)
             return false; // not create the enfant
         }
     
@@ -1682,40 +1687,40 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
         const PCR1Prelevement = Moment(PCR1Prelevement_raw, SIDAINFO_DATEFORMAT)
         if (PCR1Prelevement_raw && validateDate(PCR1Prelevement, MIN_YEAR_EVENTS) == false) {
             patient_enfant.addLog(`10;Le patient a une date PCR 1 avec une DATE inattendu : ${PCR1Prelevement_raw}.`)
-            logger_generation.warn(`10;${codepatient};Patient ${codepatient} has a PCR 1 with an unexpected DATE ${PCR1Prelevement_raw}. Check the row number ${row_number + 1} in the ${CURRENT_TABLE} table`)
-            logger_generation_fr.warn(`Le patient ${codepatient} a une date PCR 1 avec une DATE inattendu : ${PCR1Prelevement_raw}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE};Erreur 10;${codepatient}`)
+            logger_generation.warn(`10;${codepatient};Patient ${codepatient} (enfant) (mother ${codemother}) has a PCR 1 with an unexpected DATE ${PCR1Prelevement_raw}. Check the row number ${row_number + 1} in the ${CURRENT_TABLE} table`)
+            logger_generation_fr.warn(`Le patient ${codepatient} (enfant) (mère ${codemother}) a une date PCR 1 avec une DATE inattendu : ${PCR1Prelevement_raw}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE};Erreur 10;${codepatient}`)
         }
     
         const PCR2Prelevement_raw = row[19];
         const PCR2Prelevement = Moment(PCR2Prelevement_raw, SIDAINFO_DATEFORMAT)
         if (PCR2Prelevement_raw && validateDate(PCR2Prelevement, MIN_YEAR_EVENTS) == false) {
             patient_enfant.addLog(`10;Date PCR 2 avec une DATE inattendu : ${PCR2Prelevement_raw}.`)
-            logger_generation.warn(`10;${codepatient};Patient ${codepatient} has a PCR 2 with an unexpected DATE ${PCR2Prelevement_raw}. Check the row number ${row_number + 1} in the ${CURRENT_TABLE} table`)
-            logger_generation_fr.warn(`Le patient ${codepatient} a une date PCR 2 avec une DATE inattendu : ${PCR2Prelevement_raw}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE};Erreur 10;${codepatient}`)
+            logger_generation.warn(`10;${codepatient};Patient ${codepatient} (enfant) (mother ${codemother}) has a PCR 2 with an unexpected DATE ${PCR2Prelevement_raw}. Check the row number ${row_number + 1} in the ${CURRENT_TABLE} table`)
+            logger_generation_fr.warn(`Le patient ${codepatient} (enfant) (mère ${codemother}) a une date PCR 2 avec une DATE inattendu : ${PCR2Prelevement_raw}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE};Erreur 10;${codepatient}`)
         }
     
         const PCR3Prelevement_raw = row[20];
         const PCR3Prelevement = Moment(PCR3Prelevement_raw, SIDAINFO_DATEFORMAT)
         if (PCR3Prelevement_raw && validateDate(PCR3Prelevement, MIN_YEAR_EVENTS) == false) {
             patient_enfant.addLog(`10;Date PCR 3 avec une DATE inattendu : ${PCR3Prelevement_raw}.`)
-            logger_generation.warn(`10;${codepatient};Patient ${codepatient} has a PCR 3 with an unexpected DATE ${PCR3Prelevement_raw}. Check the row number ${row_number + 1} in the ${CURRENT_TABLE} table`)
-            logger_generation_fr.warn(`Le patient ${codepatient} a une date PCR 3 avec une DATE inattendu : ${PCR3Prelevement_raw}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE};Erreur 10;${codepatient}`)
+            logger_generation.warn(`10;${codepatient};Patient ${codepatient} (enfant) (mother ${codemother}) has a PCR 3 with an unexpected DATE ${PCR3Prelevement_raw}. Check the row number ${row_number + 1} in the ${CURRENT_TABLE} table`)
+            logger_generation_fr.warn(`Le patient ${codepatient} (enfant) (mère ${codemother}) a une date PCR 3 avec une DATE inattendu : ${PCR3Prelevement_raw}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE};Erreur 10;${codepatient}`)
         }
     
         const PCR4Prelevement_raw = row[21];
         const PCR4Prelevement = Moment(PCR4Prelevement_raw, SIDAINFO_DATEFORMAT)
         if (PCR4Prelevement_raw && validateDate(PCR4Prelevement, MIN_YEAR_EVENTS) == false) {
             patient_enfant.addLog(`10;Date PCR 4 avec une DATE inattendu : ${PCR4Prelevement_raw}.`)
-            logger_generation.warn(`10;${codepatient};Patient ${codepatient} has a PCR 4 with an unexpected DATE ${PCR4Prelevement_raw}. Check the row number ${row_number + 1} in the ${CURRENT_TABLE} table`)
-            logger_generation_fr.warn(`Le patient ${codepatient} a une date PCR 4 avec une DATE inattendu : ${PCR4Prelevement_raw}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE};Erreur 10;${codepatient}`)
+            logger_generation.warn(`10;${codepatient};Patient ${codepatient} (enfant) (mother ${codemother}) has a PCR 4 with an unexpected DATE ${PCR4Prelevement_raw}. Check the row number ${row_number + 1} in the ${CURRENT_TABLE} table`)
+            logger_generation_fr.warn(`Le patient ${codepatient} (enfant) (mère ${codemother}) a une date PCR 4 avec une DATE inattendu : ${PCR4Prelevement_raw}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE};Erreur 10;${codepatient}`)
         }
     
         const PrelevementAutre_raw = row[24];
         const PrelevementAutre = Moment(PrelevementAutre_raw, SIDAINFO_DATEFORMAT)
         if (PrelevementAutre_raw && validateDate(PrelevementAutre, MIN_YEAR_EVENTS) == false) {
             patient_enfant.addLog(`10;Date PCR Prelevement Autre avec une DATE inattendu : ${PrelevementAutre_raw}.`)
-            logger_generation.warn(`10;${codepatient};Patient ${codepatient} has a PCR Autre with an unexpected DATE ${PrelevementAutre_raw}. Check the row number ${row_number + 1} in the ${CURRENT_TABLE} table`)
-            logger_generation_fr.warn(`Le patient ${codepatient} a une date PCR Prelevement Autre avec une DATE inattendu : ${PrelevementAutre_raw}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE};Erreur 10;${codepatient}`)
+            logger_generation.warn(`10;${codepatient};Patient ${codepatient} (enfant) (mother ${codemother}) has a PCR Autre with an unexpected DATE ${PrelevementAutre_raw}. Check the row number ${row_number + 1} in the ${CURRENT_TABLE} table`)
+            logger_generation_fr.warn(`Le patient ${codepatient} (enfant) (mère ${codemother}) a une date PCR Prelevement Autre avec une DATE inattendu : ${PrelevementAutre_raw}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE};Erreur 10;${codepatient}`)
         }
     
         const PCR1 = row[25]; // PCR1_resultat
@@ -1757,8 +1762,8 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
         const DateSortie = Moment(DateSortie_raw, SIDAINFO_DATEFORMAT)
         if (DateSortie_raw && validateDate(DateSortie, MIN_YEAR_EVENTS) == false) {
             patient_enfant.addLog(`11;Le patient a une date Sortie avec une DATE inattendu : ${DateSortie_raw}.`)
-            logger_generation.warn(`11;${codepatient};Patient ${codepatient} has a Date Sortie with an unexpected DATE ${DateSortie_raw}. Check the row number ${row_number + 1} in the ${CURRENT_TABLE} table`)
-            logger_generation_fr.warn(`Le patient ${codepatient} a une Date Sortie avec une DATE inattendu : ${DateSortie_raw}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE};Erreur 11;${codepatient}`)
+            logger_generation.warn(`11;${codepatient};Patient ${codepatient} (enfant) (mother ${codemother}) has a Date Sortie with an unexpected DATE ${DateSortie_raw}. Check the row number ${row_number + 1} in the ${CURRENT_TABLE} table`)
+            logger_generation_fr.warn(`Le patient ${codepatient} (enfant) (mère ${codemother}) a une Date Sortie avec une DATE inattendu : ${DateSortie_raw}. Veuillez consulter la ligne ${row_number + 1} dans la table ${CURRENT_TABLE};Erreur 11;${codepatient}`)
         }
     
         const CauseSortie = row[41];
@@ -2321,6 +2326,7 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
     
     function validatePCR_list(pcr_list, patient_enfant) {
         const patientCode = patient_enfant.code;
+        const codemother = patient_enfant.codemother;
         let flag = true; // for checking if there is any invalid date in all th PCR list
     
         // Check that all valid results have a date associated
@@ -2329,8 +2335,8 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
                 if (validateOption("enfant_ptme_pcr_result", pcr.result, patientCode, "ENFANT_PTME") && pcr.date.isValid() == false) {
                     flag = false
                     patient_enfant.addLog(`33;Résultat PCR valid mais sans date : ${JSON.stringify(pcr)}`);
-                    logger_generation.warn(`33;${patientCode};Patient ${patientCode} (enfant) has a valid PCR result BUT without PCR date: ${JSON.stringify(pcr)}`);
-                    logger_generation_fr.warn(`Le patient ${patientCode} (enfant) a un résultat PCR valid mais sans date : ${JSON.stringify(pcr)};Erreur 33;${patientCode}`);
+                    logger_generation.warn(`33;${patientCode};Patient ${patientCode} (enfant) (mother ${codemother}) has a valid PCR result BUT without PCR date: ${JSON.stringify(pcr)}`);
+                    logger_generation_fr.warn(`Le patient ${patientCode} (enfant) (mère ${codemother}) a un résultat PCR valid mais sans date : ${JSON.stringify(pcr)};Erreur 33;${patientCode}`);
                 }
             }
         })
@@ -2342,8 +2348,8 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
         if (JSON.stringify(pcr_dates) != JSON.stringify(pcr_dates_processed)) {
             flag = false
             patient_enfant.addLog(`34;Le patient a des dates de PCR qui ne sont pas consécutives : ${JSON.stringify(pcr_dates)}`);
-            logger_generation.warn(`34;${patientCode};Patient ${patientCode} (enfant) has PCR dates that are not consecutive: ${JSON.stringify(pcr_dates)}`);
-            logger_generation_fr.warn(`Le patient ${patientCode} (enfant) a des dates de PCR qui ne sont pas consécutives : ${JSON.stringify(pcr_dates)};Erreur 34;${patientCode}`);
+            logger_generation.warn(`34;${patientCode};Patient ${patientCode} (enfant) (mother ${codemother}) has PCR dates that are not consecutive: ${JSON.stringify(pcr_dates)}`);
+            logger_generation_fr.warn(`Le patient ${patientCode} (enfant) (mère ${codemother}) a des dates de PCR qui ne sont pas consécutives : ${JSON.stringify(pcr_dates)};Erreur 34;${patientCode}`);
         }
     
         // Validate that all PCRs have different day
@@ -2352,8 +2358,8 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
         if (duplicateElements.length > 0){
             flag = false
             patient_enfant.addLog(`35;Le patient (enfant) a deux PCR à la même date : ${JSON.stringify(pcr_dates)}`);
-            logger_generation.warn(`35;${patientCode};Patient ${patientCode} (enfant) with more than one PCR on the very same date: ${duplicateElements}`);
-            logger_generation_fr.warn(`Le patient ${patientCode} (enfant) a deux PCR à la même date : ${duplicateElements};Erreur 35;${patientCode}`);
+            logger_generation.warn(`35;${patientCode};Patient ${patientCode} (enfant) (mother ${codemother}) with more than one PCR on the very same date: ${duplicateElements}`);
+            logger_generation_fr.warn(`Le patient ${patientCode} (enfant) (mère ${codemother}) a deux PCR à la même date : ${duplicateElements};Erreur 35;${patientCode}`);
         }
     
         return flag
