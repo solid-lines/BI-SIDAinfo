@@ -1,6 +1,6 @@
 {
   "name": "sidainfo-dhis2",
-  "version": "1.5.0-dev",
+  "version": "1.5.0",
   "description": "This is the node script created for managing the DHIS2 data from the SIDAinfo data dump for PSI Burundi.",
   "main": "index.js",
   "bin": {
