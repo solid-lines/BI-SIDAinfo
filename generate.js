@@ -1880,18 +1880,21 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
     
         var causesortie = row[9];
         if (causesortie.normalize().localeCompare("Transféré".normalize()) == 0) {
+            logger_generation.debug(`${codepatient}. Initial cause sortie = ${causesortie}. Changed to '1'`)
             causesortie = "1"
         }
-    
         if (causesortie.normalize().localeCompare("Fin de traitement prophyl. post-expositionnel".normalize()) == 0) {
+            logger_generation.debug(`${codepatient}. Initial cause sortie = ${causesortie}. Changed to '4'`)
             causesortie = "4"
         }
         // T = Transféré sortant et correspond au code numérique 1
         if (causesortie.normalize().localeCompare("T".normalize()) == 0) {
+            //logger_generation.debug(`${codepatient}. Initial cause sortie = ${causesortie}. Changed to '1'`)
             causesortie = "1"
         }
         // F = Fin prophylaxie et correspond au code numérique 6 et ce code était utilisé avant pour le cas de dépannage (personne venant d’un autre site mais qui ne retournera pas peut être à ce site) et après on faisait sortir le client en disant fin prophylaxie pour justifier le médicament sorti.
         if (causesortie.normalize().localeCompare("F".normalize()) == 0) {
+            //logger_generation.debug(`${codepatient}. Initial cause sortie = ${causesortie}. Changed to '6'`)
             causesortie = "6"
         }
         // 7 = 'Auto transfert', but it can be treated as transfer (ie code 1)
