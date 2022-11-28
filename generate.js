@@ -1894,7 +1894,11 @@ function generate_complete(SOURCE_OU_CODE, SOURCE_DATE){
         if (causesortie.normalize().localeCompare("F".normalize()) == 0) {
             causesortie = "6"
         }
-    
+        // 7 = 'Auto transfert', but it can be treated as transfer (ie code 1)
+        if (causesortie == "7") {
+            logger_generation.debug(`${codepatient}. Initial cause sortie = ${causesortie}. Changed to '1'`)
+            causesortie = "1"
+        }
         if (sortie === "Vrai") {
             if (validateOption("causesortie", causesortie, patient.code, CURRENT_TABLE) && (["1", "2", "5", "6"].includes(causesortie))) {
                 patient.setARV_CauseSortie({ "causesortie": causesortie });
